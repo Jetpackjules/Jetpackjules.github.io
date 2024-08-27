@@ -1,131 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Cube Wall with Dome Effect</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: black; }
-        canvas { display: block; }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Robot Hand</title>
+	<style>
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+			font-family: Arial, sans-serif;
+		}
+		.wip {
+			font-size: 5em;
+			color: red;
+		}
+	</style>
 </head>
 <body>
-    <script>
-        let scene, camera, renderer, cubes = [];
-        const mouse = new THREE.Vector2();
-        const cubeSize = 0.4;
-        const spacing = 0.5;
-
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            camera.position.z = 15;
-
-            // Add lighting
-            const ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
-
-            const frontLight = new THREE.DirectionalLight(0xffffff, 0.7);
-            frontLight.position.set(1, 1, 1);
-            scene.add(frontLight);
-
-            const backLight = new THREE.DirectionalLight(0x8080ff, 0.5);
-            backLight.position.set(-1, -1, -1);
-            scene.add(backLight);
-
-            // Calculate grid dimensions based on screen size
-            const gridWidth = Math.ceil(window.innerWidth / (cubeSize * 100)) + 5;
-            const gridHeight = Math.ceil(window.innerHeight / (cubeSize * 100)) + 5;
-
-            // Create cube wall
-            for (let x = 0; x < gridWidth; x++) {
-                for (let y = 0; y < gridHeight; y++) {
-                    const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-                    const material = new THREE.MeshPhongMaterial({ 
-                        color: 0xffffff,
-                        specular: 0x050505,
-                        shininess: 100
-                    });
-                    const cube = new THREE.Mesh(geometry, material);
-                    cube.position.set(
-                        (x - gridWidth/2) * spacing,
-                        (y - gridHeight/2) * spacing,
-                        0
-                    );
-                    cube.originalPosition = cube.position.clone();
-                    scene.add(cube);
-                    cubes.push(cube);
-                }
-            }
-
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            const time = Date.now() * 0.001;
-
-            cubes.forEach((cube) => {
-                // Reset cube position and rotation
-                cube.position.copy(cube.originalPosition);
-                cube.rotation.set(0, 0, 0);
-                cube.scale.set(1, 1, 1);
-
-                // Calculate distance from mouse
-                const mouseX = mouse.x * camera.position.z;
-                const mouseY = mouse.y * camera.position.z;
-                const distanceX = mouseX - cube.position.x;
-                const distanceY = mouseY - cube.position.y;
-                const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-                const maxDistance = 5;
-
-                if (distance < maxDistance) {
-                    const scale = 1 - distance / maxDistance;
-                    
-                    // Pop out effect
-                    cube.position.z += scale * 2;
-                    
-                    // Dome effect
-                    const angle = Math.atan2(distanceY, distanceX);
-                    cube.position.x += Math.cos(angle) * scale * 0.5;
-                    cube.position.y += Math.sin(angle) * scale * 0.5;
-                    
-                    // Lean effect
-                    cube.rotation.x = (cube.position.y - cube.originalPosition.y) * 0.2;
-                    cube.rotation.y = -(cube.position.x - cube.originalPosition.x) * 0.2;
-                    
-                    // Scale effect
-                    cube.scale.setScalar(1 + scale * 0.5);
-                }
-
-                // Subtle floating motion
-                cube.position.x += Math.sin(time + cube.originalPosition.x * 10) * 0.01;
-                cube.position.y += Math.cos(time + cube.originalPosition.y * 10) * 0.01;
-            });
-
-            renderer.render(scene, camera);
-        }
-
-        init();
-        animate();
-    </script>
+	<h1 class="wip">WIP</h1>
 </body>
 </html>
