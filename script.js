@@ -7,15 +7,15 @@ const app = new PIXI.Application({
 document.body.appendChild(app.view);
 
 const creatures = [];
-const numCreatures = 50;
+const numCreatures = 500;
 let mouseX = app.screen.width / 2;
 let mouseY = app.screen.height / 2;
 
 class Creature {
     constructor() {
         this.graphics = new PIXI.Graphics();
-        this.x = Math.random() * app.screen.width;
-        this.y = Math.random() * app.screen.height;
+        this.x = Math.random() * app.screen.width/2;
+        this.y = Math.random() * app.screen.height/2;
         this.vx = Math.random() * 4 - 2;
         this.vy = Math.random() * 4 - 2;
         this.targetX = this.x;
@@ -34,11 +34,17 @@ class Creature {
             this.alpha -= 0.005;
         }
 
+        if (Math.random() < 0.001) {
+            creatures.push(new Creature());
+        }
+
         // Update target occasionally
         if (Math.random() < 0.02) {
-            this.targetX = mouseX + (Math.random() * 200 - 100);
-            this.targetY = mouseY + (Math.random() * 200 - 100);
+            this.targetX = app.screen.width / 4 + (Math.random() * app.screen.width / 2 - app.screen.width / 4);
+            this.targetY = app.screen.height / 4 + (Math.random() * app.screen.height / 2 - app.screen.height / 4);
         }
+
+
 
         // Move towards target
         const dx = this.targetX - this.x;
@@ -57,8 +63,8 @@ class Creature {
         this.y += this.vy;
 
         // Bounce off edges
-        if (this.x < 0 || this.x > app.screen.width) this.vx *= -1;
-        if (this.y < 0 || this.y > app.screen.height) this.vy *= -1;
+        if (this.x < 0 || this.x > app.screen.width/2) this.vx *= -1;
+        if (this.y < 0 || this.y > app.screen.height/2) this.vy *= -1;
 
         this.trailPoints.unshift({ x: this.x, y: this.y });
         if (this.trailPoints.length > this.maxTrailLength) {
@@ -72,18 +78,18 @@ class Creature {
         this.graphics.clear();
         
         // Draw trail
-        this.graphics.lineStyle(2, this.color, this.alpha * 0.5);
+        this.graphics.lineStyle(1, this.color, this.alpha * 1.5);
         for (let i = 1; i < this.trailPoints.length; i++) {
             const p1 = this.trailPoints[i - 1];
             const p2 = this.trailPoints[i];
             this.graphics.moveTo(p1.x, p1.y);
             this.graphics.lineTo(p2.x, p2.y);
-            this.graphics.alpha = (1 - (i / this.maxTrailLength)) * this.alpha;
+            this.graphics.alpha = (1 - (i / this.maxTrailLength/2)) * this.alpha;
         }
 
         // Draw creature
         this.graphics.beginFill(this.color, this.alpha);
-        this.graphics.drawCircle(this.x, this.y, 3);
+        this.graphics.drawCircle(this.x, this.y, 1);
         this.graphics.endFill();
     }
 }
