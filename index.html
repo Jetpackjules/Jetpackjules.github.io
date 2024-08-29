@@ -3,19 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Cube Wall with Dome Effect</title>
+    <title>3D Cube Wall with Dynamic Controls</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: black; }
+        body { margin: 0; overflow: hidden; background-color: black; color: white; font-family: Arial, sans-serif; }
         canvas { display: block; }
+        #controls { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; }
+        .slider-container { margin-bottom: 10px; }
+        input[type="range"] { width: 200px; }
     </style>
 </head>
 <body>
+    <div id="controls">
+        <div class="slider-container">
+            <label for="cubeCount">Cube Count: <span id="cubeCountValue"></span></label>
+            <input type="range" id="cubeCount" min="100" max="10000" value="1000">
+        </div>
+        <div class="slider-container">
+            <label for="cubeSpacing">Cube Spacing: <span id="cubeSpacingValue"></span></label>
+            <input type="range" id="cubeSpacing" min="0.1" max="2" step="0.1" value="0.5">
+        </div>
+        <div class="slider-container">
+            <label for="cubeSize">Cube Size: <span id="cubeSizeValue"></span></label>
+            <input type="range" id="cubeSize" min="0.1" max="1" step="0.1" value="0.4">
+        </div>
+        <div class="slider-container">
+            <label for="mouseInfluence">Mouse Influence: <span id="mouseInfluenceValue"></span></label>
+            <input type="range" id="mouseInfluence" min="1" max="10" value="5">
+        </div>
+        <div class="slider-container">
+            <label for="mouseVelocity">Mouse Velocity Effect: <span id="mouseVelocityValue"></span></label>
+            <input type="range" id="mouseVelocity" min="0" max="5" step="0.1" value="2">
+        </div>
+    </div>
     <script>
         let scene, camera, renderer, cubes = [];
         const mouse = new THREE.Vector2();
-        const cubeSize = 0.4;
-        const spacing = 0.5;
+        let mouseVelocity = new THREE.Vector2();
+        let moveInward = false;
+
+        // Dynamic parameters
+        let params = {
+            cubeCount: 1000,
+            cubeSpacing: 0.5,
+            cubeSize: 0.4,
+            mouseInfluence: 5,
+            mouseVelocity: 2
+        };
 
         function init() {
             scene = new THREE.Scene();
@@ -38,38 +72,59 @@
             backLight.position.set(-1, -1, -1);
             scene.add(backLight);
 
-            // Calculate grid dimensions based on screen size
-            const gridWidth = Math.ceil(window.innerWidth / (cubeSize * 100)) + 5;
-            const gridHeight = Math.ceil(window.innerHeight / (cubeSize * 100)) + 5;
-
-            // Create cube wall
-            for (let x = 0; x < gridWidth; x++) {
-                for (let y = 0; y < gridHeight; y++) {
-                    const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-                    const material = new THREE.MeshPhongMaterial({ 
-                        color: 0xffffff,
-                        specular: 0x050505,
-                        shininess: 100
-                    });
-                    const cube = new THREE.Mesh(geometry, material);
-                    cube.position.set(
-                        (x - gridWidth/2) * spacing,
-                        (y - gridHeight/2) * spacing,
-                        0
-                    );
-                    cube.originalPosition = cube.position.clone();
-                    scene.add(cube);
-                    cubes.push(cube);
-                }
-            }
+            createCubes();
 
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('resize', onWindowResize);
+
+            // Set up slider listeners
+            document.getElementById('cubeCount').addEventListener('input', updateCubeCount);
+            document.getElementById('cubeSpacing').addEventListener('input', updateCubeSpacing);
+            document.getElementById('cubeSize').addEventListener('input', updateCubeSize);
+            document.getElementById('mouseInfluence').addEventListener('input', updateMouseInfluence);
+            document.getElementById('mouseVelocity').addEventListener('input', updateMouseVelocity);
+
+            updateSliderDisplays();
+        }
+
+        function createCubes() {
+            // Remove existing cubes
+            cubes.forEach(cube => scene.remove(cube));
+            cubes = [];
+
+            const totalCubes = Math.sqrt(params.cubeCount);
+            const gridSize = Math.ceil(totalCubes);
+            const offset = (gridSize - 1) * params.cubeSpacing / 2;
+
+            for (let i = 0; i < params.cubeCount; i++) {
+                const x = (i % gridSize) * params.cubeSpacing - offset;
+                const y = Math.floor(i / gridSize) * params.cubeSpacing - offset;
+
+                const geometry = new THREE.BoxGeometry(params.cubeSize, params.cubeSize, params.cubeSize);
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: 0xffffff,
+                    specular: 0x050505,
+                    shininess: 100
+                });
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.set(x, y, 0);
+                cube.originalPosition = cube.position.clone();
+                cube.currentOffset = new THREE.Vector3();
+                cube.targetOffset = new THREE.Vector3();
+                scene.add(cube);
+                cubes.push(cube);
+            }
         }
 
         function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            const newMouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            const newMouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            mouseVelocity.x = newMouseX - mouse.x;
+            mouseVelocity.y = newMouseY - mouse.y;
+
+            mouse.x = newMouseX;
+            mouse.y = newMouseY;
         }
 
         function onWindowResize() {
@@ -84,44 +139,87 @@
             const time = Date.now() * 0.001;
 
             cubes.forEach((cube) => {
-                // Reset cube position and rotation
-                cube.position.copy(cube.originalPosition);
-                cube.rotation.set(0, 0, 0);
-                cube.scale.set(1, 1, 1);
-
-                // Calculate distance from mouse
                 const mouseX = mouse.x * camera.position.z;
                 const mouseY = mouse.y * camera.position.z;
-                const distanceX = mouseX - cube.position.x;
-                const distanceY = mouseY - cube.position.y;
+                const distanceX = mouseX - cube.originalPosition.x;
+                const distanceY = mouseY - cube.originalPosition.y;
                 const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-                const maxDistance = 5;
+                const maxDistance = params.mouseInfluence;
 
                 if (distance < maxDistance) {
                     const scale = 1 - distance / maxDistance;
+                    const movement = scale * 2;
                     
-                    // Pop out effect
-                    cube.position.z += scale * 2;
-                    
-                    // Dome effect
                     const angle = Math.atan2(distanceY, distanceX);
-                    cube.position.x += Math.cos(angle) * scale * 0.5;
-                    cube.position.y += Math.sin(angle) * scale * 0.5;
+                    const moveX = Math.cos(angle) * movement;
+                    const moveY = Math.sin(angle) * movement;
                     
-                    // Lean effect
-                    cube.rotation.x = (cube.position.y - cube.originalPosition.y) * 0.2;
-                    cube.rotation.y = -(cube.position.x - cube.originalPosition.x) * 0.2;
-                    
-                    // Scale effect
-                    cube.scale.setScalar(1 + scale * 0.5);
+                    cube.targetOffset.x = moveX + mouseVelocity.x * params.mouseVelocity;
+                    cube.targetOffset.y = moveY + mouseVelocity.y * params.mouseVelocity;
+                    cube.targetOffset.z = moveInward ? -movement : movement;
+                } else {
+                    cube.targetOffset.set(0, 0, 0);
                 }
 
+                // Smooth transition
+                cube.currentOffset.lerp(cube.targetOffset, 0.1);
+
+                // Apply offset
+                cube.position.copy(cube.originalPosition).add(cube.currentOffset);
+
+                // Rotation based on offset
+                cube.rotation.x = cube.currentOffset.y * 0.5;
+                cube.rotation.y = -cube.currentOffset.x * 0.5;
+
+                // Scale effect
+                const scaleOffset = cube.currentOffset.length() * 0.1;
+                cube.scale.setScalar(1 + scaleOffset);
+
                 // Subtle floating motion
-                cube.position.x += Math.sin(time + cube.originalPosition.x * 10) * 0.01;
-                cube.position.y += Math.cos(time + cube.originalPosition.y * 10) * 0.01;
+                cube.position.x += Math.sin(time + cube.originalPosition.x * 10) * 0.002;
+                cube.position.y += Math.cos(time + cube.originalPosition.y * 10) * 0.002;
             });
 
+            // Decay mouse velocity
+            mouseVelocity.multiplyScalar(0.95);
+
             renderer.render(scene, camera);
+        }
+
+        function updateCubeCount() {
+            params.cubeCount = parseInt(this.value);
+            createCubes();
+            updateSliderDisplays();
+        }
+
+        function updateCubeSpacing() {
+            params.cubeSpacing = parseFloat(this.value);
+            createCubes();
+            updateSliderDisplays();
+        }
+
+        function updateCubeSize() {
+            params.cubeSize = parseFloat(this.value);
+            createCubes();
+            updateSliderDisplays();
+        }
+
+        function updateMouseInfluence() {
+            params.mouseInfluence = parseFloat(this.value);
+            updateSliderDisplays();
+        }
+
+        function updateMouseVelocity() {
+            params.mouseVelocity = parseFloat(this.value);
+            updateSliderDisplays();
+        }
+
+        function updateSliderDisplays() {
+            document.getElementById('cubeCountValue').textContent = params.cubeCount;
+            document.getElementById('cubeSpacingValue').textContent = params.cubeSpacing.toFixed(1);
+            document.getElementById('cubeSizeValue').textContent = params.cubeSize.toFixed(1);
+            document.getElementById('mouseInfluenceValue').textContent = params.mouseInfluence.toFixed(1);
+            document.getElementById('mouseVelocityValue').textContent = params.mouseVelocity.toFixed(1);
         }
 
         init();

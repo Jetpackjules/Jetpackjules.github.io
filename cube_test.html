@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Wrapped by Cubes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #textContainer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            pointer-events: none;
+        }
+        .text-bubble {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="textContainer"></div>
+    <div id="cubeBackground"></div>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xffffff);
+        document.getElementById('cubeBackground').appendChild(renderer.domElement);
+
+        const cubeSize = 0.4;
+        const spacing = cubeSize * 1.0
+        const gridSize = 0;
+
+        const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xeeeeee,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+
+        const cubes = [];
+        const textPositions = [];
+        const bubbles = [];
+
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        function createTextBubble(text) {
+            const bubble = document.createElement('div');
+            bubble.className = 'text-bubble';
+            bubble.textContent = text;
+            document.getElementById('textContainer').appendChild(bubble);
+
+            const rect = bubble.getBoundingClientRect();
+            console.log(window.innerWidth/46)
+            // console.log(textPositions);
+            // console.log(text)
+            // const x = (rect.left + ((rect.right-rect.left)/2)); /// 2 / window.innerWidth * 2 - 1;
+            // const y = -(rect.top + rect.bottom) / 2 / window.innerHeight * 2 + 1;
+            bubbles.push(bubble);
+        }
+
+        function getBubbblePosition(bubble) {
+            const rect = bubble.getBoundingClientRect();
+            // console.log(window.innerWidth)
+            // console.log(textPositions);
+            // console.log(bubble.text)
+            const x = (rect.left + ((rect.right-rect.left)/2)); /// 2 / window.innerWidth * 2 - 1;
+            const y = (rect.top + ((rect.bottom-rect.top)/2)); /// 2 / window.innerWidth * 2 - 1;
+
+            // const y = -(rect.top + rect.bottom) / 2 / window.innerHeight * 2 + 1;
+        
+            textPositions.push(new THREE.Vector3(x, y, 0));
+        }
+        
+        const texts = [
+            "Hello, world!",
+            "This is a test",
+            "Wrapped by cubes",
+            "Cool effect",
+            "3D text bubbles"
+        ];
+
+        texts.forEach(createTextBubble);
+        bubbles.forEach(getBubbblePosition);
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            cubes.forEach(cube => {
+                cube.rotation.x += 0.005;
+                // cube.rotation.y += 0.005;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // camera.position.z = 15;
+        // Make sure your camera is at a reasonable position
+        // gridSize = 100;
+        camera.position.set(gridSize*cubeSize / 2, gridSize*cubeSize / 2, 15); // Adjust Z value if necessary
+        camera.lookAt(new THREE.Vector3(gridSize*cubeSize / 2, gridSize*cubeSize / 2, 0))
+
+        function projectToScreen(position, camera, renderer) {
+            const vector = position.clone().project(camera);
+
+            // console.log(`Original Position: ${position.x}, ${position.y}, ${position.z}`);
+            // console.log(`Projected Vector: ${vector.x}, ${vector.y}, ${vector.z}`);
+
+            const halfWidth = renderer.domElement.width / 2;
+            const halfHeight = renderer.domElement.height / 2;
+
+            const pixelX = (vector.x * halfWidth) + halfWidth;
+            const pixelY = -(vector.y * halfHeight) + halfHeight;
+
+            // return { x: pixelX, y: pixelY };
+            return new THREE.Vector3(pixelX, pixelY, 0)
+        }
+
+        const gridSizeX = 23; // Number of cubes per row
+
+        
+        console.log("TEST")
+        console.log("TATATATATA")
+        let screenPos = projectToScreen(new THREE.Vector3(0, 0, 0), camera, renderer);
+
+        let yLim = null;
+        let xLim = null;
+
+        let x = 0;
+        let borderX = false;
+
+        while (!borderX && x < 100) {
+            const y = 0;
+            
+            console.log("X: ", x)
+
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(x * spacing, y * spacing, 0);
+            screenPos = projectToScreen(cube.position, camera, renderer);
+
+            if (screenPos.x > window.innerWidth) {
+                    console.log("borderX")
+                    console.log(x)
+                    borderX = true;
+                    xLim = x;
+            }
+            x += 1;
+        }
+
+
+        let y = 0;
+        let borderY = false;
+        while (!borderY && y < 300) {
+            const x = 0;
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(x * spacing, y * spacing, 0);
+
+            screenPos = projectToScreen(cube.position, camera, renderer);
+
+            if (screenPos.y < 0) {
+                console.log("borderY")
+                console.log(screenPos.y)
+                console.log(y)  
+                console.log(window.innerHeight)
+                console.log("---------")
+                yLim = y;
+                borderY= true;
+            }
+            y += 1;
+        }
+
+
+
+
+
+        for (let x = -xLim; x < xLim; x++) {
+            for (let y = -yLim; y < yLim; y++) {
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.set(x * spacing, y * spacing, 0);
+
+                screenPos = projectToScreen(cube.position, camera, renderer);
+
+
+
+
+                // Create edges (black outlines)
+                const edges = new THREE.EdgesGeometry(geometry);
+                const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+                const line = new THREE.LineSegments(edges, edgeMaterial);
+                cube.add(line);
+
+                let shouldRender = true;
+                let minDistance = Infinity;
+                textPositions.forEach(pos => {
+                    // console.log(pos)
+                    const distance = screenPos.distanceTo(pos);
+                    minDistance = Math.min(minDistance, distance);
+                    
+                    if (distance < 75) {
+                    shouldRender = false;
+                    }
+
+                });
+
+                if (shouldRender) {
+                    // Scale cubes based on proximity to text
+                    prox_min = 180;
+                    prox_max = 10;
+                    if (minDistance < prox_min) {
+                    const scale = Math.max(0.1, (minDistance - prox_max) / prox_min);
+                    cube.scale.setScalar(scale);
+                    }
+
+
+                    scene.add(cube);
+                    cubes.push(cube);
+                }
+
+
+            }
+
+
+
+        }   
+
+
+
+
+        // camera.position.z = 15;
+        // Make sure your camera is at a reasonable position
+        // camera.position.set(gridSize*cubeSize / 2, gridSize*cubeSize / 2, 50); // Adjust Z value if necessary
+        // camera.lookAt(new THREE.Vector3(gridSize*cubeSize / 2, gridSize*cubeSize / 2, 0))
+
+        
+
+
+
+
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
