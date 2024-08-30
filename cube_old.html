@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cube Wall with Dynamic Controls</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #ffffff; /* White background */
+            color: #333; 
+            font-family: Arial, sans-serif; 
+        }
+        #cubeContainer {
+            position: relative;
+            width: 100%;
+            height: 600px; /* Set your desired height here */
+            overflow: hidden;
+            background-color: #ffffff; /* White background */
+        }
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%;
+        }
+        #controls { 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            background: rgba(255, 255, 255, 0.8); 
+            padding: 10px; 
+            border-radius: 5px; 
+        }
+        .slider-container { margin-bottom: 10px; }
+        input[type="range"] { width: 200px; }
+    </style>
+</head>
+<body>
+    <div id="cubeContainer">
+        <div id="controls">
+            <div class="slider-container">
+                <label for="cubeCount">Cube Count: <span id="cubeCountValue"></span></label>
+                <input type="range" id="cubeCount" min="100" max="10000" value="1000">
+            </div>
+            <div class="slider-container">
+                <label for="cubeSpacing">Cube Spacing: <span id="cubeSpacingValue"></span></label>
+                <input type="range" id="cubeSpacing" min="0.1" max="2" step="0.1" value="0.5">
+            </div>
+            <div class="slider-container">
+                <label for="cubeSize">Cube Size: <span id="cubeSizeValue"></span></label>
+                <input type="range" id="cubeSize" min="0.1" max="1" step="0.1" value="0.4">
+            </div>
+            <div class="slider-container">
+                <label for="mouseInfluence">Mouse Influence Area: <span id="mouseInfluenceValue"></span></label>
+                <input type="range" id="mouseInfluence" min="1" max="10" value="5">
+            </div>
+            <div class="slider-container">
+                <label for="mouseEffectStrength">Mouse Effect Strength: <span id="mouseEffectStrengthValue"></span></label>
+                <input type="range" id="mouseEffectStrength" min="0.1" max="2" step="0.1" value="1">
+            </div>
+            <div class="slider-container">
+                <label for="mouseVelocity">Mouse Velocity Effect: <span id="mouseVelocityValue"></span></label>
+                <input type="range" id="mouseVelocity" min="0" max="5" step="0.1" value="2">
+            </div>
+            <div class="slider-container">
+                <label for="trailDecay">Trail Decay: <span id="trailDecayValue"></span></label>
+                <input type="range" id="trailDecay" min="0.1" max="1" step="0.1" value="0.9">
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript should be placed at the end of the body to ensure it loads correctly in Weebly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, cubes = [];
+        const mouse = new THREE.Vector2();
+        let mouseVelocity = new THREE.Vector2();
+
+        // Dynamic parameters
+        let params = {
+            cubeCount: 1000,
+            cubeSpacing: 0.5,
+            cubeSize: 0.4,
+            mouseInfluence: 5,
+            mouseEffectStrength: 1, // New: controls how much cubes are affected by the mouse
+            mouseVelocity: 2,
+            trailDecay: 0.9 // New: controls how quickly the trail effect decays
+        };
+
+        function init() {
+            const container = document.getElementById('cubeContainer');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.setClearColor(0xffffff); // Set background to white
+            container.appendChild(renderer.domElement);
+
+            camera.position.z = 10;
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff);
+            scene.add(ambientLight);
+
+            const light = new THREE.DirectionalLight(0xffffff, 0.5);
+            light.position.set(1, 1, 1);
+            scene.add(light);
+
+            createCubes();
+
+            container.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('resize', onWindowResize);
+
+            // Set up slider listeners
+            document.getElementById('cubeCount').addEventListener('input', updateCubeCount);
+            document.getElementById('cubeSpacing').addEventListener('input', updateCubeSpacing);
+            document.getElementById('cubeSize').addEventListener('input', updateCubeSize);
+            document.getElementById('mouseInfluence').addEventListener('input', updateMouseInfluence);
+            document.getElementById('mouseEffectStrength').addEventListener('input', updateMouseEffectStrength);
+            document.getElementById('mouseVelocity').addEventListener('input', updateMouseVelocity);
+            document.getElementById('trailDecay').addEventListener('input', updateTrailDecay);
+
+            updateSliderDisplays();
+        }
+
+        function createCubes() {
+            cubes.forEach(cube => scene.remove(cube));
+            cubes = [];
+
+            const gridSize = Math.sqrt(params.cubeCount);
+            const offset = (gridSize - 1) * params.cubeSpacing / 2;
+
+            for (let i = 0; i < params.cubeCount; i++) {
+                const x = (i % gridSize) * params.cubeSpacing - offset;
+                const y = Math.floor(i / gridSize) * params.cubeSpacing - offset;
+
+                const geometry = new THREE.BoxGeometry(params.cubeSize, params.cubeSize, params.cubeSize);
+                
+                // Create edges (black outlines)
+                const edges = new THREE.EdgesGeometry(geometry);
+                const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+                const line = new THREE.LineSegments(edges, edgeMaterial);
+
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: 0xeeeeee,  // Cream surface
+                    roughness: 0.8,
+                    metalness: 0.2
+                });
+
+                const cube = new THREE.Mesh(geometry, material);
+                cube.add(line); // Add edges to the cube
+                
+                cube.position.set(x, y, 0);
+                cube.originalPosition = cube.position.clone();
+                cube.currentOffset = new THREE.Vector3();
+                cube.targetOffset = new THREE.Vector3();
+                scene.add(cube);
+                cubes.push(cube);
+            }
+        }
+
+        function onMouseMove(event) {
+            const container = document.getElementById('cubeContainer');
+            const rect = container.getBoundingClientRect();
+            const newMouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            const newMouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            mouseVelocity.x = newMouseX - mouse.x;
+            mouseVelocity.y = newMouseY - mouse.y;
+
+            mouse.x = newMouseX;
+            mouse.y = newMouseY;
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('cubeContainer');
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+
+            cubes.forEach((cube) => {
+                const mouseX = mouse.x * camera.position.z;
+                const mouseY = mouse.y * camera.position.z;
+                const distanceX = mouseX - cube.originalPosition.x;
+                const distanceY = mouseY - cube.originalPosition.y;
+                const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+                // Reduced maxDistance for smoother effect
+                const maxDistance = params.mouseInfluence * 0.5;
+
+                // Always apply a small floating effect
+                const baseFloat = Math.sin(time + cube.originalPosition.x + cube.originalPosition.y) * 0.2;
+
+                if (distance < maxDistance) {
+                    const scale = 1 - distance / maxDistance;
+                    const movement = scale * params.mouseEffectStrength * 0.2; // Use mouseEffectStrength for intensity
+
+                    const angle = Math.atan2(distanceY, distanceX);
+                    const moveX = Math.cos(angle) * movement;
+                    const moveY = Math.sin(angle) * movement;
+
+                    // Move cubes outward, away from the mouse
+                    cube.targetOffset.x = -moveX + mouseVelocity.x * params.mouseVelocity * 0.05; // Reduce velocity effect
+                    cube.targetOffset.y = -moveY + mouseVelocity.y * params.mouseVelocity * 0.05;
+                    cube.targetOffset.z = baseFloat + movement * 0.3; // Combine with small floating
+
+                    // Tilt cubes outward
+                    cube.rotation.x = -cube.targetOffset.y * 0.1; 
+                    cube.rotation.y = cube.targetOffset.x * 0.1;
+                } else {
+                    // Floating effect when the mouse isn't near
+                    cube.targetOffset.z = baseFloat;
+                }
+
+                // Smooth transition
+                cube.currentOffset.lerp(cube.targetOffset, 0.2);
+
+                // Apply offset
+                cube.position.copy(cube.originalPosition).add(cube.currentOffset);
+
+                // Scale effect
+                const scaleOffset = cube.currentOffset.length() * 0.03;
+                cube.scale.setScalar(1 + scaleOffset);
+            });
+
+            // Decay mouse velocity and apply trail effect based on trailDecay parameter
+            mouseVelocity.multiplyScalar(params.trailDecay);
+
+            renderer.render(scene, camera);
+        }
+
+        function updateCubeCount() {
+            params.cubeCount = parseInt(this.value);
+            createCubes();
+            updateSliderDisplays();
+        }
+
+        function updateCubeSpacing() {
+            params.cubeSpacing = parseFloat(this.value);
+            createCubes();
+            updateSliderDisplays();
+        }
+
+        function updateCubeSize() {
+            params.cubeSize = parseFloat(this.value);
+            createCubes();
+            updateSliderDisplays();
+        }
+
+        function updateMouseInfluence() {
+            params.mouseInfluence = parseFloat(this.value);
+            updateSliderDisplays();
+        }
+
+        function updateMouseEffectStrength() {
+            params.mouseEffectStrength = parseFloat(this.value);
+            updateSliderDisplays();
+        }
+
+        function updateMouseVelocity() {
+            params.mouseVelocity = parseFloat(this.value);
+            updateSliderDisplays();
+        }
+
+        function updateTrailDecay() {
+            params.trailDecay = parseFloat(this.value);
+            updateSliderDisplays();
+        }
+
+        function updateSliderDisplays() {
+            document.getElementById('cubeCountValue').textContent = params.cubeCount;
+            document.getElementById('cubeSpacingValue').textContent = params.cubeSpacing.toFixed(1);
+            document.getElementById('cubeSizeValue').textContent = params.cubeSize.toFixed(1);
+            document.getElementById('mouseInfluenceValue').textContent = params.mouseInfluence.toFixed(1);
+            document.getElementById('mouseEffectStrengthValue').textContent = params.mouseEffectStrength.toFixed(1);
+            document.getElementById('mouseVelocityValue').textContent = params.mouseVelocity.toFixed(1);
+            document.getElementById('trailDecayValue').textContent = params.trailDecay.toFixed(1);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
