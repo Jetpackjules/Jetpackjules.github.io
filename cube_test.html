@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Wrapped by Cubes</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+
     <style>
         body { margin: 0; overflow: hidden; }
         #textContainer {
@@ -47,7 +49,11 @@
             mouseInfluence: 50,
             mouseEffectStrength: 1, // New: controls how much cubes are affected by the mouse
             mouseVelocity: 0.1,
-            trailDecay: 99.0 // New: controls how quickly the trail effect decays
+             
+            textMargin: 100,    // Represents the margin around the text bubbles
+            cubeFade: 100,    // Represents the distance over which scaling occurrs
+            minSize: 0.1,      // Represents the minimum size of the cubes
+            shrinkMult: 1.0,   // Represents the scaling factor for the cubes
         };
 
 
@@ -89,7 +95,8 @@
 
             document.getElementById('textContainer').appendChild(bubble);
 
-            bubbles.push(bubble);
+            // bubbles.push(bubble);
+
         }
 
         function getBubbblePosition(bubble) {
@@ -111,19 +118,23 @@
         ];
 
         texts.forEach(createTextBubble);
+
+    
+        const divsToAvoid = document.querySelectorAll('div.text-bubble:not(.cube-ignore)');
+            divsToAvoid.forEach(div => {
+                console.log(div)
+                bubbles.push(div);
+        });
         bubbles.forEach(getBubbblePosition);
 
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.001;
+            const time = Date.now() * 0.01;
 
             cubes.forEach((cube) => {
-                // screenPos = projectToScreen(cube.position, camera, renderer);
-
                 const mouseX = mouse.x;
                 const mouseY = -mouse.y;
-                // console.log(cube.originalPosition)
-                // console.log("DONE")
+
                 const distanceX = mouseX - cube.screenPos.x;
                 const distanceY = mouseY - cube.screenPos.y;
                 const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
@@ -150,7 +161,6 @@
                     // Tilt cubes outward
                     cube.rotation.x = -cube.targetOffset.y * 0.1; 
                     cube.rotation.y = cube.targetOffset.x * 0.1;
-                    // console.log(cube.targetOffset)
                 } else {
                     // Floating effect when the mouse isn't near
                     cube.targetOffset.z = baseFloat;
@@ -162,31 +172,20 @@
                 // Apply offset
                 cube.position.copy(cube.originalPosition).add(cube.currentOffset);
 
-                // Scale effect
-                // const scaleOffset = cube.currentOffset.length() * 0.03;
-                // cube.scale.setScalar( + scaleOffset*20);
             });
 
-            // Decay mouse velocity and apply trail effect based on trailDecay parameter
-            // mouseVelocity.multiplyScalar(params.trailDecay);
-            // cube.scale.setScalar(cube.scale-0.000000001);
+
 
             renderer.render(scene, camera);
         }
 
-        animate();
+        
 
-        // camera.position.z = 15;
-        // Make sure your camera is at a reasonable position
-        // gridSize = 100;
         camera.position.set(gridSize*cubeSize / 2, gridSize*cubeSize / 2, 15); // Adjust Z value if necessary
         camera.lookAt(new THREE.Vector3(gridSize*cubeSize / 2, gridSize*cubeSize / 2, 0))
 
         function projectToScreen(position, camera, renderer) {
             const vector = position.clone().project(camera);
-
-            // console.log(`Original Position: ${position.x}, ${position.y}, ${position.z}`);
-            // console.log(`Projected Vector: ${vector.x}, ${vector.y}, ${vector.z}`);
 
             const halfWidth = renderer.domElement.width / 2;
             const halfHeight = renderer.domElement.height / 2;
@@ -197,66 +196,19 @@
             return new THREE.Vector3(pixelX, pixelY, 0)
         }
 
-        const gridSizeX = 23; // Number of cubes per row
+        function createCubes() {
+            let screenPos = projectToScreen(new THREE.Vector3(0, 0, 0), camera, renderer);
 
-        
-        let screenPos = projectToScreen(new THREE.Vector3(0, 0, 0), camera, renderer);
+            let yLim = null;
+            let xLim = null;
 
-        let yLim = null;
-        let xLim = null;
+            let x = 0;
+            let borderX = false;
 
-        let x = 0;
-        let borderX = false;
+            while (!borderX && x < 100) {
+                const y = 0;
+                
 
-        while (!borderX && x < 100) {
-            const y = 0;
-            
-
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x * spacing, y * spacing, 0);
-            cube.originalPosition = cube.position.clone();
-            cube.currentOffset = new THREE.Vector3();
-            cube.targetOffset = new THREE.Vector3();
-
-            screenPos = projectToScreen(cube.position, camera, renderer);
-            cube.screenPos = screenPos;
-            if (screenPos.x > window.innerWidth) {
-                    borderX = true;
-                    xLim = x+5;
-            }
-            x += 1;
-        }
-
-
-        let y = 0;
-        let borderY = false;
-        while (!borderY && y < 300) {
-            const x = 0;
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x * spacing, y * spacing, 0);
-            cube.originalPosition = cube.position.clone();
-            cube.currentOffset = new THREE.Vector3();
-            cube.targetOffset = new THREE.Vector3();
-
-            screenPos = projectToScreen(cube.position, camera, renderer);
-            cube.screenPos = screenPos;
-            if (screenPos.y < 0) {
-                // console.log("borderY")
-                // console.log(screenPos.y)
-                // console.log(y)  
-                // console.log(window.innerHeight)
-                // console.log("---------")
-                yLim = y+5;
-                borderY= true;
-            }
-            y += 1;
-        }
-
-        const xSpace = 0;
-        const ySpace = 0;
-        
-        for (let x = -xLim; x < xLim; x++) {
-            for (let y = -yLim; y < yLim; y++) {
                 const cube = new THREE.Mesh(geometry, material);
                 cube.position.set(x * spacing, y * spacing, 0);
                 cube.originalPosition = cube.position.clone();
@@ -265,80 +217,120 @@
 
                 screenPos = projectToScreen(cube.position, camera, renderer);
                 cube.screenPos = screenPos;
-
-                // Create edges (black outlines)
-                const edges = new THREE.EdgesGeometry(geometry);
-                const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-                const line = new THREE.LineSegments(edges, edgeMaterial);
-                cube.add(line);
-
-                let shouldRender = true;
-                let minDistance = Infinity;
+                if (screenPos.x > window.innerWidth) {
+                        borderX = true;
+                        xLim = x+10;
+                }
+                x += 1;
+            }
 
 
-                bubbles.forEach(bubble => {
-                    const distanceX = Math.abs(screenPos.x - bubble.position.x);
-                    const distanceY = Math.abs(screenPos.y - bubble.position.y);
-                    
-                    // console.log(distanceX)
-                    if (distanceX < bubble.width / 2+xSpace && distanceY < bubble.height / 2+ySpace) {
-                        shouldRender = false;
-                    } else {
+            let y = 0;
+            let borderY = false;
+            while (!borderY && y < 300) {
+                const x = 0;
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.set(x * spacing, y * spacing, 0);
+                cube.originalPosition = cube.position.clone();
+                cube.currentOffset = new THREE.Vector3();
+                cube.targetOffset = new THREE.Vector3();
 
-                        const distance = Math.sqrt(
-
-                            Math.pow(Math.max(0, distanceX - bubble.width / 2), 2) +
-                            Math.pow(Math.max(0, distanceY - bubble.height / 2), 2)
-                        );
-                        // console.log(distance)
-                        
-                        minDistance = Math.min(minDistance, distance);
-                    }
-                });
-
-                if (shouldRender) {
-                    // Define the distance where scaling begins and ends
-                    const startDistance = 75; // Distance from the text edge where scaling begins
-                    const endDistance = 0;    // Distance from the text edge where scaling ends
-
-                    // Calculate distance from the text edge (already done in `minDistance`)
-                    bubbles.forEach(bubble => {
-                        const distanceX = Math.abs(screenPos.x - bubble.position.x);
-                        const distanceY = Math.abs(screenPos.y - bubble.position.y);
-                        
-                        // Measure the distance from the edge of the text
-                        const distanceFromEdgeX = Math.max(0, distanceX - bubble.width / 2);
-                        const distanceFromEdgeY = Math.max(0, distanceY - bubble.height / 2);
-
-                        const distanceFromEdge = Math.sqrt(Math.pow(distanceFromEdgeX, 2) + Math.pow(distanceFromEdgeY, 2));
-
-                        if (distanceFromEdge < startDistance) {
-                            // Scale calculation based on distance from edge
-                            const scaleFactor = Math.max(0, Math.min(1, (distanceFromEdge - endDistance) / (startDistance - endDistance)));
-                            const scale = scaleFactor; // Adjust for scaling intensity as needed
-                            cube.scale.setScalar(scale);
-                        }
-                    });
-
-    scene.add(cube);
-    cubes.push(cube);
-}
-
-
-
+                screenPos = projectToScreen(cube.position, camera, renderer);
+                cube.screenPos = screenPos;
+                if (screenPos.y < 0) {
+                    yLim = y+10;
+                    borderY= true;
+                }
+                y += 1;
             }
 
 
 
-        }   
+                
+            for (let x = -xLim; x < xLim; x++) {
+                for (let y = -yLim; y < yLim; y++) {
+                    const cube = new THREE.Mesh(geometry, material);
+                    cube.position.set(x * spacing, y * spacing, 0);
+                    cube.originalPosition = cube.position.clone();
+                    cube.currentOffset = new THREE.Vector3();
+                    cube.targetOffset = new THREE.Vector3();
+
+                    screenPos = projectToScreen(cube.position, camera, renderer);
+                    cube.screenPos = screenPos;
+
+                    // Create edges (black outlines)
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+                    const line = new THREE.LineSegments(edges, edgeMaterial);
+                    cube.add(line);
+
+
+                    scene.add(cube);
+                    cubes.push(cube);
+                }
+            }
+                
+        }
+
+
+            function renderCubes() {
+                
+                cubes.forEach(cube => {
+
+                    cube.visible = true;
+                    
+                    
+                    let minDistance = Infinity;
+
+
+                    bubbles.forEach(bubble => {
+                        const distanceX = Math.abs(cube.screenPos.x - bubble.position.x);
+                        const distanceY = Math.abs(cube.screenPos.y - bubble.position.y);
+                        
+                        if (distanceX < bubble.width / 2+params.textMargin && distanceY < bubble.height / 2+params.textMargin) {
+                            shouldRender = false;
+                            cube.visible = false;
+                        } else {
+                            // cube.visible=true
+                            cube.scale.setScalar(1.0);
+                            const distance = Math.sqrt(
+                            Math.pow(Math.max(0, distanceX - bubble.width / 2), 2) +
+                            Math.pow(Math.max(0, distanceY - bubble.height / 2), 2)
+                            );
+                            
+                            minDistance = Math.min(minDistance, distance);
+                            
+                        }
+                    });
+
+                    if (cube.visible) {
+                        
+                        const distanceFromEdge = minDistance
+                        
+                        if ((distanceFromEdge < (params.cubeFade+params.textMargin)) && (distanceFromEdge > params.textMargin)) {
+                            const scaleFactor = Math.max(0, (distanceFromEdge-params.textMargin) / (params.cubeFade));
+                            const scale = scaleFactor*params.shrinkMult;
+                            cube.scale.setScalar(scale);
+                        }
+                    }
+
+                });
+            }
+
+            function purgeScene(scene) {
+                for (let i = scene.children.length - 1; i >= 0; i--) {
+                    let obj = scene.children[i];
+                    if (obj instanceof THREE.Mesh) {
+                        scene.remove(obj);
+                    }
+                }
+            }
 
 
         function onMouseMove(event) {
-            // console.log("MOUSE MOOVE")
             const container = document.getElementById('cubeBackground');
             const rect = container.getBoundingClientRect();
             const newMouseX = event.clientX;
-            // console.log(event.clientX)
             const newMouseY = -event.clientY;
 
             mouseVelocity.x = newMouseX - mouse.x;
@@ -351,13 +343,50 @@
         container.addEventListener('mousemove', onMouseMove);
         
 
+        let lastWidth = window.innerWidth;
+        let lastHeight = window.innerHeight;
+        const resizeThreshold = 100; // Change this to your desired threshold
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        const widthChange = Math.abs(window.innerWidth - lastWidth);
+        const heightChange = Math.abs(window.innerHeight - lastHeight);
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        if (widthChange > resizeThreshold || heightChange > resizeThreshold) {
+            cubes.length = 0; // Clear cubes array
+            purgeScene(scene); // Remove cubes from the scene
+            createCubes(); // Recreate cubes
+            renderCubes(); // Render the cubes
+
+
+
+            // Update last known width and height
+            lastWidth = window.innerWidth;
+            lastHeight = window.innerHeight;
+        }
+    });
         
+
+        // Create GUI
+        const gui = new dat.GUI();
+        gui.add(params, 'cubeSize', 0.1, 1).onChange(renderCubes);
+        gui.add(params, 'cubeSpacing', 0.5, 2).onChange(renderCubes);
+        gui.add(params, 'mouseInfluence', 10, 100);
+        gui.add(params, 'mouseEffectStrength', 0.1, 5);
+        gui.add(params, 'mouseVelocity', 0, 1);
+        gui.add(params, 'textMargin', 0, 200).onChange(renderCubes);
+        gui.add(params, 'cubeFade', 0, 200).onChange(renderCubes);
+        gui.add(params, 'minSize', 0.0, 1).onChange(renderCubes);
+        gui.add(params, 'shrinkMult', 0.00, 1).onChange(renderCubes);
+
+        createCubes();
+        animate();
+        
+        renderCubes()
+
     </script>
 </body>
 </html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Website</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: white; /* Changed to white */
+        }
+        
+        /* Header with floating, rounded buttons */
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: transparent; /* Transparent to allow background to show */
+        }
+        
+        header nav {
+            display: flex;
+            gap: 15px;
+        }
+        /* Footer styles */
+        footer {
+            background-color: white;
+            color: #333;
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            max-width: 850px; /* Set a maximum width for the footer */
+            margin: 0 auto; /* Center the footer */
+            
+        }
+
+        header nav a {
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            border-radius: 25px; /* Rounded corners */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Floating effect */
+            transition: all 0.3s ease;
+        }
+
+        header nav a:hover {
+            background-color: #777;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px); /* Floating effect on hover */
+        }
+
+        /* Main content styles */
+        .main-content {
+            margin: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .main-content .image-placeholder {
+            width: auto;
+            
+            max-width: 350px;
+            height: 200px;
+            background-color: #000;
+            margin-bottom: 20px;
+        }
+
+        .main-content .text-content {
+            flex: 1;
+            margin-left: 20px;
+        }
+
+        .main-content .text-content p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Cube-ignore class */
+        .cube-ignore {
+            position: relative;
+            z-index: 10; /* Makes sure cubes do not cover this element */
+        }
+
+        footer {
+            background-color: white; /* Changed to white */
+            color: #333;
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header with rounded buttons -->
+    <header class="cube-ignore">
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Main content with labeled divs -->
+    <div class="main-content">
+        <div class="image-placeholder cube-ignore"></div> <!-- Add cube-ignore class -->
+        <div class="text-content cube-ignore"> <!-- Add cube-ignore class -->
+            <h2>Welcome to My Website</h2>
+            <p>This is a sample paragraph. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque convallis felis at sem elementum, ac venenatis libero scelerisque. Aliquam erat volutpat. Integer ac velit at velit volutpat eleifend quis nec risus. Nulla facilisi. Ut ac orci ut sapien blandit vehicula. Proin scelerisque urna et lectus dictum, at suscipit quam iaculis.</p>
+        </div>
+    </div>
+
+    <!-- <footer style="background-color: rgba(255, 255, 255, 0); color: white; text-align: center; padding: 10px 0; position: relative; bottom: 0; width: 100%;"> -->
+
+    <footer class="cube-ignore" style="background-color: rgba(255, 255, 255, 0); color: black; text-align: center; padding: 10px 0; position: relative; bottom: 0; width: auto;">
+        <div style="display: inline-block;">&copy; 2024 My Sample Website</div>
+    </footer>
+
+    <!-- Link to external JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Video Trimmer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .input-container {
+            margin-bottom: 2rem;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-label {
+            padding: 15px 30px;
+            background-color: #333;
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .file-label:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .file-label.small {
+            font-size: 1rem;
+            padding: 10px 20px;
+            margin-bottom: 1rem;
+        }
+        #video-container {
+            max-width: 100%;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        #preview-video {
+            max-width: 100%;
+            height: auto;
+        }
+        #trim-controls {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        #trim-slider {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        #trim-btn, #download-btn {
+            padding: 10px 20px;
+            background-color: rgba(51, 51, 51, 0.9);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0.5rem;
+        }
+        #trim-btn:hover, #download-btn:hover {
+            background-color: rgba(85, 85, 85, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        #trim-btn:active, #download-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <h1>Aesthetic Video Trimmer</h1>
+        <div class="input-container">
+            <input type="file" id="video-input" accept="video/*" class="file-input">
+            <label for="video-input" class="file-label">Upload Video</label>
+        </div>
+        <div id="video-container">
+            <video id="preview-video" controls></video>
+        </div>
+        <div id="trim-controls">
+            <input type="range" id="trim-slider" min="0" max="100" value="0">
+            <div class="time-display">
+                <span id="start-time">0:00</span>
+                <span id="end-time">0:00</span>
+            </div>
+            <button id="trim-btn">Trim Video</button>
+            <button id="download-btn" style="display: none;">Download Trimmed Video</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#333333" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: false, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#333333", opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: "none", random: false, straight: false, out_mode: "out", bounce: false, attract: { enable: false, rotateX: 600, rotateY: 1200 } }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+                modes: { grab: { distance: 140, line_linked: { opacity: 1 } }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+
+        const videoInput = document.getElementById('video-input');
+        const previewVideo = document.getElementById('preview-video');
+        const videoContainer = document.getElementById('video-container');
+        const trimControls = document.getElementById('trim-controls');
+        const trimSlider = document.getElementById('trim-slider');
+        const startTime = document.getElementById('start-time');
+        const endTime = document.getElementById('end-time');
+        const trimBtn = document.getElementById('trim-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const fileLabel = document.querySelector('.file-label');
+
+        let videoBlob;
+        let trimmedVideo;
+
+        videoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const videoURL = URL.createObjectURL(file);
+                previewVideo.src = videoURL;
+                videoContainer.style.display = 'block';
+                trimControls.style.display = 'flex';
+                fileLabel.classList.add('small');
+                fileLabel.textContent = 'Change Video';
+
+                previewVideo.onloadedmetadata = function() {
+                    trimSlider.max = previewVideo.duration;
+                    endTime.textContent = formatTime(previewVideo.duration);
+                };
+
+                fetch(videoURL)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        videoBlob = blob;
+                    });
+            }
+        });
+
+        trimSlider.addEventListener('input', function() {
+            const time = parseFloat(trimSlider.value);
+            previewVideo.currentTime = time;
+            startTime.textContent = formatTime(time);
+        });
+
+        trimBtn.addEventListener('click', function() {
+            const startTime = parseFloat(trimSlider.value);
+            const endTime = previewVideo.duration;
+
+            const trimmedBlob = videoBlob.slice(startTime * 1000000, endTime * 1000000, 'video/mp4');
+            trimmedVideo = URL.createObjectURL(trimmedBlob);
+
+            previewVideo.src = trimmedVideo;
+            downloadBtn.style.display = 'inline-block';
+        });
+
+        downloadBtn.addEventListener('click', function() {
+            const a = document.createElement('a');
+            a.href = trimmedVideo;
+            a.download = 'trimmed-video.mp4';
+            a.click();
+        });
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Enhanced mouse interaction with particles
+        const container = document.querySelector('.container');
+        const containerRect = container.getBoundingClientRect();
+        const centerX = containerRect.left + containerRect.width / 2;
+        const centerY = containerRect.top + containerRect.height / 2;
+        const maxDistance = Math.max(containerRect.width, containerRect.height) / 2;
+
+        document.addEventListener('mousemove', function(e) {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            const particles = window.pJSDom[0].pJS.particles.array;
+
+            particles.forEach(particle => {
+                const dx = mouseX - particle.x;
+                const dy = mouseY - particle.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = 100;
+
+                if (dist < maxDist) {
+                    const force = (maxDist - dist) / maxDist;
+                    particle.vx += dx * force * 0.0015;
+                    particle.vy += dy * force * 0.0015;
+                }
+
+                // Calculate distance from particle to container center
+                const distToCenter = Math.sqrt(
+                    Math.pow(particle.x - centerX, 2) + Math.pow(particle.y - centerY, 2)
+                );
+
+                // Calculate opacity based on distance to center
+                const opacity = Math.max(0, (distToCenter - maxDistance / 2) / (maxDistance / 2));
+                particle.opacity = opacity;
+            });
+        });
+    </script>
+</body>
+</html>
