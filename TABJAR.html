@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- HELLO TRISHA DIDN'T EXPECT YOU TO LOOK HERE <3<3<3 -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom right, #ff9a9e, #fecfef, #f6d365, #fda085);
+            font-family: 'Comic Sans MS', 'Cursive', sans-serif;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            color: #fff;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border: 5px solid white;
+            border-radius: 50px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #timer {
+            display: flex;
+            gap: 30px;
+            font-size: 3rem;
+            font-weight: bold;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #timer div {
+            text-align: center;
+        }
+
+        #timer span {
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .label {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-top: 10px;
+            text-transform: uppercase;
+            color: #fff3e0;
+        }
+
+        .countdown {
+            font-size: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Time till' we meet again</h1>
+    
+    <div id="timer">
+        <div id="days">
+            <span class="countdown">00</span><br>
+            <span class="label">Days</span>
+        </div>
+        <div id="hours">
+            <span class="countdown">00</span><br>
+            <span class="label">Hours</span>
+        </div>
+        <div id="minutes">
+            <span class="countdown">00</span><br>
+            <span class="label">Minutes</span>
+        </div>
+        <div id="seconds">
+            <span class="countdown">00</span><br>
+            <span class="label">Seconds</span>
+        </div>
+    </div>
+
+    <script>
+        // Countdown target: midnight of Sep 19th
+        const targetDate = new Date('September 19, 2024 00:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            // Calculate time components
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result
+            document.getElementById('days').querySelector('.countdown').innerHTML = days;
+            document.getElementById('hours').querySelector('.countdown').innerHTML = hours;
+            document.getElementById('minutes').querySelector('.countdown').innerHTML = minutes;
+            document.getElementById('seconds').querySelector('.countdown').innerHTML = seconds;
+
+            // If the countdown is finished
+            if (distance < 0) {
+                document.getElementById('timer').innerHTML = "TIME'S UP!";
+            }
+        }
+
+        // Update the countdown every second
+        setInterval(updateCountdown, 1000);
+    </script>
+
+</body>
+</html>

@@ -72,7 +72,6 @@
 
 
         const cubes = [];
-        const textPositions = [];
         const bubbles = [];
 
         // Add lighting
@@ -87,29 +86,21 @@
             const bubble = document.createElement('div');
             bubble.className = 'text-bubble';
             bubble.textContent = text;
+
             document.getElementById('textContainer').appendChild(bubble);
 
-            const rect = bubble.getBoundingClientRect();
-            console.log(window.innerWidth/46)
-            // console.log(textPositions);
-            // console.log(text)
-            // const x = (rect.left + ((rect.right-rect.left)/2)); /// 2 / window.innerWidth * 2 - 1;
-            // const y = -(rect.top + rect.bottom) / 2 / window.innerHeight * 2 + 1;
             bubbles.push(bubble);
         }
 
         function getBubbblePosition(bubble) {
             const rect = bubble.getBoundingClientRect();
-            // console.log(window.innerWidth)
-            // console.log(textPositions);
-            // console.log(bubble.text)
-            const x = (rect.left + ((rect.right-rect.left)/2)); /// 2 / window.innerWidth * 2 - 1;
-            const y = (rect.top + ((rect.bottom-rect.top)/2)); /// 2 / window.innerWidth * 2 - 1;
 
-            // const y = -(rect.top + rect.bottom) / 2 / window.innerHeight * 2 + 1;
-        
-            textPositions.push(new THREE.Vector3(x, y, 0));
-        }
+            bubble.width =  (rect.right-rect.left)
+            bubble.height = (rect.bottom-rect.top)
+
+            bubble.position = (new THREE.Vector3((rect.left + (bubble.width/2)), (rect.top + (bubble.height/2)), 0))
+            
+        }   
         
         const texts = [
             "Hello, world!",
@@ -159,7 +150,7 @@
                     // Tilt cubes outward
                     cube.rotation.x = -cube.targetOffset.y * 0.1; 
                     cube.rotation.y = cube.targetOffset.x * 0.1;
-                    console.log(cube.targetOffset)
+                    // console.log(cube.targetOffset)
                 } else {
                     // Floating effect when the mouse isn't near
                     cube.targetOffset.z = baseFloat;
@@ -172,12 +163,12 @@
                 cube.position.copy(cube.originalPosition).add(cube.currentOffset);
 
                 // Scale effect
-                const scaleOffset = cube.currentOffset.length() * 0.03;
-                cube.scale.setScalar(1 + scaleOffset);
+                // const scaleOffset = cube.currentOffset.length() * 0.03;
+                // cube.scale.setScalar( + scaleOffset*20);
             });
 
             // Decay mouse velocity and apply trail effect based on trailDecay parameter
-            mouseVelocity.multiplyScalar(params.trailDecay);
+            // mouseVelocity.multiplyScalar(params.trailDecay);
             // cube.scale.setScalar(cube.scale-0.000000001);
 
             renderer.render(scene, camera);
@@ -203,15 +194,12 @@
             const pixelX = (vector.x * halfWidth) + halfWidth;
             const pixelY = -(vector.y * halfHeight) + halfHeight;
 
-            // return { x: pixelX, y: pixelY };
             return new THREE.Vector3(pixelX, pixelY, 0)
         }
 
         const gridSizeX = 23; // Number of cubes per row
 
         
-        // console.log("TEST")
-        // console.log("TATATATATA")
         let screenPos = projectToScreen(new THREE.Vector3(0, 0, 0), camera, renderer);
 
         let yLim = null;
@@ -223,7 +211,6 @@
         while (!borderX && x < 100) {
             const y = 0;
             
-            console.log("X: ", x)
 
             const cube = new THREE.Mesh(geometry, material);
             cube.position.set(x * spacing, y * spacing, 0);
@@ -234,8 +221,6 @@
             screenPos = projectToScreen(cube.position, camera, renderer);
             cube.screenPos = screenPos;
             if (screenPos.x > window.innerWidth) {
-                    console.log("borderX")
-                    console.log(x)
                     borderX = true;
                     xLim = x+5;
             }
@@ -256,21 +241,20 @@
             screenPos = projectToScreen(cube.position, camera, renderer);
             cube.screenPos = screenPos;
             if (screenPos.y < 0) {
-                console.log("borderY")
-                console.log(screenPos.y)
-                console.log(y)  
-                console.log(window.innerHeight)
-                console.log("---------")
+                // console.log("borderY")
+                // console.log(screenPos.y)
+                // console.log(y)  
+                // console.log(window.innerHeight)
+                // console.log("---------")
                 yLim = y+5;
                 borderY= true;
             }
             y += 1;
         }
 
-
-
-
-
+        const xSpace = 0;
+        const ySpace = 0;
+        
         for (let x = -xLim; x < xLim; x++) {
             for (let y = -yLim; y < yLim; y++) {
                 const cube = new THREE.Mesh(geometry, material);
@@ -290,30 +274,56 @@
 
                 let shouldRender = true;
                 let minDistance = Infinity;
-                textPositions.forEach(pos => {
-                    // console.log(pos)
-                    const distance = screenPos.distanceTo(pos);
-                    minDistance = Math.min(minDistance, distance);
-                    
-                    if (distance < 75) {
-                    shouldRender = false;
-                    }
 
+
+                bubbles.forEach(bubble => {
+                    const distanceX = Math.abs(screenPos.x - bubble.position.x);
+                    const distanceY = Math.abs(screenPos.y - bubble.position.y);
+                    
+                    // console.log(distanceX)
+                    if (distanceX < bubble.width / 2+xSpace && distanceY < bubble.height / 2+ySpace) {
+                        shouldRender = false;
+                    } else {
+
+                        const distance = Math.sqrt(
+
+                            Math.pow(Math.max(0, distanceX - bubble.width / 2), 2) +
+                            Math.pow(Math.max(0, distanceY - bubble.height / 2), 2)
+                        );
+                        // console.log(distance)
+                        
+                        minDistance = Math.min(minDistance, distance);
+                    }
                 });
 
                 if (shouldRender) {
-                    // Scale cubes based on proximity to text
-                    prox_min = 180;
-                    prox_max = 10;
-                    if (minDistance < prox_min) {
-                    const scale = Math.max(0.1, (minDistance - prox_max) / prox_min);
-                    cube.scale.setScalar(scale);
-                    }
+                    // Define the distance where scaling begins and ends
+                    const startDistance = 75; // Distance from the text edge where scaling begins
+                    const endDistance = 0;    // Distance from the text edge where scaling ends
 
+                    // Calculate distance from the text edge (already done in `minDistance`)
+                    bubbles.forEach(bubble => {
+                        const distanceX = Math.abs(screenPos.x - bubble.position.x);
+                        const distanceY = Math.abs(screenPos.y - bubble.position.y);
+                        
+                        // Measure the distance from the edge of the text
+                        const distanceFromEdgeX = Math.max(0, distanceX - bubble.width / 2);
+                        const distanceFromEdgeY = Math.max(0, distanceY - bubble.height / 2);
 
-                    scene.add(cube);
-                    cubes.push(cube);
-                }
+                        const distanceFromEdge = Math.sqrt(Math.pow(distanceFromEdgeX, 2) + Math.pow(distanceFromEdgeY, 2));
+
+                        if (distanceFromEdge < startDistance) {
+                            // Scale calculation based on distance from edge
+                            const scaleFactor = Math.max(0, Math.min(1, (distanceFromEdge - endDistance) / (startDistance - endDistance)));
+                            const scale = scaleFactor; // Adjust for scaling intensity as needed
+                            cube.scale.setScalar(scale);
+                        }
+                    });
+
+    scene.add(cube);
+    cubes.push(cube);
+}
+
 
 
             }
