@@ -24,14 +24,16 @@ const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
              {children}
           </motion.div>
           <motion.div
-             initial={{ clipPath: `circle(3000px at ${clickPos.x}px ${clickPos.y}px)` }}
-             animate={{ clipPath: `circle(0px at ${clickPos.x}px ${clickPos.y}px)`, transition: { duration: 0.5, ease: 'easeOut' } }}
-             style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'var(--accent)', zIndex: 99999, pointerEvents: 'none' }}
-          />
-          <motion.div
-             initial={{ clipPath: `circle(0px at ${clickPos.x}px ${clickPos.y}px)` }}
-             exit={{ clipPath: `circle(3000px at ${clickPos.x}px ${clickPos.y}px)`, transition: { duration: 0.4, ease: 'easeIn' } }}
-             style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'var(--accent)', zIndex: 99999, pointerEvents: 'none' }}
+             initial={{ width: 0, height: 0 }}
+             animate={{ width: 3000, height: 3000, transition: { duration: 0.6, ease: 'easeInOut' } }}
+             exit={{ width: 0, height: 0, transition: { duration: 0.5, ease: 'easeInOut' } }}
+             style={{ 
+               position: 'fixed', top: clickPos.y, left: clickPos.x, 
+               borderRadius: '50%', 
+               boxShadow: '0 0 0 3000px var(--accent)', 
+               transform: 'translate(-50%, -50%)', 
+               zIndex: 99999, pointerEvents: 'none' 
+             }}
           />
        </motion.div>
     );
