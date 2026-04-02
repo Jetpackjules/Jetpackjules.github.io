@@ -23,18 +23,22 @@ const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
           <motion.div exit={{ opacity: 1, transition: { duration: 0.5 } }}>
              {children}
           </motion.div>
-          <motion.div
-             initial={{ width: 0, height: 0 }}
-             animate={{ width: 3000, height: 3000, transition: { duration: 0.6, ease: 'easeInOut' } }}
-             exit={{ width: 0, height: 0, transition: { duration: 0.5, ease: 'easeInOut' } }}
-             style={{ 
-               position: 'fixed', top: clickPos.y, left: clickPos.x, 
-               borderRadius: '50%', 
-               boxShadow: '0 0 0 3000px var(--accent)', 
-               transform: 'translate(-50%, -50%)', 
-               zIndex: 99999, pointerEvents: 'none' 
-             }}
-          />
+          <svg style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99999, pointerEvents: 'none' }}>
+             <defs>
+                <mask id="iris-mask">
+                   <rect width="100%" height="100%" fill="white" />
+                   <motion.circle 
+                      cx={clickPos.x} 
+                      cy={clickPos.y} 
+                      initial={{ r: 0 }} 
+                      animate={{ r: 3000, transition: { duration: 0.6, ease: 'easeInOut' } }} 
+                      exit={{ r: 0, transition: { duration: 0.5, ease: 'easeInOut' } }} 
+                      fill="black" 
+                   />
+                </mask>
+             </defs>
+             <rect width="100%" height="100%" fill="var(--accent)" mask="url(#iris-mask)" />
+          </svg>
        </motion.div>
     );
   }
