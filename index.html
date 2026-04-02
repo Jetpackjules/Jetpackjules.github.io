@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jules • Portfolio</title>
+  <title>JetpackJules • Portfolio</title>
   <meta name="description" content="Interactive portfolio showcasing projects including 2.5D Window and NEAT in Godot." />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
@@ -267,7 +267,7 @@
       <h1>Interactive systems, experiments, and playful technical art.</h1>
       <p class="lead">
         I build visual-first software and game prototypes that blend engineering with design.
-        This site uses a refined cube-field interaction inspired by my earlier cube_test experiment,
+        This site uses a refined cube-field interaction inspired by my earlier cube-test experiment,
         rebuilt to feel cleaner, smoother, and more polished.
       </p>
       <div class="chips">
@@ -344,14 +344,25 @@
     document.getElementById('year').textContent = new Date().getFullYear();
 
     if (typeof THREE === 'undefined') {
-      console.warn('Three.js failed to load; rendering static background fallback.');
+      console.warn('Three.js failed to load; dynamic cube background is disabled and CSS background styling is used.');
     } else {
       (function initBackground() {
         const canvas = document.getElementById('bg');
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 0, 18);
+        const CAMERA_CONFIG = {
+          fov: 52,
+          near: 0.1,
+          far: 100,
+          z: 18
+        };
+        const camera = new THREE.PerspectiveCamera(
+          CAMERA_CONFIG.fov,
+          window.innerWidth / window.innerHeight,
+          CAMERA_CONFIG.near,
+          CAMERA_CONFIG.far
+        );
+        camera.position.set(0, 0, CAMERA_CONFIG.z);
 
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -363,9 +374,14 @@
         fill.position.set(-1, -1, 1.2);
         scene.add(ambient, key, fill);
 
-        const columns = 52;
-        const rows = 32;
-        const spacing = 0.58;
+        const GRID_CONFIG = {
+          columns: 52,
+          rows: 32,
+          spacing: 0.58
+        };
+        const columns = GRID_CONFIG.columns;
+        const rows = GRID_CONFIG.rows;
+        const spacing = GRID_CONFIG.spacing;
         const geometry = new THREE.BoxGeometry(0.28, 0.28, 0.28);
         const material = new THREE.MeshStandardMaterial({
           color: 0xcfd7ee,
@@ -416,8 +432,10 @@
           mesh.instanceColor.needsUpdate = true;
         }
 
-        const pointer = new THREE.Vector2(999, 999);
-        const smoothPointer = new THREE.Vector2(999, 999);
+        // Start outside normalized device coordinates ([-1, 1]) so no cubes are initially influenced.
+        const POINTER_NO_INFLUENCE = 3; // Deliberately outside NDC [-1, 1] to start with no pointer influence.
+        const pointer = new THREE.Vector2(POINTER_NO_INFLUENCE, POINTER_NO_INFLUENCE);
+        const smoothPointer = new THREE.Vector2(POINTER_NO_INFLUENCE, POINTER_NO_INFLUENCE);
         const dummy = new THREE.Object3D();
         const worldPointer = new THREE.Vector3();
         const rayPoint = new THREE.Vector3();
@@ -440,6 +458,8 @@
           renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
           renderer.setSize(window.innerWidth, window.innerHeight, false);
         });
+
+        const MIN_SAFE_DISTANCE = 0.0001;
 
         const ANIMATION_CONFIG = {
           mouseInfluenceRadius: 2.9,
@@ -465,12 +485,22 @@
             const y = base[i * 2 + 1];
             const dx = x - worldPointer.x;
             const dy = y - worldPointer.y;
-            const d = Math.sqrt(dx * dx + dy * dy);
-            const power = Math.max(0, 1 - d / ANIMATION_CONFIG.mouseInfluenceRadius);
+            const distanceSq = dx * dx + dy * dy;
+            const maxDistanceSq = ANIMATION_CONFIG.mouseInfluenceRadius * ANIMATION_CONFIG.mouseInfluenceRadius;
+
+            let d = 0;
+            let power = 0;
+            let nx = 0;
+            let ny = 0;
+
+            if (distanceSq < maxDistanceSq) {
+              d = Math.sqrt(distanceSq);
+              power = 1 - d / ANIMATION_CONFIG.mouseInfluenceRadius;
+              nx = d > MIN_SAFE_DISTANCE ? dx / d : 0;
+              ny = d > MIN_SAFE_DISTANCE ? dy / d : 0;
+            }
 
             const push = power * ANIMATION_CONFIG.repulsionStrength;
-            const nx = d > 0.0001 ? dx / d : 0;
-            const ny = d > 0.0001 ? dy / d : 0;
 
             const px = x + nx * push;
             const py = y + ny * push;
