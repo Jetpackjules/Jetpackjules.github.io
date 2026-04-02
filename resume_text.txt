@@ -1,0 +1,52 @@
+JULES ROPARS 
++1 (206) 714-5719 | jropars@cs.washington.edu | linkedin.com/in/Jropars
+EDUCATION 
+ 
+ 
+University of Washington, Paul Allen Institute of Computer Science                                                                       Expected Jun. 2027 
+Bachelor's, Computer Science with Focus on Data Science CSE GPA: 3.78 
+• Relevant Courses: Data Structures & Parallelism, Software Design & Implementation, Matrix Algebra with 
+Applications, Hardware/Software Interface 
+PROFESSIONAL EXPERIENCE 
+AUGER         Bellevue, WA 
+AI Ontology & Software Engineering Intern                                                                                              March 2025 – September 2025 
+• Built out ontology for AI data management and worked to centralize logistics data for pipeline ingestion.  
+• Implemented production code for mass tagging of ontic logistics infrastructure in the supply chain. 
+UW MAKEABILITY LAB            Seattle, WA 
+Machine Learning Researcher                                                                                                                    September 2024 – March 2025 
+• Developed alongside postgraduate students a tool to help wheelchair users navigate the world by using AI to mark sidewalks 
+with curbs, wheelchair ramps, etc. 
+• Accelerated nightly database clustering by ~500% applying Density-Based Spatial Clustering of Applications with Noise 
+(DBSCAN). 
+• Project: makeabilitylab.cs.washington.edu 
+ABBOTT            Alameda, CA 
+AI/ML and Data Science Intern                                                                 August 2023 – September 2023 & July 2024 - September 2024 
+• Designed and deployed a centralized intranet database (Elasticsearch+ Kibana) for the Diabetes Division. 
+• Built program to continually consolidate and re-index data from out-scaled sources (e.g., excel, google sheets). 
+• Enabled the dynamic data visualization of 30,000+ employee records, streamlining HR operations. 
+• Performed a comparative analysis of current enterprise architecture frameworks and tools (e.g., Gartner, TOGAF, LeanIX). 
+• Published findings on Medium (With Approval): Medium Article 
+NEOHACKS           Seattle, WA 
+Organizer & Host June 2022 - July 2022 
+• Hosted the 48-hour hackathon for over 500 participants from Europe, Africa, and the Americas. 
+• Built the registration website, team management system, and participant database. 
+• Hackathon: neohacks.org 
+ML PROJECTS 
+ML ASL TRANSCRIBER - Project 
+• Trained computer vision model to transcribe American Sign Language for 2023 Dubhacks Hackathon (team of 4). 
+SIMULATED WITH REINFORCEMENT LEARNING (NEAT) - Project 
+• Leveraged Godot game engine to showcase in real-time the creation and evolution of species based on different emergent 
+behaviors (e.g., foraging and imprinting). 
+FULLY AI-DRIVEN YT ACCOUNTS - Project  // Link to Acc. 
+• Built a system to automatically generate YouTube videos using only AI for audio, video, and content, dynamically 
+adjusting to prior video SEO performance and a mix of google trends, social media activity, and web scraping. 
+• Reached over 1,000 subscribers in under 4 months and averaged 15,000+ views daily. 
+• Learn more Here 
+CUSTOM LLM - Project 
+• Tuned a custom LLM using TensorFlow for a Seattle-based crypto marketplace (Nibiru). 
+SKILLS 
+Skills: Reinforcement Learning, AI, Databricks, SEO, Business Analytics, Excel/Numbers/Sheets, Git, machine learning, REST APIs,  
+AWS, Elasticsearch, R studio, PPO, NEAT, Database management 
+Programming Languages: Python, JavaScript, Java, (E)SQL, C/C++, HTML/CSS, TypeScript, R, MySQL 
+Interests: Hackathons, Rainy Days, Learning Languages, Squash, Classical History, Personal Programming Projects, Reading 
+Languages: French - Native, Spanish – Basic Working Proficiency, Japanese - Basic (Currently Learning) 
