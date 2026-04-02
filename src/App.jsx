@@ -7,6 +7,38 @@ import Home from './pages/Home';
 import ProjectDetail from './pages/ProjectDetail';
 import Resume from './pages/Resume';
 
+const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
+  if (styleType === 'none') {
+    return <motion.div initial={{opacity:1}} animate={{opacity:1}} exit={{opacity:0, transition:{duration:0}}} style={{width: '100%'}}>{children}</motion.div>;
+  }
+  if (styleType === 'fade') {
+    return <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0, transition: {duration: 0.3}}} exit={{opacity:0, y:-20, transition: {duration: 0.2}}} style={{width: '100%'}}>{children}</motion.div>;
+  }
+  if (styleType === 'slide') {
+    return <motion.div initial={{opacity:0, x:'100vw'}} animate={{opacity:1, x:0, transition: {type:'spring', stiffness:100, damping:15}}} exit={{opacity:0, x:'-100vw', transition: {duration: 0.2}}} style={{width: '100%'}}>{children}</motion.div>;
+  }
+  if (styleType === 'iris') {
+    return (
+       <motion.div style={{width: '100%'}}>
+          <motion.div exit={{ opacity: 1, transition: { duration: 0.5 } }}>
+             {children}
+          </motion.div>
+          <motion.div
+             initial={{ clipPath: `circle(3000px at ${clickPos.x}px ${clickPos.y}px)` }}
+             animate={{ clipPath: `circle(0px at ${clickPos.x}px ${clickPos.y}px)`, transition: { duration: 0.5, ease: 'easeOut' } }}
+             style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'var(--accent)', zIndex: 99999, pointerEvents: 'none' }}
+          />
+          <motion.div
+             initial={{ clipPath: `circle(0px at ${clickPos.x}px ${clickPos.y}px)` }}
+             exit={{ clipPath: `circle(3000px at ${clickPos.x}px ${clickPos.y}px)`, transition: { duration: 0.4, ease: 'easeIn' } }}
+             style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'var(--accent)', zIndex: 99999, pointerEvents: 'none' }}
+          />
+       </motion.div>
+    );
+  }
+  return <>{children}</>;
+};
+
 function App() {
   const location = useLocation();
   const [effect, setEffect] = useState('dots'); 
@@ -20,6 +52,14 @@ function App() {
   const [popSize, setPopSize] = useState(6);
   const [popDirection, setPopDirection] = useState('diagonal'); // 'diagonal' or 'below'
   const [layoutWidth, setLayoutWidth] = useState('1100px');
+  const [transitionStyle, setTransitionStyle] = useState('none');
+  const [clickPos, setClickPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+
+  useEffect(() => {
+    const handleClick = (e) => setClickPos({ x: e.clientX, y: e.clientY });
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--pop-size', `${popSize}px`);
@@ -46,9 +86,9 @@ function App() {
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<Home />} />
-              <Route path="/resume" element={<Resume />} />
-              <Route path="/projects/:projectId" element={<ProjectDetail />} />
+              <Route path="/" element={<AnimatedRouteWrapper styleType={transitionStyle} clickPos={clickPos}><Home /></AnimatedRouteWrapper>} />
+              <Route path="/resume" element={<AnimatedRouteWrapper styleType={transitionStyle} clickPos={clickPos}><Resume /></AnimatedRouteWrapper>} />
+              <Route path="/projects/:projectId" element={<AnimatedRouteWrapper styleType={transitionStyle} clickPos={clickPos}><ProjectDetail /></AnimatedRouteWrapper>} />
             </Routes>
           </AnimatePresence>
         </main>
@@ -137,6 +177,16 @@ function App() {
              {/* UI Drop Shadow Tweaker */}
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1rem', borderTop: '2px dashed #000' }}>
                  <h4 style={{ margin: 0, fontWeight: 800 }}>UI Tuning</h4>
+
+                 <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
+                   Page Transitions
+                   <select value={transitionStyle} onChange={(e) => setTransitionStyle(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
+                      <option value="none">Off (Instant)</option>
+                      <option value="fade">Cross-Fade</option>
+                      <option value="slide">Brutal Slide</option>
+                      <option value="iris">Cartoon Iris (Lime)</option>
+                   </select>
+                 </label>
 
                  <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
                    Container Width
