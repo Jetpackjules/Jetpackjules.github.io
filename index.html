@@ -349,125 +349,145 @@
       (function initBackground() {
         const canvas = document.getElementById('bg');
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 0, 18);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 18);
 
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight, false);
-
-      const ambient = new THREE.AmbientLight(0xffffff, 0.62);
-      const key = new THREE.DirectionalLight(0xa5b4fc, 0.85);
-      const fill = new THREE.DirectionalLight(0x7dd3fc, 0.45);
-      key.position.set(1.5, 1.2, 2);
-      fill.position.set(-1, -1, 1.2);
-      scene.add(ambient, key, fill);
-
-      const cols = 52;
-      const rows = 32;
-      const spacing = 0.58;
-      const geometry = new THREE.BoxGeometry(0.28, 0.28, 0.28);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xcfd7ee,
-        roughness: 0.45,
-        metalness: 0.22
-      });
-
-      const count = cols * rows;
-      const mesh = new THREE.InstancedMesh(geometry, material, count);
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      scene.add(mesh);
-
-      const base = new Float32Array(count * 2);
-      const noise = new Float32Array(count);
-      const colors = [];
-      const color = new THREE.Color();
-
-      let index = 0;
-      const xOffset = (cols - 1) * spacing * 0.5;
-      const yOffset = (rows - 1) * spacing * 0.5;
-
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const px = x * spacing - xOffset;
-          const py = y * spacing - yOffset;
-          base[index * 2] = px;
-          base[index * 2 + 1] = py;
-          noise[index] = Math.random() * Math.PI * 2;
-
-          color.setHSL(0.58 + (y / rows) * 0.06, 0.38, 0.74 - (x / cols) * 0.06);
-          mesh.setColorAt(index, color);
-          index++;
-        }
-      }
-
-      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-
-      const pointer = new THREE.Vector2(999, 999);
-      const smoothPointer = new THREE.Vector2(999, 999);
-      const dummy = new THREE.Object3D();
-      const worldPointer = new THREE.Vector3();
-      const rayPoint = new THREE.Vector3();
-
-      function pointerToWorld() {
-        rayPoint.set(pointer.x, pointer.y, 0.5).unproject(camera);
-        rayPoint.sub(camera.position).normalize();
-        const distance = -camera.position.z / rayPoint.z;
-        worldPointer.copy(camera.position).add(rayPoint.multiplyScalar(distance));
-      }
-
-      window.addEventListener('pointermove', (e) => {
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      }, { passive: true });
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setSize(window.innerWidth, window.innerHeight, false);
-      });
 
-      const influence = 2.9;
-      const repel = 0.78;
-      const wave = 0.34;
-      const clock = new THREE.Clock();
+        const ambient = new THREE.AmbientLight(0xffffff, 0.62);
+        const key = new THREE.DirectionalLight(0xa5b4fc, 0.85);
+        const fill = new THREE.DirectionalLight(0x7dd3fc, 0.45);
+        key.position.set(1.5, 1.2, 2);
+        fill.position.set(-1, -1, 1.2);
+        scene.add(ambient, key, fill);
 
-      function animate() {
-        requestAnimationFrame(animate);
+        const columns = 52;
+        const rows = 32;
+        const spacing = 0.58;
+        const geometry = new THREE.BoxGeometry(0.28, 0.28, 0.28);
+        const material = new THREE.MeshStandardMaterial({
+          color: 0xcfd7ee,
+          roughness: 0.45,
+          metalness: 0.22
+        });
 
-        const t = clock.getElapsedTime();
-        smoothPointer.lerp(pointer, 0.08);
-        pointerToWorld();
+        const count = columns * rows;
+        const mesh = new THREE.InstancedMesh(geometry, material, count);
+        mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        scene.add(mesh);
 
-        for (let i = 0; i < count; i++) {
-          const x = base[i * 2];
-          const y = base[i * 2 + 1];
-          const dx = x - worldPointer.x;
-          const dy = y - worldPointer.y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          const power = Math.max(0, 1 - d / influence);
+        const base = new Float32Array(count * 2);
+        const noise = new Float32Array(count);
+        const color = new THREE.Color();
 
-          const push = power * repel;
-          const nx = d > 0.0001 ? dx / d : 0;
-          const ny = d > 0.0001 ? dy / d : 0;
+        const COLOR_CONFIG = {
+          baseHue: 0.58,
+          hueRange: 0.06,
+          saturation: 0.38,
+          baseLightness: 0.74,
+          lightnessRange: 0.06
+        };
 
-          const px = x + nx * push;
-          const py = y + ny * push;
-          const pz = Math.sin(t * 1.2 + noise[i]) * wave + power * 0.85;
+        let index = 0;
+        const xOffset = (columns - 1) * spacing * 0.5;
+        const yOffset = (rows - 1) * spacing * 0.5;
 
-          dummy.position.set(px, py, pz);
-          dummy.rotation.x = -ny * power * 0.35;
-          dummy.rotation.y = nx * power * 0.35;
-          const s = 1 + power * 0.75;
-          dummy.scale.set(s, s, s);
-          dummy.updateMatrix();
-          mesh.setMatrixAt(i, dummy.matrix);
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < columns; x++) {
+            const px = x * spacing - xOffset;
+            const py = y * spacing - yOffset;
+            base[index * 2] = px;
+            base[index * 2 + 1] = py;
+            noise[index] = Math.random() * Math.PI * 2;
+
+            color.setHSL(
+              COLOR_CONFIG.baseHue + (y / rows) * COLOR_CONFIG.hueRange,
+              COLOR_CONFIG.saturation,
+              COLOR_CONFIG.baseLightness - (x / columns) * COLOR_CONFIG.lightnessRange
+            );
+            mesh.setColorAt(index, color);
+            index += 1;
+          }
         }
 
-        mesh.instanceMatrix.needsUpdate = true;
-        renderer.render(scene, camera);
-      }
+        if (mesh.instanceColor) {
+          mesh.instanceColor.needsUpdate = true;
+        }
+
+        const pointer = new THREE.Vector2(999, 999);
+        const smoothPointer = new THREE.Vector2(999, 999);
+        const dummy = new THREE.Object3D();
+        const worldPointer = new THREE.Vector3();
+        const rayPoint = new THREE.Vector3();
+
+        function pointerToWorld() {
+          rayPoint.set(smoothPointer.x, smoothPointer.y, 0.5).unproject(camera);
+          rayPoint.sub(camera.position).normalize();
+          const distance = -camera.position.z / rayPoint.z;
+          worldPointer.copy(camera.position).add(rayPoint.multiplyScalar(distance));
+        }
+
+        window.addEventListener('pointermove', (e) => {
+          pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+          pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          renderer.setSize(window.innerWidth, window.innerHeight, false);
+        });
+
+        const ANIMATION_CONFIG = {
+          mouseInfluenceRadius: 2.9,
+          repulsionStrength: 0.78,
+          waveAmplitude: 0.34,
+          waveFrequency: 1.2,
+          pointerEase: 0.08,
+          powerZScale: 0.85,
+          tiltScale: 0.35,
+          scaleBoost: 0.75
+        };
+        const clock = new THREE.Clock();
+
+        function animate() {
+          requestAnimationFrame(animate);
+
+          const t = clock.getElapsedTime();
+          smoothPointer.lerp(pointer, ANIMATION_CONFIG.pointerEase);
+          pointerToWorld();
+
+          for (let i = 0; i < count; i++) {
+            const x = base[i * 2];
+            const y = base[i * 2 + 1];
+            const dx = x - worldPointer.x;
+            const dy = y - worldPointer.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            const power = Math.max(0, 1 - d / ANIMATION_CONFIG.mouseInfluenceRadius);
+
+            const push = power * ANIMATION_CONFIG.repulsionStrength;
+            const nx = d > 0.0001 ? dx / d : 0;
+            const ny = d > 0.0001 ? dy / d : 0;
+
+            const px = x + nx * push;
+            const py = y + ny * push;
+            const pz = Math.sin(t * ANIMATION_CONFIG.waveFrequency + noise[i]) * ANIMATION_CONFIG.waveAmplitude + power * ANIMATION_CONFIG.powerZScale;
+
+            dummy.position.set(px, py, pz);
+            dummy.rotation.x = -ny * power * ANIMATION_CONFIG.tiltScale;
+            dummy.rotation.y = nx * power * ANIMATION_CONFIG.tiltScale;
+            const s = 1 + power * ANIMATION_CONFIG.scaleBoost;
+            dummy.scale.set(s, s, s);
+            dummy.updateMatrix();
+            mesh.setMatrixAt(i, dummy.matrix);
+          }
+
+          mesh.instanceMatrix.needsUpdate = true;
+          renderer.render(scene, camera);
+        }
 
         animate();
       })();
