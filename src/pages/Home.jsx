@@ -27,7 +27,7 @@ export default function Home() {
         <div style={{ marginTop: '0.5rem' }}>
            <h2 style={{ fontSize: '2.2rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>JULES ROPARS</h2>
            <p style={{ color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.95rem', margin: '0.5rem 0', lineHeight: 1.4 }}>
-             Creative Technologist | Engineer | 3D Architect
+             Software Engineer | Machine Learning Researcher
            </p>
            <p style={{ fontWeight: 600, margin: '0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
              &#128205; Seattle, WA
