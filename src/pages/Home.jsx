@@ -81,6 +81,7 @@ export default function Home() {
                 <Link to={`/projects/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <motion.div 
                     whileHover={{ y: -8, x: 'calc(var(--pop-dir-x) * -8px)', boxShadow: 'calc(var(--pop-dir-x) * 12px) calc(var(--pop-dir-y) * 12px) 0px #000' }}
+                    whileTap={{ y: 'calc(var(--pop-dir-y) * 6px)', x: 'calc(var(--pop-dir-x) * 6px)', boxShadow: '0px 0px 0px #000', transition: { duration: 0.05 } }}
                     className="brutalist-panel" 
                     style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
                   >
