@@ -31,8 +31,8 @@ const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
                       cx={clickPos.x} 
                       cy={clickPos.y} 
                       initial={{ r: 0 }} 
-                      animate={{ r: 3000, transition: { duration: 0.6, ease: 'easeInOut' } }} 
-                      exit={{ r: 0, transition: { duration: 0.5, ease: 'easeInOut' } }} 
+                      animate={{ r: 3000, transition: { duration: 0.4, ease: 'easeInOut' } }} 
+                      exit={{ r: 0, transition: { duration: 0.3, ease: 'easeInOut' } }} 
                       fill="black" 
                    />
                 </mask>
