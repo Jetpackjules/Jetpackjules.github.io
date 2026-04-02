@@ -19,12 +19,14 @@ function App() {
   // Global UI "Pop" config
   const [popSize, setPopSize] = useState(6);
   const [popDirection, setPopDirection] = useState('diagonal'); // 'diagonal' or 'below'
+  const [layoutWidth, setLayoutWidth] = useState('1100px');
 
   useEffect(() => {
     document.documentElement.style.setProperty('--pop-size', `${popSize}px`);
     document.documentElement.style.setProperty('--pop-dir-x', popDirection === 'diagonal' ? '1' : '0');
     document.documentElement.style.setProperty('--pop-dir-y', '1');
-  }, [popSize, popDirection]);
+    document.documentElement.style.setProperty('--layout-width', layoutWidth);
+  }, [popSize, popDirection, layoutWidth]);
 
   return (
     <div className="app-container">
@@ -135,6 +137,16 @@ function App() {
              {/* UI Drop Shadow Tweaker */}
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1rem', borderTop: '2px dashed #000' }}>
                  <h4 style={{ margin: 0, fontWeight: 800 }}>UI Tuning</h4>
+
+                 <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
+                   Container Width
+                   <select value={layoutWidth} onChange={(e) => setLayoutWidth(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
+                      <option value="1100px">Standard (1100px)</option>
+                      <option value="1400px">Wide (1400px)</option>
+                      <option value="95%">Full Width (95%)</option>
+                   </select>
+                 </label>
+
                  <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
                    Element "Pop" Shadow ({popSize}px)
                    <input type="range" min="0" max="20" step="1" value={popSize} onChange={(e) => setPopSize(Number(e.target.value))} style={{ marginTop: '0.5rem' }} />

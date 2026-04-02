@@ -78,9 +78,9 @@ export default function Home() {
              {projectsData.map((p, i) => (
                 <Link to={`/projects/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <motion.div 
-                    whileHover={{ y: -8, x: -8, boxShadow: 'calc(var(--pop-x) * 1.5) calc(var(--pop-y) * 1.5) 0px #000' }}
+                    whileHover={{ y: -8, x: -8, boxShadow: '12px 12px 0px #000' }}
                     className="brutalist-panel" 
-                    style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: '6px 6px 0px #000' }}
                   >
                      <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', background: `url('/assets/projects/${p.id}/placeholder_img_or_gif.gif') center/cover`, backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
                      </div>

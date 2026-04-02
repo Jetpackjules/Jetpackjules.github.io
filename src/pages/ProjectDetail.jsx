@@ -19,7 +19,7 @@ export default function ProjectDetail() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      style={{ width: '100%', maxWidth: '1050px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '3rem' }}
+      style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '3rem' }}
     >
       <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
         <Link to="/" className="brutalist-button" style={{ background: '#fff' }}>
