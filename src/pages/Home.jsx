@@ -17,7 +17,7 @@ export default function Home() {
         animate={{ y: 0, opacity: 1 }} 
         transition={{ duration: 0.4 }} 
         className="brutalist-panel" 
-        style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'fit-content', gap: '1rem' }}
+        style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'fit-content', gap: '0.8rem' }}
       >
         <div style={{ background: 'var(--accent-purple)', margin: '-1.5rem -1.5rem 0 -1.5rem', height: '140px', borderRadius: '10px 10px 0 0', borderBottom: 'var(--border-width) solid var(--border-color)' }}></div>
         <div style={{ width: '100px', height: '100px', borderRadius: '16px', background: 'var(--accent)', border: 'var(--border-width) solid var(--border-color)', marginTop: '-65px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', boxShadow: 'var(--brutal-shadow)' }}>
@@ -35,14 +35,14 @@ export default function Home() {
            </p>
         </div>
 
-        <Link to="/resume" style={{ textDecoration: 'none', margin: '1.2rem 0' }}>
+        <Link to="/resume" style={{ textDecoration: 'none', margin: 0 }}>
            <button className="brutalist-button" style={{ width: '100%', padding: '0.8rem', background: '#fff', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
              View Resume / CV
            </button>
         </Link>
         
-        <div style={{ marginTop: '0.5rem' }}>
+        <div>
            <p style={{ fontWeight: 800, marginBottom: '0.8rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
              Connect with me
