@@ -1,5 +1,5 @@
 import React from 'react';
-import { window } from 'framer-motion';
+
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
