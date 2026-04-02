@@ -24,12 +24,12 @@ export default function Home() {
           👽
         </div>
         
-        <div style={{ marginTop: '0.5rem' }}>
-           <h2 style={{ fontSize: '2.2rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>JULES ROPARS</h2>
-           <p style={{ color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.95rem', margin: '0.5rem 0', lineHeight: 1.4 }}>
-             Software Engineer | UW Paul Allen Student
+        <div style={{ marginTop: '0.2rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+           <h2 style={{ fontSize: '2.2rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>JULES ROPARS</h2>
+           <p style={{ color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.95rem', margin: 0, lineHeight: 1.4 }}>
+             Software Engineer<br/>UW Paul Allen Student
            </p>
-           <p style={{ fontWeight: 600, margin: '0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
+           <p style={{ fontWeight: 600, margin: 0, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
              &#128205; Seattle, WA
            </p>
         </div>
