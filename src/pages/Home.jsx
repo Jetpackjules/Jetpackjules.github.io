@@ -59,7 +59,7 @@ export default function Home() {
            </div>
            
            <style>{`
-             .social-btn:hover { background: var(--accent-light) !important; transform: translate(calc(var(--pop-size) * -0.5), calc(var(--pop-size) * -0.5)); box-shadow: calc(var(--pop-x) * 1.5) calc(var(--pop-y) * 1.5) 0px #000; }
+             .social-btn:hover { background: var(--accent-light) !important; transform: translate(calc(var(--pop-x) * -0.5), calc(var(--pop-y) * -0.5)); box-shadow: calc(var(--pop-x) * 1.5) calc(var(--pop-y) * 1.5) 0px #000; }
              .social-btn:active { box-shadow: 0px 0px 0px #000 !important; transform: translate(var(--pop-x), var(--pop-y)) !important; }
            `}</style>
         </div>
@@ -78,9 +78,9 @@ export default function Home() {
              {projectsData.map((p, i) => (
                 <Link to={`/projects/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <motion.div 
-                    whileHover={{ y: -8, x: -8, boxShadow: '12px 12px 0px #000' }}
+                    whileHover={{ y: -8, x: 'calc(var(--pop-dir-x) * -8px)', boxShadow: 'calc(var(--pop-dir-x) * 12px) calc(var(--pop-dir-y) * 12px) 0px #000' }}
                     className="brutalist-panel" 
-                    style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: '6px 6px 0px #000' }}
+                    style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
                   >
                      <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', background: `url('/assets/projects/${p.id}/placeholder_img_or_gif.gif') center/cover`, backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
                      </div>
