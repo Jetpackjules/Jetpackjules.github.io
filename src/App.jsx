@@ -55,16 +55,9 @@ function ClickEffectLayer({ particles, type }) {
              {type === 'sunburst-color' && (
                 [...Array(6)].map((_, i) => (
                   <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 60 + (p.id % 30)}deg)` }}>
-                    <motion.div initial={{ x: 20, width: 0, opacity: 1 }} animate={{ x: [20, 50, 70], width: [0, 30, 0], opacity: [1, 1, 0] }} transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }} style={{ height: '10px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '2.5px solid #000', translateY: '-50%' }} />
+                    <motion.div initial={{ x: 20, width: 0, opacity: 1, scale: 1 }} animate={{ x: [20, 50, 90], width: [0, 30, 0], opacity: [1, 1, 0], scale: [1, 1, 0] }} transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }} style={{ height: '10px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '2.5px solid #000', translateY: '-50%' }} />
                   </div>
                 ))
-             )}
-
-             {/* SUNBURST RETRO SVG STAR */}
-             {type === 'sunburst-retro' && (
-                 <motion.div initial={{ scale: 0.2, opacity: 1, rotate: (p.id % 45) }} animate={{ scale: [0.2, 1.5, 2], opacity: [1, 1, 0] }} transition={{ duration: 0.4, ease: 'easeOut', times: [0, 0.3, 1] }} style={{ position: 'absolute', top: p.y, left: p.x, transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}>
-                    <svg width="80" height="80" viewBox="0 0 100 100" overflow="visible"><path d="M50 0 L58 38 L95 25 L65 55 L100 80 L62 70 L50 100 L38 70 L0 80 L35 55 L5 25 L42 38 Z" fill="var(--accent)" stroke="#000" strokeWidth="4" strokeLinejoin="miter"/></svg>
-                 </motion.div>
              )}
              
            </React.Fragment>
@@ -296,7 +289,6 @@ function App() {
                       <optgroup label="Sunbursts">
                         <option value="sunburst-monochrome">Monochrome Lines</option>
                         <option value="sunburst-color">Colorful Chunky</option>
-                        <option value="sunburst-retro">Retro SVG Star</option>
                       </optgroup>
                       <optgroup label="Ripples">
                         <option value="ripple-point">Circular Wave</option>
