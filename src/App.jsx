@@ -40,13 +40,13 @@ function ClickEffectLayer({ particles, type }) {
                 />
              )}
              {type === 'sunburst' && (
-                [...Array(8)].map((_, i) => (
-                  <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 45}deg)` }}>
+                [...Array(6)].map((_, i) => (
+                  <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 60 + (p.id % 30)}deg)` }}>
                     <motion.div
-                       initial={{ x: 10, width: 0, opacity: 1 }}
-                       animate={{ x: 35, width: [0, 15, 0], opacity: [1, 1, 0] }}
-                       transition={{ duration: 0.4, ease: 'easeOut', times: [0, 0.4, 1] }}
-                       style={{ height: '4px', background: 'var(--text-primary)', borderRadius: '2px', translateY: '-50%' }}
+                       initial={{ x: 20, width: 0 }}
+                       animate={{ x: [20, 50, 70], width: [0, 30, 0] }}
+                       transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }}
+                       style={{ height: '10px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '2.5px solid #000', translateY: '-50%' }}
                     />
                   </div>
                 ))
@@ -61,6 +61,9 @@ function ClickEffectLayer({ particles, type }) {
 const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
   if (styleType === 'none') {
     return <motion.div initial={{opacity:1}} animate={{opacity:1}} exit={{opacity:0, transition:{duration:0}}} style={{width: '100%'}}>{children}</motion.div>;
+  }
+  if (styleType === 'fast') {
+    return <motion.div initial={{opacity:0, y:15}} animate={{opacity:1, y:0, transition: {duration: 0.15}}} exit={{opacity:0, y:-15, transition: {duration: 0.1}}} style={{width: '100%'}}>{children}</motion.div>;
   }
   if (styleType === 'fade') {
     return <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0, transition: {duration: 0.3}}} exit={{opacity:0, y:-20, transition: {duration: 0.2}}} style={{width: '100%'}}>{children}</motion.div>;
@@ -109,7 +112,7 @@ function App() {
   const [popSize, setPopSize] = useState(6);
   const [popDirection, setPopDirection] = useState('diagonal'); // 'diagonal' or 'below'
   const [layoutWidth, setLayoutWidth] = useState('1100px');
-  const [transitionStyle, setTransitionStyle] = useState('none');
+  const [transitionStyle, setTransitionStyle] = useState('fade');
   const [clickPos, setClickPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
   const [clickEffect, setClickEffect] = useState('none');
@@ -263,7 +266,8 @@ function App() {
                    Page Transitions
                    <select value={transitionStyle} onChange={(e) => setTransitionStyle(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
                       <option value="none">Off (Instant)</option>
-                      <option value="fade">Cross-Fade</option>
+                      <option value="fast">Fast Fade</option>
+                      <option value="fade">Smooth Fade</option>
                       <option value="slide">Brutal Slide</option>
                       <option value="iris">Cartoon Iris (Lime)</option>
                    </select>
