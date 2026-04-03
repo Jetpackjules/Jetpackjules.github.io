@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -6,6 +6,57 @@ import BackgroundManager from './components/BackgroundManager';
 import Home from './pages/Home';
 import ProjectDetail from './pages/ProjectDetail';
 import Resume from './pages/Resume';
+
+function ClickEffectLayer({ particles, type }) {
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999999, pointerEvents: 'none' }}>
+       <AnimatePresence>
+         {particles.map(p => (
+           <React.Fragment key={p.id}>
+             {type === 'ripple' && p.type === 'button' && (
+                <motion.div
+                  initial={{ opacity: 0.6, scale: 1 }}
+                  animate={{ opacity: 0, scale: 1.15 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  style={{
+                     position: 'absolute', top: p.rect.top, left: p.rect.left,
+                     width: p.rect.width, height: p.rect.height,
+                     border: '4px solid var(--text-primary)', 
+                     borderRadius: p.br || '8px',
+                     transformOrigin: 'center', pointerEvents: 'none'
+                  }}
+                />
+             )}
+             {type === 'ripple' && p.type === 'point' && (
+                <motion.div
+                  initial={{ width: 0, height: 0, opacity: 0.6 }}
+                  animate={{ width: 60, height: 60, opacity: 0 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  style={{
+                     position: 'absolute', top: p.y, left: p.x,
+                     border: '3px solid var(--text-primary)', borderRadius: '50%',
+                     transform: 'translate(-50%, -50%)', pointerEvents: 'none'
+                  }}
+                />
+             )}
+             {type === 'sunburst' && (
+                [...Array(8)].map((_, i) => (
+                  <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 45}deg)` }}>
+                    <motion.div
+                       initial={{ x: 10, width: 0, opacity: 1 }}
+                       animate={{ x: 35, width: [0, 15, 0], opacity: [1, 1, 0] }}
+                       transition={{ duration: 0.4, ease: 'easeOut', times: [0, 0.4, 1] }}
+                       style={{ height: '4px', background: 'var(--text-primary)', borderRadius: '2px', translateY: '-50%' }}
+                    />
+                  </div>
+                ))
+             )}
+           </React.Fragment>
+         ))}
+       </AnimatePresence>
+    </div>
+  );
+}
 
 const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
   if (styleType === 'none') {
@@ -61,10 +112,34 @@ function App() {
   const [transitionStyle, setTransitionStyle] = useState('none');
   const [clickPos, setClickPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
+  const [clickEffect, setClickEffect] = useState('none');
+  const [clickParticles, setClickParticles] = useState([]);
+  const clickEffectRef = useRef(clickEffect);
+  clickEffectRef.current = clickEffect;
+
   useEffect(() => {
-    const handleClick = (e) => setClickPos({ x: e.clientX, y: e.clientY });
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    const handleMouseDown = (e) => {
+      setClickPos({ x: e.clientX, y: e.clientY });
+      
+      const effectType = clickEffectRef.current;
+      if (effectType !== 'none') {
+        const target = e.target.closest('button, a, .brutalist-panel');
+        let particleData = { id: Date.now() + Math.random(), x: e.clientX, y: e.clientY, type: 'point' };
+        
+        if (target && effectType === 'ripple') {
+           const rect = target.getBoundingClientRect();
+           const br = window.getComputedStyle(target).borderRadius;
+           particleData = { ...particleData, rect, br, type: 'button' };
+        }
+        
+        setClickParticles(prev => [...prev, particleData]);
+        setTimeout(() => {
+           setClickParticles(prev => prev.filter(p => p.id !== particleData.id));
+        }, 600);
+      }
+    };
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
   }, []);
 
   useEffect(() => {
@@ -217,6 +292,8 @@ function App() {
            </motion.div>
         )}
       </AnimatePresence>
+
+      <ClickEffectLayer particles={clickParticles} type={clickEffect} />
     </div>
   );
 }
