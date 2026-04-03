@@ -13,44 +13,60 @@ function ClickEffectLayer({ particles, type }) {
        <AnimatePresence>
          {particles.map(p => (
            <React.Fragment key={p.id}>
-             {type === 'ripple' && p.type === 'button' && (
+           
+             {/* RIPPLE BUTTON (Element Fit) */}
+             {type === 'ripple-button' && p.type === 'button' && (
                 <motion.div
                   initial={{ opacity: 0.6, scale: 1 }}
                   animate={{ opacity: 0, scale: 1.15 }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
-                  style={{
-                     position: 'absolute', top: p.rect.top, left: p.rect.left,
-                     width: p.rect.width, height: p.rect.height,
-                     border: '4px solid var(--text-primary)', 
-                     borderRadius: p.br || '8px',
-                     transformOrigin: 'center', pointerEvents: 'none'
-                  }}
+                  style={{ position: 'absolute', top: p.rect.top, left: p.rect.left, width: p.rect.width, height: p.rect.height, border: '4px solid var(--text-primary)', borderRadius: p.br || '8px', transformOrigin: 'center', pointerEvents: 'none' }}
                 />
              )}
-             {type === 'ripple' && p.type === 'point' && (
+             
+             {/* RIPPLE POINT (Circular Wave) */}
+             {(type === 'ripple-point' || (type === 'ripple-button' && p.type === 'point')) && (
                 <motion.div
                   initial={{ width: 0, height: 0, opacity: 0.6 }}
                   animate={{ width: 60, height: 60, opacity: 0 }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
-                  style={{
-                     position: 'absolute', top: p.y, left: p.x,
-                     border: '3px solid var(--text-primary)', borderRadius: '50%',
-                     transform: 'translate(-50%, -50%)', pointerEvents: 'none'
-                  }}
+                  style={{ position: 'absolute', top: p.y, left: p.x, border: '3px solid var(--text-primary)', borderRadius: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}
                 />
              )}
-             {type === 'sunburst' && (
-                [...Array(6)].map((_, i) => (
-                  <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 60 + (p.id % 30)}deg)` }}>
-                    <motion.div
-                       initial={{ x: 20, width: 0 }}
-                       animate={{ x: [20, 50, 70], width: [0, 30, 0] }}
-                       transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }}
-                       style={{ height: '10px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '2.5px solid #000', translateY: '-50%' }}
-                    />
+
+             {/* RIPPLE DOUBLE */}
+             {type === 'ripple-double' && (
+                <>
+                  <motion.div initial={{ width: 0, height: 0, opacity: 0.8 }} animate={{ width: 80, height: 80, opacity: 0 }} transition={{ duration: 0.5, ease: 'easeOut' }} style={{ position: 'absolute', top: p.y, left: p.x, border: '3px solid var(--text-primary)', borderRadius: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+                  <motion.div initial={{ width: 0, height: 0, opacity: 0.8 }} animate={{ width: 60, height: 60, opacity: 0 }} transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }} style={{ position: 'absolute', top: p.y, left: p.x, border: '3px dashed var(--accent)', borderRadius: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+                </>
+             )}
+
+             {/* SUNBURST MONOCHROME */}
+             {type === 'sunburst-monochrome' && (
+                [...Array(8)].map((_, i) => (
+                  <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 45}deg)` }}>
+                    <motion.div initial={{ x: 10, width: 0, opacity: 1 }} animate={{ x: 40, width: [0, 15, 0], opacity: [1, 1, 0] }} transition={{ duration: 0.4, ease: 'easeOut', times: [0, 0.4, 1] }} style={{ height: '3px', background: 'var(--text-primary)', borderRadius: '1.5px', translateY: '-50%' }} />
                   </div>
                 ))
              )}
+
+             {/* SUNBURST COLORFUL */}
+             {type === 'sunburst-color' && (
+                [...Array(6)].map((_, i) => (
+                  <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 60 + (p.id % 30)}deg)` }}>
+                    <motion.div initial={{ x: 20, width: 0, opacity: 1, scale: 1 }} animate={{ x: [20, 50, 70], width: [0, 30, 0], opacity: [1, 1, 0], scale: [1, 1, 0] }} transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }} style={{ height: '10px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '2.5px solid #000', translateY: '-50%' }} />
+                  </div>
+                ))
+             )}
+
+             {/* SUNBURST RETRO SVG STAR */}
+             {type === 'sunburst-retro' && (
+                 <motion.div initial={{ scale: 0.2, opacity: 1, rotate: (p.id % 45) }} animate={{ scale: [0.2, 1.5, 2], opacity: [1, 1, 0] }} transition={{ duration: 0.4, ease: 'easeOut', times: [0, 0.3, 1] }} style={{ position: 'absolute', top: p.y, left: p.x, transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}>
+                    <svg width="80" height="80" viewBox="0 0 100 100" overflow="visible"><path d="M50 0 L58 38 L95 25 L65 55 L100 80 L62 70 L50 100 L38 70 L0 80 L35 55 L5 25 L42 38 Z" fill="var(--accent)" stroke="#000" strokeWidth="4" strokeLinejoin="miter"/></svg>
+                 </motion.div>
+             )}
+             
            </React.Fragment>
          ))}
        </AnimatePresence>
@@ -129,7 +145,7 @@ function App() {
         const target = e.target.closest('button, a, .brutalist-panel');
         let particleData = { id: Date.now() + Math.random(), x: e.clientX, y: e.clientY, type: 'point' };
         
-        if (target && effectType === 'ripple') {
+        if (target && effectType === 'ripple-button') {
            const rect = target.getBoundingClientRect();
            const br = window.getComputedStyle(target).borderRadius;
            particleData = { ...particleData, rect, br, type: 'button' };
@@ -277,8 +293,16 @@ function App() {
                    Visual Clicks
                    <select value={clickEffect} onChange={(e) => setClickEffect(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
                       <option value="none">Off</option>
-                      <option value="sunburst">Cartoon Sunburst</option>
-                      <option value="ripple">Element Outline Ripple</option>
+                      <optgroup label="Sunbursts">
+                        <option value="sunburst-monochrome">Monochrome Lines</option>
+                        <option value="sunburst-color">Colorful Chunky</option>
+                        <option value="sunburst-retro">Retro SVG Star</option>
+                      </optgroup>
+                      <optgroup label="Ripples">
+                        <option value="ripple-point">Circular Wave</option>
+                        <option value="ripple-button">Element Fit</option>
+                        <option value="ripple-double">Double Echo</option>
+                      </optgroup>
                    </select>
                  </label>
 
