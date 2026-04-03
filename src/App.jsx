@@ -270,6 +270,15 @@ function App() {
                  </label>
 
                  <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
+                   Visual Clicks
+                   <select value={clickEffect} onChange={(e) => setClickEffect(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
+                      <option value="none">Off</option>
+                      <option value="sunburst">Cartoon Sunburst</option>
+                      <option value="ripple">Element Outline Ripple</option>
+                   </select>
+                 </label>
+
+                 <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
                    Container Width
                    <select value={layoutWidth} onChange={(e) => setLayoutWidth(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
                       <option value="1100px">Standard (1100px)</option>

@@ -14,13 +14,7 @@ export default function ProjectDetail() {
   if (!project) return <div>Project not found</div>;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '3rem' }}
-    >
+    <div style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '3rem' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
         <Link to="/" className="brutalist-button" style={{ background: '#fff' }}>
           &larr; Back to Gallery
@@ -106,6 +100,6 @@ export default function ProjectDetail() {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
