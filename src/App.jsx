@@ -120,7 +120,7 @@ function App() {
   // Global UI "Pop" config
   const [popSize, setPopSize] = useState(6);
   const [popDirection, setPopDirection] = useState('diagonal'); // 'diagonal' or 'below'
-  const [layoutWidth, setLayoutWidth] = useState('1100px');
+  const [layoutWidth, setLayoutWidth] = useState('1400px');
   const [transitionStyle, setTransitionStyle] = useState('fade');
   const [clickPos, setClickPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
