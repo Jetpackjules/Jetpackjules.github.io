@@ -55,7 +55,7 @@ function ClickEffectLayer({ particles, type }) {
              {type === 'sunburst-color' && (
                 [...Array(6)].map((_, i) => (
                   <div key={`${p.id}-${i}`} style={{ position: 'absolute', top: p.y, left: p.x, transform: `rotate(${i * 60 + (p.id % 30)}deg)` }}>
-                    <motion.div initial={{ x: 12, width: 0, opacity: 1, scale: 1 }} animate={{ x: [12, 25, 55], width: [0, 28, 0], opacity: [1, 1, 0], scale: [1, 1, 0] }} transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }} style={{ height: '8px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '2px solid #000', translateY: '-50%' }} />
+                    <motion.div initial={{ x: 10, width: 0, opacity: 1, scaleY: 1 }} animate={{ x: [10, 15, 50], width: [0, 35, 0], opacity: [1, 1, 0], scaleY: [1, 1, 0] }} transition={{ duration: 0.35, ease: 'easeOut', times: [0, 0.4, 1] }} style={{ height: '5px', background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent-purple)', border: '1.5px solid #000', translateY: '-50%' }} />
                   </div>
                 ))
              )}
