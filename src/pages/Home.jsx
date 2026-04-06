@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 export const projectsData = [
   { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.1 },
   { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', delay: 0.2 },
-  { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.3 }
+  { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.3, image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
+  { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.4 }
 ];
 
 export default function Home() {
@@ -85,7 +86,7 @@ export default function Home() {
                     className="brutalist-panel" 
                     style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
                   >
-                     <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', background: `url('/assets/projects/${p.id}/placeholder_img_or_gif.gif') center/cover`, backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
+                     <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', background: `url('/assets/projects/${p.id}/${p.image || 'placeholder_img_or_gif.gif'}') center/cover`, backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
                      </div>
                      <div style={{ padding: '1.5rem', background: '#fff', display: 'flex', flexDirection: 'column' }}>
                         <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', border: '2px solid #000', padding: '3px 8px', borderRadius: '4px', width: 'fit-content', marginBottom: '0.8rem', background: 'var(--bg-color)', boxShadow: 'var(--brutal-shadow)' }}>{p.category}</span>
