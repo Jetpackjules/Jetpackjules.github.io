@@ -23,7 +23,12 @@ export default function ProjectDetail() {
 
       <div className="brutalist-panel" style={{ padding: '0', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header Image Thumbnail directly pointing to the asset */}
-        <div style={{ width: '100%', height: '350px', borderBottom: 'var(--border-width) solid var(--border-color)', backgroundColor: 'var(--accent-purple)', backgroundImage: `url('/assets/projects/${projectId}/${project.headerImage || project.image || 'placeholder_img_or_gif.gif'}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div style={{ width: '100%', height: '350px', borderBottom: 'var(--border-width) solid var(--border-color)', backgroundColor: 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
+           {(project.headerImage || project.image || '').endsWith('.mp4') ? (
+              <video src={`/assets/projects/${projectId}/${project.headerImage || project.image}`} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+           ) : (
+              <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${projectId}/${project.headerImage || project.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />
+           )}
         </div>
         
         <div style={{ padding: '3.5rem', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
@@ -214,7 +219,7 @@ export default function ProjectDetail() {
                       </a>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/rainy-day/screen_2.png" alt="Rainy Day Main" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                      <video src="/assets/projects/rainy-day/trailer.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
                 </div>
 
@@ -245,7 +250,7 @@ export default function ProjectDetail() {
                       </p>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', maxWidth: '1000px' }}>
-                      <img src="/assets/projects/rainy-day/screen_2.png" alt="Rainy Day Demo" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                      <video src="/assets/projects/rainy-day/trailer.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
                 </div>
 
