@@ -93,7 +93,7 @@ export default function ProjectDetail() {
           {projectId === 'squash' && (
              <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '8rem' }}>
                 
-                {/* The Challenge */}
+                {/* Introduction */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
                    <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -104,45 +104,87 @@ export default function ProjectDetail() {
                         Given an image of a squash court, the objective is to accurately predict the location of the ball at all times. Unlike other sports, squash features an incredibly fast-moving target that is only 40mm in diameter. 
                       </p>
                       <p style={{ fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                        This project tackles severe motion blur, challenging camera angles, and dynamic partial occlusions caused by players. We trained on a custom dataset of 424 labeled images from RoboFlow featuring heavy wooden flooring and strict white boundary walls.
+                        This project tackles severe motion blur, challenging camera angles, and dynamic partial occlusions caused by players swinging at high speeds in an enclosed box.
                       </p>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', height: '400px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/squash/wide%20squash%20gif.gif" alt="Squash gameplay" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <img src="/assets/projects/squash/wide%20squash%20gif.gif" alt="Squash gameplay" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(1.08)' }} />
                    </div>
                 </div>
 
-                {/* Heatmap Generation */}
+                {/* Dataset & Preprocessing */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
                    <div className="brutalist-panel" style={{ width: '100%', height: '400px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/squash/multi-ball%20squash%20gif.gif" alt="Multi-ball tracking heatmap" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <img src="/assets/projects/squash/slide_4_img_1.jpeg" alt="Canny Edge Filter" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                    </div>
                    <div style={{ order: 1 }}>
-                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Heatmap Generation</h3>
-                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-purple)', padding: '2px 8px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Encoder-Decoder Model</span>
+                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Dataset & Pre-Processing</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent)', padding: '2px 8px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>RoboFlow + Canny Edge</span>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
-                        We constructed a deep computer vision architecture that predicts a dense confidence heatmap rather than simple bounding boxes. By utilizing an Encoder-Decoder model, the network flawlessly tracks multiple overlapping moving targets simultaneously.
+                        We downloaded a custom dataset from RoboFlow consisting of 424 labeled images featuring wooden floors and static white walls, with at least 1+ balls manually labeled per frame.
                       </p>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                        To optimize performance, we implemented a <strong>Canny Edge Filter</strong> upstream in the pipeline. This actively isolates structural boundaries and filters out strict unmoving lines (like court walls), forcing the network's weights to successfully converge entirely on rapid organic motion.
+                        To optimize performance, we implemented a <strong>Canny Edge Filter</strong> upstream in the pipeline. This actively isolates structural boundaries and filters out "obviously incorrect" edges (like the straight architectural lines of the court walls), forcing the network's weights to converge entirely on unpredictable organic motion.
                       </p>
                    </div>
                 </div>
 
-                {/* Kalman Filtering */}
+                {/* Model Architecture */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
                    <div>
+                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Model Architecture</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-purple)', padding: '2px 8px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Encoder-Decoder Heatmap</span>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
+                        We constructed a deep computer vision architecture utilizing an Encoder-Decoder model (incorporating structured downsampling followed by targeted upsampling) that predicts a dense confidence heatmap rather than simple bounding boxes.
+                      </p>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
+                        We tuned a <strong>Modified Focal Loss</strong> function parameterized aggressively across Alpha, Beta, and Ball Position weights. We explicitly trained the network with the logic that predicting harmless false-positives on the floor was drastically better than allowing false negatives to prematurely drop a tracking frame.
+                      </p>
+                   </div>
+                   <div className="brutalist-panel" style={{ width: '100%', height: '400px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src="/assets/projects/squash/slide_3_img_1.jpeg" alt="Heatmap Loss Architecture" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                   </div>
+                </div>
+
+                {/* Temporal Persistence */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+                   <div className="brutalist-panel" style={{ width: '100%', height: '400px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src="/assets/projects/squash/slide_5_img_1.jpeg" alt="Kalman Filter Diagram" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                   </div>
+                   <div style={{ order: 1 }}>
                       <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Temporal Persistence</h3>
                       <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-light)', padding: '2px 8px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Kalman Filter Pipeline</span>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
-                        When a player physically steps in front of the ball, the CV heatmap natively loses confidence. To solve this occlusion, we routed the raw coordinate payload through a continuous kinematic Kalman Filter.
+                        When a player physically steps in front of the ball or severe motion blur destroys pixel continuity, the CV heatmap natively loses confidence. To structurally solve this localized occlusion, we routed the raw coordinate payload through a continuous kinematic <strong>Kalman Filter</strong>.
                       </p>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                        The filter leverages object velocity momentum to mathematically predict the ball's position even during total visual occlusion. Furthermore, we aggressively biased the Modified Focal Loss parameters, guaranteeing the model prefers predicting harmless false-positives on the wooden floor over prematurely dropping a true-positive tracking frame.
+                        The filter leverages object velocity momentum to mathematically predict and maintain an accurate ball position even when individual frames suffer from incredibly poor or non-existent visual data.
                       </p>
                    </div>
-                   <div className="brutalist-panel" style={{ width: '100%', height: '400px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/squash/slide_5_img_1.jpeg" alt="Kalman Filter Diagram" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+
+                {/* Results & Future Scope */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center', marginTop: '2rem' }}>
+                   <div style={{ textAlign: 'center' }}>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px' }}>Live Demonstration</h3>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '800px', margin: '0 auto 2rem auto' }}>
+                        By flawlessly compounding our Encoder-Decoder heatmap generation with kinematic Kalman smoothing, the final network effortlessly tracks up to 5 overlapping balls at once despite rampant motion blur.
+                      </p>
+                   </div>
+                   
+                   <div className="brutalist-panel" style={{ width: '100%', height: '500px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', maxWidth: '1000px' }}>
+                      <img src="/assets/projects/squash/multi-ball%20squash%20gif.gif" alt="Live Demo Tracking" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                   </div>
+
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginTop: '3rem' }}>
+                      <div className="brutalist-panel" style={{ background: '#fff' }}>
+                         <h4 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Future: Generalization</h4>
+                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '1.05rem', fontWeight: 500 }}>Train and test on completely diverse datasets across different court styles, ball colors, and severe camera angles to evaluate robust adaptability.</p>
+                      </div>
+                      <div className="brutalist-panel" style={{ background: '#fff' }}>
+                         <h4 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Future: AI Referee</h4>
+                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '1.05rem', fontWeight: 500 }}>Utilize real-time inference to train an automated Squash “Referee” that can tally points out-of-bounds, combined with player-pose identifiers to algorithmically classify obstruction calls.</p>
+                      </div>
                    </div>
                 </div>
 

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 export const projectsData = [
   { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.1 },
   { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', delay: 0.2 },
-  { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.3, image: 'wide%20squash%20gif.gif', headerImage: 'slide_5_img_1.jpeg' },
+  { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.3, image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
   { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.4 }
 ];
 
