@@ -193,8 +193,67 @@ export default function ProjectDetail() {
              </div>
           )}
 
+          {/* Rainy Day Chrome Extension */}
+          {projectId === 'rainy-day' && (
+             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '8rem' }}>
+                
+                {/* Introduction */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+                   <div>
+                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1px' }}>The Concept</h3>
+                      <p style={{ fontSize: '1.15rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                        Rainy Day New Tab reimagines the standard Chrome browsing experience by turning your monitor into a dynamic, atmospheric windowpane.
+                      </p>
+                      <p style={{ fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+                        It generates a hyper-realistic WebGL rain simulation that tracks continuously down your screen, providing a soothing lo-fi aesthetic whenever you open a new tab.
+                      </p>
+                      <a href="https://chromewebstore.google.com/detail/rainy-day-new-tab/eaaeknijfjmpcjdfnpkeghjioaebimjg" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                         <button className="brutalist-button" style={{ background: 'var(--accent)', fontSize: '1.1rem', padding: '1rem 2rem', border: '3px solid #000', fontWeight: 900, cursor: 'pointer', boxShadow: 'var(--brutal-shadow)' }}>
+                           Download on Chrome Web Store →
+                         </button>
+                      </a>
+                   </div>
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src="/assets/projects/rainy-day/screen_2.png" alt="Rainy Day Main" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                   </div>
+                </div>
+
+                {/* Technical Features */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
+                      <img src="/assets/projects/rainy-day/screen_0.png" alt="Time Widget" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.1)' }} />
+                      <img src="/assets/projects/rainy-day/screen_1.png" alt="Weather Widget" style={{ width: '200%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.1) translateX(-25%)' }} />
+                   </div>
+                   <div style={{ order: 1 }}>
+                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Utility Modules</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-light)', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Localized Data Pipelines</span>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
+                        To ensure the extension was actually functional and not just aesthetic, I engineered distinct minimalist floating modules into the ecosystem.
+                      </p>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
+                        Users can toggle a clock/time display, and uniquely, a real-time hyper-local weather integration pipeline that geolocates the client and fetches live precipitation and temperature data to natively match the visual vibe of the extension.
+                      </p>
+                   </div>
+                </div>
+
+                {/* Final Product */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center', marginTop: '2rem' }}>
+                   <div style={{ textAlign: 'center' }}>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px' }}>Final Product</h3>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '800px', margin: '0 auto 2rem auto' }}>
+                        The final packaged application successfully handles native simulated rain droplets, local data caching, and user preference persistence across the browser session natively without heavy performance overhead.
+                      </p>
+                   </div>
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', maxWidth: '1000px' }}>
+                      <img src="/assets/projects/rainy-day/screen_2.png" alt="Rainy Day Demo" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                   </div>
+                </div>
+
+             </div>
+          )}
+
           {/* Placeholder Fallback */}
-          {projectId !== '25d-window' && projectId !== 'squash' && (
+          {projectId !== '25d-window' && projectId !== 'squash' && projectId !== 'rainy-day' && (
              <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <div className="brutalist-panel" style={{ width: '100%', height: '400px', background: `url('/assets/projects/${projectId}/placeholder_img_or_gif.gif') center/cover` }}></div>
                 <p style={{ fontSize: '1.2rem', fontWeight: 500, lineHeight: 1.6 }}>

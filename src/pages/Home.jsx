@@ -6,7 +6,8 @@ export const projectsData = [
   { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.1 },
   { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', delay: 0.2 },
   { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.3, image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
-  { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.4 }
+  { id: 'rainy-day', title: 'Rainy Day New Tab', category: 'Chrome Extension', desc: 'A soothing neo-brutalist Chrome extension simulating realistic monitor rain with hyper-local real-time weather data.', delay: 0.4, image: 'screen_2.png', headerImage: 'screen_2.png' },
+  { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.5 }
 ];
 
 export default function Home() {
