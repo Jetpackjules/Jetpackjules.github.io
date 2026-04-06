@@ -32,15 +32,6 @@ export default function ProjectDetail() {
             <h1 style={{ fontSize: '4.5rem', margin: '0 0 0.5rem 0', fontWeight: 900, letterSpacing: '-2px', lineHeight: 1 }}>{project.title}</h1>
             <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{project.desc}</p>
             
-            {/* Metadata Tags */}
-            {projectId === 'squash' && (
-              <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                 <div className="brutalist-panel" style={{ background: '#fff', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Team</span>
-                    <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Jules, Daniel, Lawrence, Lyle</span>
-                 </div>
-              </div>
-            )}
           </div>
 
           {projectId === '25d-window' && (
@@ -192,6 +183,10 @@ export default function ProjectDetail() {
                          <h4 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Future: AI Referee</h4>
                          <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '1.05rem', fontWeight: 500 }}>Utilize real-time inference to train an automated Squash "Referee" that can tally points out-of-bounds, combined with player-pose identifiers to algorithmically classify obstruction calls.</p>
                       </div>
+                   </div>
+
+                   <div style={{ marginTop: '3rem', textAlign: 'center', opacity: 0.35, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Collaborators: Daniel Shubin, Lawrence Tan, Lyle Deng (Jules Ropars - CV Lead)
                    </div>
                 </div>
 

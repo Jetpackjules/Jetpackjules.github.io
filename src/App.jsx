@@ -3,7 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import BackgroundManager from './components/BackgroundManager';
-import Home from './pages/Home';
+import Home, { projectsData } from './pages/Home';
 import ProjectDetail from './pages/ProjectDetail';
 import Resume from './pages/Resume';
 
@@ -110,6 +110,12 @@ const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
 
 function App() {
   const location = useLocation();
+  
+  // Extract active project ID for navigation title
+  const isProjectRoute = location.pathname.startsWith('/projects/');
+  const activeProjectId = isProjectRoute ? location.pathname.split('/')[2] : null;
+  const activeProject = activeProjectId ? projectsData.find(p => p.id === activeProjectId) : null;
+
   const [effect, setEffect] = useState('dots'); 
   const [showControls, setShowControls] = useState(false);
   
@@ -170,7 +176,12 @@ function App() {
       <div className="content-wrapper">
         <nav className="main-nav brutalist-panel">
           <Link to="/" className="brand">JULES.</Link>
-          <div className="nav-links">
+          <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
+            {activeProject && (
+              <span style={{ fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginRight: '1.5rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.7rem' }}>▶</span> {activeProject.title}
+              </span>
+            )}
             <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link>
             <Link to="/resume" className={location.pathname === '/resume' ? 'active' : ''}>Resume</Link>
           </div>
