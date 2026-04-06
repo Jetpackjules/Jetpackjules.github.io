@@ -95,10 +95,10 @@ export default function ProjectDetail() {
                 
                 {/* Introduction */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
-                   <div className="brutalist-panel" style={{ padding: '3rem', background: 'var(--accent-light)' }}>
+                   <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                          <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>The Challenge</h3>
-                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', border: '2px solid var(--border-color)', padding: '6px 16px', borderRadius: '6px', background: '#fff' }}>In collaboration with Daniel, Lawrence & Lyle</span>
+                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', border: '2px solid var(--border-color)', padding: '6px 16px', borderRadius: '6px' }}>In collaboration with Daniel, Lawrence & Lyle</span>
                       </div>
                       <p style={{ fontSize: '1.15rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                         Given an image of a squash court, the objective is to accurately predict the location of the ball at all times. Unlike other sports, squash features an incredibly fast-moving target that is only 40mm in diameter. 
@@ -117,7 +117,7 @@ export default function ProjectDetail() {
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <img src="/assets/projects/squash/slide_4_img_1.jpeg" alt="Canny Edge Filter" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
-                   <div className="brutalist-panel" style={{ order: 1, padding: '3rem', background: '#f4f4f0' }}>
+                   <div style={{ order: 1 }}>
                       <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Dataset & Pre-Processing</h3>
                       <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent)', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>RoboFlow + Canny Edge</span>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
@@ -131,9 +131,9 @@ export default function ProjectDetail() {
 
                 {/* Model Architecture */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
-                   <div className="brutalist-panel" style={{ padding: '3rem', background: 'var(--accent-purple)' }}>
+                   <div>
                       <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Model Architecture</h3>
-                      <span style={{ display: 'inline-block', fontWeight: 800, background: '#fff', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Encoder-Decoder Heatmap</span>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-purple)', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Encoder-Decoder Heatmap</span>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
                         We constructed a deep computer vision architecture utilizing an Encoder-Decoder model (incorporating structured downsampling followed by targeted upsampling) that predicts a dense confidence heatmap rather than simple bounding boxes.
                       </p>
@@ -151,7 +151,7 @@ export default function ProjectDetail() {
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <img src="/assets/projects/squash/slide_5_img_1.jpeg" alt="Kalman Filter Diagram" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
-                   <div className="brutalist-panel" style={{ order: 1, padding: '3rem', background: '#f4f4f0' }}>
+                   <div style={{ order: 1 }}>
                       <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Temporal Persistence</h3>
                       <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-light)', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Kalman Filter Pipeline</span>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
@@ -165,9 +165,9 @@ export default function ProjectDetail() {
 
                 {/* Results & Future Scope */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center', marginTop: '2rem' }}>
-                   <div className="brutalist-panel" style={{ textAlign: 'center', background: 'var(--accent)', padding: '4rem 2rem' }}>
+                   <div style={{ textAlign: 'center' }}>
                       <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px' }}>Live Demonstration</h3>
-                      <p style={{ fontWeight: 600, lineHeight: 1.6, fontSize: '1.25rem', color: 'var(--text-primary)', maxWidth: '800px', margin: '0 auto' }}>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '800px', margin: '0 auto 2rem auto' }}>
                         By combining our Encoder-Decoder heatmap generation with kinematic Kalman smoothing, the final network successfully tracks up to 5 overlapping balls at once through heavy motion blur.
                       </p>
                    </div>
