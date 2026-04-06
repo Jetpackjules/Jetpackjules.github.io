@@ -36,10 +36,6 @@ export default function ProjectDetail() {
             {projectId === 'squash' && (
               <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                  <div className="brutalist-panel" style={{ background: '#fff', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Role</span>
-                    <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Computer Vision Lead</span>
-                 </div>
-                 <div className="brutalist-panel" style={{ background: '#fff', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <span style={{ fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Team</span>
                     <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Jules, Daniel, Lawrence, Lyle</span>
                  </div>
