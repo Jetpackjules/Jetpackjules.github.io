@@ -31,6 +31,20 @@ export default function ProjectDetail() {
             <span className="brutalist-panel" style={{ fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', padding: '6px 12px', background: 'var(--accent)', display: 'inline-block', marginBottom: '1rem' }}>{project.category}</span>
             <h1 style={{ fontSize: '4.5rem', margin: '0 0 0.5rem 0', fontWeight: 900, letterSpacing: '-2px', lineHeight: 1 }}>{project.title}</h1>
             <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{project.desc}</p>
+            
+            {/* Metadata Tags */}
+            {projectId === 'squash' && (
+              <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                 <div className="brutalist-panel" style={{ background: '#fff', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Role</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Computer Vision Lead</span>
+                 </div>
+                 <div className="brutalist-panel" style={{ background: '#fff', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Team</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Jules, Daniel, Lawrence, Lyle</span>
+                 </div>
+              </div>
+            )}
           </div>
 
           {projectId === '25d-window' && (
@@ -96,10 +110,7 @@ export default function ProjectDetail() {
                 {/* Introduction */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                         <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1px' }}>The Challenge</h3>
-                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', border: '2px solid var(--border-color)', padding: '6px 16px', borderRadius: '6px' }}>In collaboration with Daniel, Lawrence & Lyle</span>
-                      </div>
+                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1px' }}>The Challenge</h3>
                       <p style={{ fontSize: '1.15rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                         Given an image of a squash court, the objective is to accurately predict the location of the ball at all times. Unlike other sports, squash features an incredibly fast-moving target that is only 40mm in diameter. 
                       </p>
