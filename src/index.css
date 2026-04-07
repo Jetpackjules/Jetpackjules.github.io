@@ -147,6 +147,18 @@ nav.main-nav {
   width: 100%;
 }
 
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@container wrapper (min-width: 768px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @container wrapper (max-width: 900px) {
   .home-layout {
     grid-template-columns: 1fr;
