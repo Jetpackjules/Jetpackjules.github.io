@@ -6,9 +6,9 @@ import RainWindow from '../components/RainWindow';
 export const projectsData = [
   { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision / ML', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.1, image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
   { id: 'rainy-day', title: 'Rainy Day New Tab', category: 'Chrome Extension', desc: 'A Chrome extension showing soothing realistic rain created in real-time.', delay: 0.2, image: 'header.mp4', headerImage: 'header.mp4' },
-  { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.3 },
-  { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', delay: 0.4 },
-  { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.5 }
+  { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.3, github: 'https://github.com/Jetpackjules/NEAT-Godot' },
+  { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', delay: 0.4, github: 'https://github.com/Jetpackjules/2.5D-Window-System' },
+  { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.5, github: 'https://github.com/Jetpackjules/floating-cubes' }
 ];
 
 export default function Home() {
