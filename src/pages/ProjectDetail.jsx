@@ -219,7 +219,7 @@ export default function ProjectDetail() {
                       </a>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <video src="/assets/projects/rainy-day/trailer.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                      <video src="/assets/projects/rainy-day/header.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
                 </div>
 
