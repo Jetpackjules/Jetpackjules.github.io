@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 export default function WidthSlider() {
-  const [width, setWidth] = useState(38);
+  const [width, setWidth] = useState(80);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--layout-width', `${width}%`);
