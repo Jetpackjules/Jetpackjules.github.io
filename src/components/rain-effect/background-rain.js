@@ -74,12 +74,14 @@ export async function startRainBackground({
     alphaSubtract: 3,
   });
 
-  window.addEventListener("resize", () => {
+  const parent = canvas.parentElement || document.documentElement;
+  const resizeObserver = new ResizeObserver(() => {
     resizeCanvas();
     renderer.resize();
     raindrops.resize(canvas.width, canvas.height);
   });
+  resizeObserver.observe(parent);
 
-  return { renderer, raindrops, backgroundId };
+  return { renderer, raindrops, backgroundId, resizeObserver };
 }
 
