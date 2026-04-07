@@ -13,7 +13,7 @@ export const projectsData = [
 
 export default function Home() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 0.8fr) 2fr', gap: '2.5rem', width: '100%' }}>
+    <div className="home-layout">
       {/* LEFT COLUMN - Profile Box */}
       <motion.div 
         initial={{ y: 20, opacity: 0 }} 

@@ -86,10 +86,14 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  container-type: inline-size;
+  container-name: wrapper;
 }
 
 nav.main-nav {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 1.5rem;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
@@ -133,5 +137,18 @@ nav.main-nav {
   .content-wrapper {
     max-width: 100% !important;
     padding: 1.5rem !important;
+  }
+}
+
+.home-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.8fr) 2fr;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+@container wrapper (max-width: 900px) {
+  .home-layout {
+    grid-template-columns: 1fr;
   }
 }
