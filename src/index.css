@@ -14,7 +14,13 @@
   --pop-dir-x: 1;
   --pop-dir-y: 1;
   --brutal-shadow: calc(var(--pop-size) * var(--pop-dir-x)) calc(var(--pop-size) * var(--pop-dir-y)) 0px 0px #000000;
-  --layout-width: 80%;
+  --layout-width: 77%;
+}
+
+@media (min-width: 1800px) {
+  :root {
+    --layout-width: 63%;
+  }
 }
 
 * {
