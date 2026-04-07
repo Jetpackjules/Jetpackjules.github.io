@@ -244,7 +244,7 @@ export default function ProjectDetail() {
                         To make it a dedicated utility space, I added customizable settings allowing users to visually toggle different floating widgets across the window layout.
                       </p>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                        You can opt in to show the current time alongside live weather information for the day, grounding the serene simulation into the actual physical day.
+                        You can opt in to show the current time alongside live weather information for the day.
                       </p>
                    </div>
                 </div>
