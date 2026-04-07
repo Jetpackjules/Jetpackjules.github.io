@@ -71,8 +71,8 @@ export default function Home() {
       </motion.div>
 
       {/* RIGHT COLUMN */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }} style={{ minWidth: 0 }}>
            
            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0 0 2.5rem 0', paddingBottom: '1rem', borderBottom: 'var(--border-width) dashed var(--border-color)' }}>
               <h2 style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-1.5px', margin: 0, color: 'var(--text-primary)' }}>Projects Gallery</h2>
@@ -86,7 +86,7 @@ export default function Home() {
                     whileHover={{ y: -8, x: 'calc(var(--pop-dir-x) * -8px)', boxShadow: 'calc(var(--pop-dir-x) * 12px) calc(var(--pop-dir-y) * 12px) 0px #000' }}
                     whileTap={{ y: 'calc(var(--pop-dir-y) * 6px)', x: 'calc(var(--pop-dir-x) * 6px)', boxShadow: '0px 0px 0px #000', transition: { duration: 0.05 } }}
                     className="brutalist-panel" 
-                    style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
+                    style={{ minWidth: 0, height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
                   >
                      <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', position: 'relative', overflow: 'hidden', backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
                         {p.id === 'rainy-day' ? (
@@ -97,7 +97,7 @@ export default function Home() {
                            <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${p.id}/${p.image || 'placeholder_img_or_gif.gif'}') center/cover`, transform: p.id === 'squash' ? 'scale(1.15)' : 'none' }} />
                         )}
                      </div>
-                     <div style={{ padding: '1.5rem', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+                     <div style={{ minWidth: 0, padding: '1.5rem', background: '#fff', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                            {p.category.split(' / ').map(cat => (
                               <span key={cat} style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', border: '2px solid #000', padding: '3px 8px', borderRadius: '4px', background: 'var(--bg-color)', color: 'var(--text-color)', display: 'inline-block', boxShadow: 'var(--brutal-shadow)' }}>

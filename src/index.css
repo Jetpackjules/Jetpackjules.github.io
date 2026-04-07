@@ -142,7 +142,7 @@ nav.main-nav {
 
 .home-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 0.8fr) 2fr;
+  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 2fr);
   gap: 2.5rem;
   width: 100%;
 }
