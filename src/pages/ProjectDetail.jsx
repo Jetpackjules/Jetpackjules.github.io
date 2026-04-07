@@ -172,9 +172,9 @@ export default function ProjectDetail() {
                 {/* Results & Future Scope */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center', marginTop: '2rem' }}>
                    <div style={{ textAlign: 'center' }}>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px' }}>Final Product</h3>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px' }}>Multi-ball Tracking</h3>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '800px', margin: '0 auto 2rem auto' }}>
-                        By combining our Encoder-Decoder heatmap generation with kinematic Kalman smoothing, the final network successfully tracks up to 5 overlapping balls at once through heavy motion blur.
+                        The final Kalman-filtered Heatmap pipeline successfully maintained target locks through extreme high-speed crossover events and transient occlusion with a completely stabilized bounding box.
                       </p>
                    </div>
                    
