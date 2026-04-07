@@ -193,8 +193,19 @@ export default function ProjectDetail() {
                       </div>
                    </div>
 
-                   <div style={{ marginTop: '3rem', textAlign: 'center', opacity: 0.35, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                      Collaborators: Daniel Shubin, Lawrence Tan, Lyle Deng (Jules Ropars - CV Lead)
+                   <div style={{ marginTop: '4rem', display: 'flex', justifyContent: 'flex-end' }}>
+                      <span style={{ 
+                        border: '2px solid var(--border-color)', 
+                        background: '#fff', 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        color: 'var(--text-secondary)', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 800, 
+                        boxShadow: '2px 2px 0px #000' 
+                      }}>
+                        Collaborators: Daniel Shubin, Jules Ropars, Lawrence Tan, Lyle Deng
+                      </span>
                    </div>
                 </div>
 
