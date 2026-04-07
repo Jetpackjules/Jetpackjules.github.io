@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import RainWindow from '../components/RainWindow';
 
 export const projectsData = [
   { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.1 },
@@ -88,7 +89,9 @@ export default function Home() {
                     style={{ height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
                   >
                      <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', position: 'relative', overflow: 'hidden', backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
-                        {(p.image || '').endsWith('.mp4') ? (
+                        {p.id === 'rainy-day' ? (
+                           <RainWindow bgIdClass={8} />
+                        ) : (p.image || '').endsWith('.mp4') ? (
                            <video src={`/assets/projects/${p.id}/${p.image}`} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                            <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${p.id}/${p.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />

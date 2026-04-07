@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import RainWindow from '../components/RainWindow';
 import { projectsData } from './Home';
 
 export default function ProjectDetail() {
@@ -24,7 +25,9 @@ export default function ProjectDetail() {
       <div className="brutalist-panel" style={{ padding: '0', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header Image Thumbnail directly pointing to the asset */}
         <div style={{ width: '100%', height: '350px', borderBottom: 'var(--border-width) solid var(--border-color)', backgroundColor: 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
-           {(project.headerImage || project.image || '').endsWith('.mp4') ? (
+           {projectId === 'rainy-day' ? (
+              <RainWindow bgIdClass={15} />
+           ) : (project.headerImage || project.image || '').endsWith('.mp4') ? (
               <video src={`/assets/projects/${projectId}/${project.headerImage || project.image}`} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
            ) : (
               <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${projectId}/${project.headerImage || project.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />
@@ -218,8 +221,8 @@ export default function ProjectDetail() {
                          </button>
                       </a>
                    </div>
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <video src="/assets/projects/rainy-day/header.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                   <div className="brutalist-panel" style={{ width: '100%', height: '350px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                      <RainWindow bgIdClass={8} />
                    </div>
                 </div>
 
@@ -249,8 +252,8 @@ export default function ProjectDetail() {
                         The final packaged application successfully handles native simulated rain droplets, local data caching, and user preference persistence across the browser session natively without heavy performance overhead.
                       </p>
                    </div>
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', maxWidth: '1000px' }}>
-                      <video src="/assets/projects/rainy-day/trailer.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                   <div className="brutalist-panel" style={{ width: '100%', height: '500px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', maxWidth: '1000px', position: 'relative' }}>
+                      <RainWindow bgIdClass={1} />
                    </div>
                 </div>
 
