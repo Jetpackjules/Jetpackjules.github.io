@@ -100,7 +100,7 @@ export default function Home() {
                      <div style={{ padding: '1.5rem', background: '#fff', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                            {p.category.split(' / ').map(cat => (
-                              <span key={cat} style={{ fontSize: '0.8rem', fontWeight: 800, background: 'var(--bg-color)', color: 'var(--text-color)', padding: '2px 8px', borderRadius: '12px', border: '2px solid var(--text-color)', display: 'inline-block', textTransform: 'uppercase' }}>
+                              <span key={cat} style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', border: '2px solid #000', padding: '3px 8px', borderRadius: '4px', background: 'var(--bg-color)', color: 'var(--text-color)', display: 'inline-block', boxShadow: 'var(--brutal-shadow)' }}>
                                  {cat}
                               </span>
                            ))}
