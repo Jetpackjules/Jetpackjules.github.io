@@ -228,18 +228,17 @@ export default function ProjectDetail() {
 
                 {/* Technical Features */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
-                      <img src="/assets/projects/rainy-day/screen_0.png" alt="Time Widget" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.1)' }} />
-                      <img src="/assets/projects/rainy-day/screen_1.png" alt="Weather Widget" style={{ width: '200%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.1) translateX(-25%)' }} />
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <video src="/assets/projects/rainy-day/custom_demo.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
                    <div style={{ order: 1 }}>
-                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Utility Modules</h3>
-                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-light)', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Localized Data Pipelines</span>
+                      <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Customisation</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-light)', padding: '4px 16px', border: '2px solid #000', borderRadius: '4px', marginBottom: '1.5rem' }}>Interface Settings</span>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
-                        To ensure the extension was actually functional and not just aesthetic, I engineered distinct minimalist floating modules into the ecosystem.
+                        To make it a dedicated utility space, I added customizable settings allowing users to visually toggle different floating widgets across the window layout.
                       </p>
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.1rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                        Users can toggle a clock/time display, and uniquely, a real-time hyper-local weather integration pipeline that geolocates the client and fetches live precipitation and temperature data to natively match the visual vibe of the extension.
+                        You can opt in to show the current time alongside live weather information for the day, grounding the serene simulation into the actual physical day.
                       </p>
                    </div>
                 </div>
