@@ -148,14 +148,14 @@ export default function ProjectDetail() {
                       </p>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/squash/slide_3_img_1.jpeg" alt="Heatmap Loss Architecture" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                      <img src="/assets/projects/squash/slide_5_img_1.jpeg" alt="Heatmap Loss Architecture" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
                 </div>
 
                 {/* Temporal Persistence */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem', alignItems: 'center' }}>
                    <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/squash/slide_5_img_1.jpeg" alt="Kalman Filter Diagram" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
+                      <img src="/assets/projects/squash/wide%20squash%20gif.gif" alt="Kalman Filter Diagram Substitution" style={{ width: '100%', height: 'auto', display: 'block', transform: 'scale(1.05)' }} />
                    </div>
                    <div style={{ order: 1 }}>
                       <h3 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 0.5rem 0', letterSpacing: '-1px' }}>Temporal Persistence</h3>
