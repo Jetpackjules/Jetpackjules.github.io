@@ -6,7 +6,7 @@ import RainWindow from '../components/RainWindow';
 export const projectsData = [
   { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', delay: 0.1 },
   { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', delay: 0.2 },
-  { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.3, image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
+  { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision / ML', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', delay: 0.3, image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
   { id: 'rainy-day', title: 'Rainy Day New Tab', category: 'Chrome Extension', desc: 'A Chrome extension showing soothing realistic rain created in real-time.', delay: 0.4, image: 'header.mp4', headerImage: 'header.mp4' },
   { id: 'floating-cubes', title: 'Reactive Cubes', category: 'Web3D', desc: 'Performant InstancedMesh effects using React Three Fiber.', delay: 0.5 }
 ];
@@ -94,11 +94,17 @@ export default function Home() {
                         ) : (p.image || '').endsWith('.mp4') ? (
                            <video src={`/assets/projects/${p.id}/${p.image}`} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
-                           <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${p.id}/${p.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />
+                           <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${p.id}/${p.image || 'placeholder_img_or_gif.gif'}') center/cover`, transform: p.id === 'squash' ? 'scale(1.15)' : 'none' }} />
                         )}
                      </div>
                      <div style={{ padding: '1.5rem', background: '#fff', display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', border: '2px solid #000', padding: '3px 8px', borderRadius: '4px', width: 'fit-content', marginBottom: '0.8rem', background: 'var(--bg-color)', boxShadow: 'var(--brutal-shadow)' }}>{p.category}</span>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                           {p.category.split(' / ').map(cat => (
+                              <span key={cat} style={{ fontSize: '0.8rem', fontWeight: 800, background: 'var(--bg-color)', color: 'var(--text-color)', padding: '2px 8px', borderRadius: '12px', border: '2px solid var(--text-color)', display: 'inline-block', textTransform: 'uppercase' }}>
+                                 {cat}
+                              </span>
+                           ))}
+                        </div>
                         <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 900, fontSize: '1.5rem', letterSpacing: '-0.5px' }}>{p.title}</h4>
                         <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.desc}</p>
                      </div>
