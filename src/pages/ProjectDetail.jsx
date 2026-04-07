@@ -193,14 +193,14 @@ export default function ProjectDetail() {
                       </div>
                    </div>
 
-                   <div style={{ marginTop: '4rem', display: 'flex', justifyContent: 'flex-end' }}>
+                   <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
                       <span style={{ 
                         border: '2px solid var(--border-color)', 
                         background: '#fff', 
-                        padding: '0.5rem 1rem', 
+                        padding: '0.6rem 1.2rem', 
                         borderRadius: '20px', 
                         color: 'var(--text-secondary)', 
-                        fontSize: '0.85rem', 
+                        fontSize: '0.95rem', 
                         fontWeight: 800, 
                         boxShadow: '2px 2px 0px #000' 
                       }}>
