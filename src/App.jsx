@@ -126,7 +126,7 @@ function App() {
   // Global UI "Pop" config
   const [popSize, setPopSize] = useState(6);
   const [popDirection, setPopDirection] = useState('diagonal'); // 'diagonal' or 'below'
-  const [layoutWidth, setLayoutWidth] = useState('1400px');
+  const [layoutWidth, setLayoutWidth] = useState('80%');
   const [transitionStyle, setTransitionStyle] = useState('fade');
   const [clickPos, setClickPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
@@ -312,6 +312,7 @@ function App() {
                  <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 600, fontSize: '0.9rem' }}>
                    Container Width
                    <select value={layoutWidth} onChange={(e) => setLayoutWidth(e.target.value)} style={{ marginTop: '0.5rem', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', fontWeight: 'bold' }}>
+                      <option value="80%">Optimal (80%)</option>
                       <option value="1100px">Standard (1100px)</option>
                       <option value="1400px">Wide (1400px)</option>
                       <option value="95%">Full Width (95%)</option>
