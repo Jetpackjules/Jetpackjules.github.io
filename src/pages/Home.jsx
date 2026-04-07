@@ -81,7 +81,7 @@ export default function Home() {
            
            <div className="projects-grid">
              {projectsData.map((p, i) => (
-                <Link to={`/projects/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link to={`/projects/${p.id}`} key={p.id} style={{ display: 'block', minWidth: 0, width: '100%', textDecoration: 'none', color: 'inherit' }}>
                   <motion.div 
                     whileHover={{ y: -8, x: 'calc(var(--pop-dir-x) * -8px)', boxShadow: 'calc(var(--pop-dir-x) * 12px) calc(var(--pop-dir-y) * 12px) 0px #000' }}
                     whileTap={{ y: 'calc(var(--pop-dir-y) * 6px)', x: 'calc(var(--pop-dir-x) * 6px)', boxShadow: '0px 0px 0px #000', transition: { duration: 0.05 } }}
