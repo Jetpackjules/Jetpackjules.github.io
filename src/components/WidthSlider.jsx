@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 export default function WidthSlider() {
-  const [width, setWidth] = useState(1100);
+  const [width, setWidth] = useState(80);
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--layout-width', `${width}px`);
+    document.documentElement.style.setProperty('--layout-width', `${width}%`);
     // Cleanup if component unmounts (optional, but good practice to reset to default)
     return () => {
         document.documentElement.style.removeProperty('--layout-width');
@@ -27,13 +27,13 @@ export default function WidthSlider() {
       width: '250px'
     }}>
       <label style={{ fontWeight: 800, fontSize: '0.9rem', color: '#000' }}>
-        Width Tuner: {width}px
+        Width Tuner: {width}%
       </label>
       <input 
         type="range" 
-        min="600" 
-        max="3000" 
-        step="5"
+        min="20" 
+        max="100" 
+        step="1"
         value={width} 
         onChange={(e) => setWidth(e.target.value)}
         style={{ width: '100%', cursor: 'pointer' }}
