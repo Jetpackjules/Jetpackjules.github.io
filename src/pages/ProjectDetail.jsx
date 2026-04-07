@@ -215,11 +215,6 @@ export default function ProjectDetail() {
                       <p style={{ fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '2rem' }}>
                         It generates a hyper-realistic WebGL rain simulation that tracks continuously down your screen, providing a soothing lo-fi aesthetic whenever you open a new tab.
                       </p>
-                      <a href="https://chromewebstore.google.com/detail/rainy-day-new-tab/eaaeknijfjmpcjdfnpkeghjioaebimjg" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-                         <button className="brutalist-button" style={{ background: 'var(--accent)', fontSize: '1.1rem', padding: '1rem 2rem', border: '3px solid #000', fontWeight: 900, cursor: 'pointer', boxShadow: 'var(--brutal-shadow)' }}>
-                           Download on Chrome Web Store →
-                         </button>
-                      </a>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', height: '350px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                       <RainWindow bgIdClass={8} />
@@ -250,6 +245,11 @@ export default function ProjectDetail() {
                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '800px', margin: '0 auto 2rem auto' }}>
                         The final packaged application successfully handles native simulated rain droplets, local data caching, and user preference persistence across the browser session natively without heavy performance overhead.
                       </p>
+                      <a href="https://chromewebstore.google.com/detail/rainy-day-new-tab/eaaeknijfjmpcjdfnpkeghjioaebimjg" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                         <button className="brutalist-button" style={{ background: 'var(--accent)', fontSize: '1.3rem', padding: '1.2rem 3rem', border: '4px solid #000', fontWeight: 900, cursor: 'pointer', boxShadow: 'var(--brutal-shadow)' }}>
+                           Download on Chrome Web Store →
+                         </button>
+                      </a>
                    </div>
                    <div className="brutalist-panel" style={{ width: '100%', height: '500px', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', maxWidth: '1000px', position: 'relative' }}>
                       <RainWindow bgIdClass={1} />
