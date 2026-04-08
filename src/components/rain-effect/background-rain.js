@@ -77,8 +77,10 @@ export async function startRainBackground({
   const parent = canvas.parentElement || document.documentElement;
   const resizeObserver = new ResizeObserver(() => {
     resizeCanvas();
-    renderer.resize();
-    raindrops.resize(canvas.width, canvas.height);
+    if (canvas.width > 0 && canvas.height > 0) {
+      if (renderer && renderer.resize) renderer.resize();
+      if (raindrops && raindrops.resize) raindrops.resize(canvas.width, canvas.height);
+    }
   });
   resizeObserver.observe(parent);
 

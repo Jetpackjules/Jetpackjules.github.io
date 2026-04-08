@@ -27,5 +27,5 @@ export default function RainWindow({ style, bgIdClass }) {
 
   const fallbackBg = bgIdClass ? `url('/assets/rain-effect/rotation/image-${bgIdClass}-bg.png')` : 'none';
 
-  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', background: `#000 ${fallbackBg} center/cover no-repeat`, ...style }} />;
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'fill', background: `#000 ${fallbackBg} 0 0 / 100% 100% no-repeat`, ...style }} />;
 }
