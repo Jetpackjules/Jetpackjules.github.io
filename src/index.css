@@ -21,6 +21,10 @@
   padding: 0;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   font-family: 'Space Grotesk', sans-serif;
   background-color: var(--bg-color);
