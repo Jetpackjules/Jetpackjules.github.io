@@ -9,7 +9,7 @@ import Resume from './pages/Resume';
 
 function ClickEffectLayer({ particles, type }) {
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999999, pointerEvents: 'none' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 999999, pointerEvents: 'none' }}>
        <AnimatePresence>
          {particles.map(p => (
            <React.Fragment key={p.id}>
@@ -86,7 +86,7 @@ const AnimatedRouteWrapper = ({ children, styleType, clickPos }) => {
           <motion.div exit={{ opacity: 1, transition: { duration: 0.5 } }}>
              {children}
           </motion.div>
-          <svg style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99999, pointerEvents: 'none' }}>
+          <svg style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 99999, pointerEvents: 'none' }}>
              <defs>
                 <mask id="iris-mask">
                    <rect width="100%" height="100%" fill="white" />
