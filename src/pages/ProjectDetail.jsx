@@ -289,7 +289,7 @@ export default function ProjectDetail() {
               <WindowWriteupSection
                 title="What This Is"
                 tag="Multi-Screen Tracked Display + ArUco Calibration"
-                media={<WindowAssetMedia src="three-screens-pingpong.mp4" poster="three-screens-pingpong.webp" label="Final effect with multiple screens or projector faces" />}
+                media={<WindowAssetMedia src="aruco-code-overlay-pingpong.mp4" poster="aruco-code-overlay-pingpong.webp" label="Camera tracker view with ArUco codes and green outlines on detected screens" />}
               >
                 <p style={{ margin: 0 }}>This project is a web-based tracked display system. Each screen acts like a physical window into the same 3D scene. Instead of every device showing the same camera view, each display renders a perspective based on its real-world position, size, and angle. When the viewer moves their head, the perspective shifts so the scene appears to sit behind the physical screens.</p>
                 <p style={{ margin: 0 }}>During calibration, each screen shows a unique ArUco marker layout. The center marker identifies the screen slot, and the corner markers let the tracker solve the screen's position, rotation, and scale. The tracking camera watches all visible screens at once and builds a shared layout map from the detected markers.</p>
@@ -298,7 +298,7 @@ export default function ProjectDetail() {
               <WindowWriteupSection
                 title="Tracked-Screen Detection Overlay"
                 tag="Live Tracker View"
-                media={<WindowAssetMedia src="aruco-calibration-pingpong.mp4" poster="aruco-calibration-pingpong.webp" label="Camera tracker view with green overlay on detected screens" />}
+                media={<WindowAssetMedia src="tracked-screen-overlay-pingpong.mp4" poster="tracked-screen-overlay-pingpong.webp" label="Camera tracker view with green overlay on detected screens" />}
               >
                 <p style={{ margin: 0 }}>The tracker includes a live detection view. When a screen is identified, a green overlay appears on top of the detected screen region in the camera feed. This makes it clear which screens are currently being tracked, which marker IDs were recognized, and whether the camera has enough information to solve that display's pose.</p>
               </WindowWriteupSection>
@@ -307,7 +307,7 @@ export default function ProjectDetail() {
                 title="Viewer Head Position Debug View"
                 tag="Calibrated 3D View"
                 reverse
-                media={<WindowPlaceholderMedia label="3D debug view showing screens camera and head position placeholder" />}
+                media={<WindowAssetMedia src="viewer-head-debug-pingpong.mp4" poster="viewer-head-debug-pingpong.webp" label="3D debug view showing screens camera and viewer head position" />}
               >
                 <p style={{ margin: 0 }}>Once the screens are calibrated, the 3D debug view shows the solved display planes together with the viewer's tracked head position. This makes it possible to see whether the head position is being interpreted correctly relative to the physical screens before relying on the final perspective effect.</p>
               </WindowWriteupSection>
