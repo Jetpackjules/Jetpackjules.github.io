@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import RainWindow from '../components/RainWindow';
 
 const projectRecords = [
-  { id: '25d-window', title: '2.5D Window System', category: 'Graphics', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', date: '2026-04', status: 'ongoing', image: 'single-screen-pingpong.mp4', thumbnailPoster: 'single-screen-pingpong.webp', github: 'https://github.com/Jetpackjules/2.5D-Window-System' },
+  { id: '25d-window', title: '2.5D Window System', category: 'Computer Vision / Godot', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', date: '2026-04', status: 'ongoing', image: 'single-screen-pingpong.mp4', thumbnailPoster: 'single-screen-pingpong.webp', github: 'https://github.com/Jetpackjules/2.5D-Window-System' },
   { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision / ML', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', date: '2026-01', image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
   { id: 'rainy-day', title: 'Rainy Day New Tab', category: 'Chrome Extension', desc: 'A Chrome extension showing soothing realistic rain created in real-time.', date: '2024-09', image: 'header.mp4', headerImage: 'header.mp4' },
   { id: 'neat-godot', title: 'NEAT Godot Repo', category: 'Game Dev / AI', desc: 'Implementing NeuroEvolution of Augmenting Topologies within the Godot Engine.', date: '2024-01', github: 'https://github.com/Jetpackjules/NEAT-Godot' },
