@@ -289,7 +289,7 @@ export default function ProjectDetail() {
               <WindowWriteupSection
                 title="What This Is"
                 tag="Multi-Screen Tracked Display + ArUco Calibration"
-                media={<WindowAssetMedia src="aruco-code-overlay-pingpong.mp4" poster="aruco-code-overlay-pingpong.webp" label="Camera tracker view with ArUco codes and green outlines on detected screens" />}
+                media={<WindowPlaceholderMedia label="Final effect with multiple screens or projector faces placeholder" />}
               >
                 <p style={{ margin: 0 }}>This project is a web-based tracked display system. Each screen acts like a physical window into the same 3D scene. Instead of every device showing the same camera view, each display renders a perspective based on its real-world position, size, and angle. When the viewer moves their head, the perspective shifts so the scene appears to sit behind the physical screens.</p>
                 <p style={{ margin: 0 }}>During calibration, each screen shows a unique ArUco marker layout. The center marker identifies the screen slot, and the corner markers let the tracker solve the screen's position, rotation, and scale. The tracking camera watches all visible screens at once and builds a shared layout map from the detected markers.</p>
