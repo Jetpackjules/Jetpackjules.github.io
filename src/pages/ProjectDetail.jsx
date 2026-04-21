@@ -14,6 +14,181 @@ export default function ProjectDetail() {
 
   if (!project) return <div>Project not found</div>;
 
+  // New Isolated Layout for 2.5D Digital Window
+  if (projectId === '25d-window') {
+    return (
+      <div style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '3rem' }}>
+         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+           <Link to="/" className="brutalist-button" style={{ background: '#fff' }}>
+             &larr; Back to Gallery
+           </Link>
+         </div>
+
+         {/* Hero Header without borders */}
+         <div className="brutalist-panel" style={{ padding: '0', background: '#000', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+           <div style={{ width: '100%', height: '350px', backgroundColor: 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
+              {(project.headerImage || project.image || '').endsWith('.mp4') ? (
+                 <video src={`/assets/projects/${projectId}/${project.headerImage || project.image}`} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                 <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${projectId}/${project.headerImage || project.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />
+              )}
+           </div>
+         </div>
+
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', marginTop: '2rem' }}>
+           <div>
+              <h1 style={{ fontSize: '4.5rem', margin: '0 0 1rem 0', fontWeight: 900, letterSpacing: '-2px', lineHeight: 1 }}>{project.title}</h1>
+              <p style={{ margin: '0 0 1.5rem 0', fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{project.desc}</p>
+              <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '0', flexWrap: 'wrap' }}>
+                {project.category.split(' / ').map(cat => (
+                  <span key={cat} className="brutalist-panel" style={{ fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', padding: '6px 12px', background: 'var(--accent)', display: 'inline-block' }}>
+                    {cat}
+                  </span>
+                ))}
+              </div>
+           </div>
+
+           {/* 2.5D Digital Window */}
+           <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '8rem' }}>
+                
+                {/* Introduction & Context (Hero Asset) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                   <div>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>What This Is</h3>
+                      <p style={{ fontSize: '1.4rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', maxWidth: '900px' }}>
+                        This project is a web-based tracked display system. Each screen acts like a physical window into the same 3D scene. Instead of every device showing the same camera view, each display renders a perspective based on its real-world position, size, and angle. When the viewer moves their head, the perspective shifts so the scene appears to sit behind the physical screens.
+                      </p>
+                      {/* Metadata Pill Array */}
+                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
+                          <span style={{ border: '3px solid var(--border-color)', background: 'var(--accent-light)', padding: '0.8rem 1.5rem', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '3px 3px 0px #000' }}>Role: Engineer</span>
+                          <span style={{ border: '3px solid var(--border-color)', background: 'var(--accent-purple)', padding: '0.8rem 1.5rem', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '3px 3px 0px #000' }}>Tech: Godot 4, OpenCV, Python</span>
+                      </div>
+                   </div>
+                   {/* Full Bleed Wide Panel */}
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src="/assets/projects/25d-window/Gifs/Three screens GIF (working).gif" alt="3 Screens Working" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                   </div>
+                </div>
+
+                {/* System Architecture (Side-by-Side Flex) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                   <div>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>System Architecture</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent)', padding: '6px 20px', border: '3px solid #000', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '1.1rem' }}>WebSocket Bridge</span>
+                   </div>
+                   
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem' }}>
+                      <div>
+                        <h4 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.5px' }}>System Setup</h4>
+                        <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
+                          The system runs from one host machine. The host runs the Python tracking and WebSocket bridge, then any device on the network can join through a browser. This makes it possible to add phones, laptops, tablets, external monitors, or projector clients without installing a custom app on each device. Each client registers itself, receives a marker slot from the server, and becomes part of the shared tracking setup.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.5px' }}>Web Client Flow</h4>
+                        <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
+                          Each display loads the Godot web build in a browser. On first setup, the client asks for the physical size of the lit screen area, not including bezels. That size is sent to the host and used later for the perspective math. After that, the screen can show calibration markers, receive tracking data, and render its own view of the shared 3D scene.
+                        </p>
+                      </div>
+                   </div>
+
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '1rem' }}>
+                      <img src="/assets/projects/25d-window/Gifs/Aruco_calibration_left.webp" alt="Laptop Client UI Setup" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                   </div>
+                </div>
+
+                {/* ArUco Calibration (Full Window Image) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                   <div>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Screen Calibration</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-purple)', padding: '6px 20px', border: '3px solid #000', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '1.1rem' }}>ArUco Detection Algorithm</span>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
+                        During calibration, each screen shows a unique ArUco marker layout. The center marker identifies the screen slot, and the corner markers let the tracker solve the screen's position, rotation, and scale. The tracking camera watches all visible screens at once and builds a shared layout map from the detected markers.
+                      </p>
+                   </div>
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src="/assets/projects/25d-window/Gifs/Calibration_Aruco_3d_view_only.gif" alt="Calibration Sequence" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                   </div>
+                </div>
+
+                {/* Tracking View & 3D Environment (Dual Stack Media) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6rem' }}>
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Tracker Overlays</h3>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
+                        The tracker includes a live detection view. When a screen is identified, a green overlay appears on top of the detected screen region in the camera feed. This makes it clear which screens are currently being tracked, which marker IDs were recognized, and whether the camera has enough information to solve that display's pose.
+                      </p>
+                      <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <img src="/assets/projects/25d-window/placeholder_img_or_gif.gif" alt="Green Tracker Overlay" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                      </div>
+                   </div>
+
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Live Spatial 3D Map</h3>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
+                        The client includes a live 3D debug view for calibration and troubleshooting. It shows the solved screen planes in 3D space, the current tracking-camera pose, and the viewer/head position. This is useful for checking whether a screen was solved in the correct place, whether its rotation is flipped, and whether multiple screens are aligned into one shared coordinate system.
+                      </p>
+                      <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <img src="/assets/projects/25d-window/placeholder_img_or_gif.gif" alt="3D Debug Scene" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                      </div>
+                   </div>
+                </div>
+
+                {/* Head Tracking */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                   <div>
+                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Head Tracking & Perspective</h3>
+                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--text-primary)', color: '#fff', padding: '6px 20px', border: '3px solid #000', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Off-Axis Projection</span>
+                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
+                        After the screen layout is locked, the system uses the viewer's tracked head position to compute an off-axis camera frustum for each screen. The screen is treated as the projection plane. If the viewer moves left, right, up, down, closer, or farther away, the rendered perspective changes according to that physical relationship. This is what creates the seamless "window into a 3D space" effect.
+                      </p>
+                   </div>
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <video src="/assets/projects/25d-window/Gifs/good_looking_single_screen_fish_tank_view.mov" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block' }} />
+                   </div>
+                </div>
+
+                {/* Final Product / Multi-Face */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', alignItems: 'center', marginTop: '4rem' }}>
+                   <div style={{ textAlign: 'center' }}>
+                       <h3 style={{ fontSize: '4.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-2px', textTransform: 'uppercase' }}>Multiple Shared Faces</h3>
+                       <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.4rem', color: 'var(--text-secondary)', maxWidth: '900px', margin: '0 auto 2rem auto' }}>
+                         The effect is strongest when multiple displays or projected faces form connected sides of a shape. Multiple angled faces give more spatial cues because the virtual scene organically continues across real-world corners, cementing physical presence.
+                       </p>
+                   </div>
+                   
+                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                      <img src="/assets/projects/25d-window/Gifs/Three screens GIF (working).gif" alt="Multiple Connected Interfaces" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                   </div>
+
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginTop: '3rem', width: '100%' }}>
+                      <div className="brutalist-panel" style={{ background: '#fff', padding: '3.5rem' }}>
+                         <h4 style={{ fontSize: '2rem', fontWeight: 900, margin: '0 0 1.5rem 0', letterSpacing: '-0.5px' }}>Current Implementation</h4>
+                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.25rem', fontWeight: 500 }}>
+                           The current version dynamically maps web clients, physical screen sizes, ArUco generation, camera pose solving, and live cross-network layout broadcasting directly inside the browser instances.
+                         </p>
+                      </div>
+                      <div className="brutalist-panel" style={{ background: '#fff', padding: '3.5rem' }}>
+                         <h4 style={{ fontSize: '2rem', fontWeight: 900, margin: '0 0 1.5rem 0', letterSpacing: '-0.5px' }}>Network Synchronization</h4>
+                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.25rem', fontWeight: 500 }}>
+                           Godot 4 handles all localized UI and 3D rendering algorithms natively on the client, while a Python/OpenCV host executes the global tracking compute, feeding positional packets dynamically over WebSocket instances.
+                         </p>
+                      </div>
+                   </div>
+
+                   <div style={{ marginTop: '3.5rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
+                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="brutalist-button" style={{ background: 'var(--accent)', fontSize: '1.5rem', padding: '1.8rem 5rem', fontWeight: 900, letterSpacing: '-1px', display: 'inline-block' }}>
+                          Explore Repository Source ↗
+                      </a>
+                   </div>
+                </div>
+
+           </div>
+         </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '3rem' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -22,9 +197,9 @@ export default function ProjectDetail() {
         </Link>
       </div>
 
-      <div className="brutalist-panel" style={{ padding: '0', background: '#000', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="brutalist-panel" style={{ padding: '0', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header Image Thumbnail directly pointing to the asset */}
-        <div style={{ width: '100%', height: '350px', backgroundColor: 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '350px', borderBottom: 'var(--border-width) solid var(--border-color)', backgroundColor: 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
            {projectId === 'rainy-day' ? (
               <RainWindow bgIdClass={15} />
            ) : (project.headerImage || project.image || '').endsWith('.mp4') ? (
@@ -33,9 +208,8 @@ export default function ProjectDetail() {
               <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${projectId}/${project.headerImage || project.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />
            )}
         </div>
-      </div>
         
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', marginTop: '2rem' }}>
+        <div style={{ padding: '3.5rem', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
           <div>
             <h1 style={{ fontSize: '4.5rem', margin: '0 0 1rem 0', fontWeight: 900, letterSpacing: '-2px', lineHeight: 1 }}>{project.title}</h1>
             <p style={{ margin: '0 0 1.5rem 0', fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{project.desc}</p>
@@ -220,147 +394,8 @@ export default function ProjectDetail() {
              </div>
           )}
 
-          {/* 2.5D Digital Window */}
-          {project.id === '25d-window' && (
-             <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '8rem' }}>
-                
-                {/* Introduction & Context (Hero Asset) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                   <div>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>What This Is</h3>
-                      <p style={{ fontSize: '1.4rem', fontWeight: 500, lineHeight: 1.6, color: 'var(--text-secondary)', maxWidth: '900px' }}>
-                        This project is a web-based tracked display system. Each screen acts like a physical window into the same 3D scene. Instead of every device showing the same camera view, each display renders a perspective based on its real-world position, size, and angle. When the viewer moves their head, the perspective shifts so the scene appears to sit behind the physical screens.
-                      </p>
-                      {/* Metadata Pill Array */}
-                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
-                          <span style={{ border: '3px solid var(--border-color)', background: 'var(--accent-light)', padding: '0.8rem 1.5rem', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '3px 3px 0px #000' }}>Role: Engineer</span>
-                          <span style={{ border: '3px solid var(--border-color)', background: 'var(--accent-purple)', padding: '0.8rem 1.5rem', borderRadius: '20px', fontWeight: 800, fontSize: '1.1rem', boxShadow: '3px 3px 0px #000' }}>Tech: Godot 4, OpenCV, Python</span>
-                      </div>
-                   </div>
-                   {/* Full Bleed Wide Panel */}
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/25d-window/Gifs/Three screens GIF (working).gif" alt="3 Screens Working" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                   </div>
-                </div>
-
-                {/* System Architecture (Side-by-Side Flex) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                   <div>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>System Architecture</h3>
-                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent)', padding: '6px 20px', border: '3px solid #000', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '1.1rem' }}>WebSocket Bridge</span>
-                   </div>
-                   
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem' }}>
-                      <div>
-                        <h4 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.5px' }}>System Setup</h4>
-                        <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
-                          The system runs from one host machine. The host runs the Python tracking and WebSocket bridge, then any device on the network can join through a browser. This makes it possible to add phones, laptops, tablets, external monitors, or projector clients without installing a custom app on each device. Each client registers itself, receives a marker slot from the server, and becomes part of the shared tracking setup.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.5px' }}>Web Client Flow</h4>
-                        <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
-                          Each display loads the Godot web build in a browser. On first setup, the client asks for the physical size of the lit screen area, not including bezels. That size is sent to the host and used later for the perspective math. After that, the screen can show calibration markers, receive tracking data, and render its own view of the shared 3D scene.
-                        </p>
-                      </div>
-                   </div>
-
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '1rem' }}>
-                      <img src="/assets/projects/25d-window/Gifs/Aruco_calibration_left.webp" alt="Laptop Client UI Setup" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                   </div>
-                </div>
-
-                {/* ArUco Calibration (Full Window Image) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                   <div>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Screen Calibration</h3>
-                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--accent-purple)', padding: '6px 20px', border: '3px solid #000', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '1.1rem' }}>ArUco Detection Algorithm</span>
-                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
-                        During calibration, each screen shows a unique ArUco marker layout. The center marker identifies the screen slot, and the corner markers let the tracker solve the screen's position, rotation, and scale. The tracking camera watches all visible screens at once and builds a shared layout map from the detected markers.
-                      </p>
-                   </div>
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="/assets/projects/25d-window/Gifs/Calibration_Aruco_3d_view_only.gif" alt="Calibration Sequence" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                   </div>
-                </div>
-
-                {/* Tracking View & 3D Environment (Dual Stack Media) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6rem' }}>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Tracker Overlays</h3>
-                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
-                        The tracker includes a live detection view. When a screen is identified, a green overlay appears on top of the detected screen region in the camera feed. This makes it clear which screens are currently being tracked, which marker IDs were recognized, and whether the camera has enough information to solve that display's pose.
-                      </p>
-                      <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <img src="/assets/projects/25d-window/placeholder_img_or_gif.gif" alt="Green Tracker Overlay" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                      </div>
-                   </div>
-
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Live Spatial 3D Map</h3>
-                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
-                        The client includes a live 3D debug view for calibration and troubleshooting. It shows the solved screen planes in 3D space, the current tracking-camera pose, and the viewer/head position. This is useful for checking whether a screen was solved in the correct place, whether its rotation is flipped, and whether multiple screens are aligned into one shared coordinate system.
-                      </p>
-                      <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <img src="/assets/projects/25d-window/placeholder_img_or_gif.gif" alt="3D Debug Scene" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                      </div>
-                   </div>
-                </div>
-
-                {/* Head Tracking */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                   <div>
-                      <h3 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>Head Tracking & Perspective</h3>
-                      <span style={{ display: 'inline-block', fontWeight: 800, background: 'var(--text-primary)', color: '#fff', padding: '6px 20px', border: '3px solid #000', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Off-Axis Projection</span>
-                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '900px' }}>
-                        After the screen layout is locked, the system uses the viewer's tracked head position to compute an off-axis camera frustum for each screen. The screen is treated as the projection plane. If the viewer moves left, right, up, down, closer, or farther away, the rendered perspective changes according to that physical relationship. This is what creates the seamless "window into a 3D space" effect.
-                      </p>
-                   </div>
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <video src="/assets/projects/25d-window/Gifs/good_looking_single_screen_fish_tank_view.mov" autoPlay loop muted playsInline style={{ width: '100%', height: 'auto', display: 'block' }} />
-                   </div>
-                </div>
-
-                {/* Final Product / Multi-Face */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', alignItems: 'center', marginTop: '4rem' }}>
-                   <div style={{ textAlign: 'center' }}>
-                      <h3 style={{ fontSize: '4.5rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-2px', textTransform: 'uppercase' }}>Multiple Shared Faces</h3>
-                      <p style={{ fontWeight: 500, lineHeight: 1.6, fontSize: '1.4rem', color: 'var(--text-secondary)', maxWidth: '900px', margin: '0 auto 2rem auto' }}>
-                        The effect is strongest when multiple displays or projected faces form connected sides of a shape. Multiple angled faces give more spatial cues because the virtual scene organically continues across real-world corners, cementing physical presence.
-                      </p>
-                   </div>
-                   
-                   <div className="brutalist-panel" style={{ width: '100%', padding: 0, overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                      <img src="/assets/projects/25d-window/Gifs/Three screens GIF (working).gif" alt="Multiple Connected Interfaces" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                   </div>
-
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginTop: '3rem', width: '100%' }}>
-                      <div className="brutalist-panel" style={{ background: '#fff', padding: '3.5rem' }}>
-                         <h4 style={{ fontSize: '2rem', fontWeight: 900, margin: '0 0 1.5rem 0', letterSpacing: '-0.5px' }}>Current Implementation</h4>
-                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.25rem', fontWeight: 500 }}>
-                           The current version dynamically maps web clients, physical screen sizes, ArUco generation, camera pose solving, and live cross-network layout broadcasting directly inside the browser instances.
-                         </p>
-                      </div>
-                      <div className="brutalist-panel" style={{ background: '#fff', padding: '3.5rem' }}>
-                         <h4 style={{ fontSize: '2rem', fontWeight: 900, margin: '0 0 1.5rem 0', letterSpacing: '-0.5px' }}>Network Synchronization</h4>
-                         <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.25rem', fontWeight: 500 }}>
-                           Godot 4 handles all localized UI and 3D rendering algorithms natively on the client, while a Python/OpenCV host executes the global tracking compute, feeding positional packets dynamically over WebSocket instances.
-                         </p>
-                      </div>
-                   </div>
-
-                   <div style={{ marginTop: '3.5rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="brutalist-button" style={{ background: 'var(--accent)', fontSize: '1.5rem', padding: '1.8rem 5rem', fontWeight: 900, letterSpacing: '-1px', display: 'inline-block' }}>
-                          Explore Repository Source ↗
-                      </a>
-                   </div>
-                </div>
-
-             </div>
-          )}
-
           {/* Placeholder Fallback */}
-          {projectId !== 'squash' && projectId !== 'rainy-day' && projectId !== '25d-window' && (
+          {projectId !== 'squash' && projectId !== 'rainy-day' && (
              <div style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2.5rem', minHeight: '30vh' }}>
                 <div style={{ textAlign: 'center' }}>
                    <h3 style={{ fontSize: '3rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1px' }}>Under Construction</h3>
@@ -376,6 +411,7 @@ export default function ProjectDetail() {
                 </a>
              </div>
           )}
+        </div>
       </div>
     </div>
   );
