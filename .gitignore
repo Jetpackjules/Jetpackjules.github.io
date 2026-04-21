@@ -2,13 +2,4 @@ node_modules/
 dist/
 .DS_Store
 .env
-
-# 2.5D Digital Window Explicit Payload Whitelisting
-public/assets/projects/25d-window/*
-!public/assets/projects/25d-window/Gifs/
-public/assets/projects/25d-window/Gifs/*
-!public/assets/projects/25d-window/Gifs/Three screens GIF (working).gif
-!public/assets/projects/25d-window/Gifs/Aruco_calibration_laptops.webp
-!public/assets/projects/25d-window/Gifs/Aruco_calibration_left.webp
-!public/assets/projects/25d-window/Gifs/Calibration_Aruco_3d_view_only.gif
-!public/assets/projects/25d-window/Gifs/good_looking_single_screen_fish_tank_view.mov
+assets-source/

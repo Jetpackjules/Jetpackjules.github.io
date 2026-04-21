@@ -32,7 +32,7 @@ function loadImages(images, onLoad) {
   }));
 }
 
-function ImageLoader(images, onLoad) {
+export default function ImageLoader(images, onLoad) {
   return new Promise(function (resolve, reject) {
     loadImages(images, onLoad).then(function (loadedImages) {
       var r = {};
@@ -48,6 +48,4 @@ function ImageLoader(images, onLoad) {
     });
   });
 }
-
-module.exports = ImageLoader;
 
