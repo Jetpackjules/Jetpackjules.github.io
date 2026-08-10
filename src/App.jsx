@@ -199,6 +199,7 @@ function App() {
       </div>
 
       <motion.button 
+        className="display-controls-button"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setShowControls(!showControls)}

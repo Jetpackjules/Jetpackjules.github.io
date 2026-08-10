@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import RainWindow from '../components/RainWindow';
 
 const projectRecords = [
+  { id: 'bonk-rl', title: 'Bonk RL', category: 'Reinforcement Learning / Physics Simulation', desc: 'Comparing PPO architectures for movement, momentum, collisions, and transfer in a recreated Bonk.io environment.', date: '2026-08', status: 'ongoing', image: 'hero_parkour_raycasts.mp4', thumbnailPoster: 'hero_parkour_raycasts.webp', headerImage: 'hero_parkour_raycasts.mp4', github: 'https://github.com/danishubin/bonkio' },
   { id: '25d-window', title: '2.5D Window System', category: 'Computer Vision / Godot', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', date: '2026-04', status: 'ongoing', image: 'single-screen-pingpong.mp4', thumbnailPoster: 'single-screen-pingpong.webp', github: 'https://github.com/Jetpackjules/2.5D-Window-System' },
   { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision / ML', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', date: '2026-01', image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
   { id: 'rainy-day', title: 'Rainy Day New Tab', category: 'Chrome Extension', desc: 'A Chrome extension showing soothing realistic rain created in real-time.', date: '2024-09', image: 'header.mp4', headerImage: 'header.mp4' },

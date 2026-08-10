@@ -168,3 +168,777 @@ nav.main-nav {
     grid-template-columns: 1fr;
   }
 }
+
+.project-detail-title {
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.bonk-project {
+  display: flex;
+  flex-direction: column;
+  gap: 7rem;
+  margin-top: 1rem;
+}
+
+.bonk-opening {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: -2.5rem;
+}
+
+.bonk-project-kicker {
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bonk-opening-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 5rem;
+  align-items: start;
+}
+
+.bonk-opening-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.bonk-opening-title {
+  max-width: 940px;
+  margin: 0;
+  font-size: 3.6rem;
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+
+.bonk-lead {
+  max-width: 980px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.bonk-opening-media {
+  align-self: start;
+}
+
+.bonk-opening-media video {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
+.bonk-section {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+  gap: 4rem;
+  align-items: center;
+}
+
+.bonk-section--reverse {
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+}
+
+.bonk-section--sensor {
+  grid-template-columns: 1fr;
+}
+
+.bonk-section--sensor .bonk-copy {
+  max-width: 900px;
+}
+
+.bonk-copy {
+  min-width: 0;
+}
+
+.bonk-copy h2,
+.bonk-cta h2 {
+  margin: 0 0 1.25rem;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: 0;
+}
+
+.bonk-copy h3 {
+  letter-spacing: 0;
+}
+
+.bonk-copy p,
+.bonk-example p,
+.bonk-cta p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  font-weight: 550;
+  line-height: 1.65;
+}
+
+.bonk-copy p + p {
+  margin-top: 1rem;
+}
+
+.bonk-copy--centered {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.bonk-eyebrow {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.65rem;
+  border: 2px solid #000;
+  border-radius: 4px;
+  background: var(--accent);
+  box-shadow: 3px 3px 0 #000;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bonk-eyebrow--purple {
+  background: var(--accent-purple);
+}
+
+.bonk-media {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 8px;
+  background: #272727;
+  box-shadow: var(--brutal-shadow);
+}
+
+.bonk-media video,
+.bonk-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.bonk-media figcaption {
+  padding: 0.75rem 1rem;
+  border-top: var(--border-width) solid var(--border-color);
+  background: #fff;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.bonk-media--comparison video {
+  aspect-ratio: 1600 / 548;
+  object-fit: cover;
+}
+
+.bonk-inline-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.bonk-inline-facts span {
+  padding: 0.45rem 0.7rem;
+  border: 2px solid #000;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bonk-methods,
+.bonk-showcase,
+.bonk-results-evidence {
+  display: grid;
+  gap: 3rem;
+}
+
+.bonk-method-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--brutal-shadow);
+}
+
+.bonk-method {
+  min-width: 0;
+  padding: 1.6rem;
+  border-right: var(--border-width) solid var(--border-color);
+}
+
+.bonk-method:last-child {
+  border-right: 0;
+}
+
+.bonk-method strong {
+  display: block;
+  margin-bottom: 0.65rem;
+  font-size: 1.18rem;
+  font-weight: 900;
+}
+
+.bonk-method p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 550;
+  line-height: 1.55;
+}
+
+.bonk-dual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem;
+}
+
+.bonk-example {
+  min-width: 0;
+}
+
+.bonk-example h3 {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.bonk-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem;
+}
+
+.bonk-chart {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--brutal-shadow);
+}
+
+.bonk-chart figcaption {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.25rem 1.4rem;
+  border-bottom: var(--border-width) solid var(--border-color);
+  background: var(--accent-light);
+}
+
+.bonk-chart figcaption strong {
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.bonk-chart figcaption span {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.bonk-column-chart {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 0.8rem;
+  padding: 1.5rem;
+}
+
+.bonk-y-axis {
+  display: grid;
+  grid-template-rows: 260px 48px;
+}
+
+.bonk-y-axis-values {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 28px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.bonk-plot {
+  min-width: 0;
+}
+
+.bonk-plot-area {
+  position: relative;
+  height: 260px;
+}
+
+.bonk-grid-lines {
+  position: absolute;
+  inset: 28px 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bonk-grid-lines span {
+  width: 100%;
+  border-top: 1px solid #babdb7;
+}
+
+.bonk-grid-lines span:last-child {
+  border-top: 3px solid #000;
+}
+
+.bonk-columns {
+  position: absolute;
+  inset: 28px 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(var(--bonk-column-count, 3), minmax(0, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.bonk-column {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bonk-column-bar {
+  width: min(72%, 100px);
+  min-height: 0;
+  border: 3px solid #000;
+  border-bottom: 0;
+}
+
+.bonk-column-value {
+  position: absolute;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  font-size: 0.88rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.bonk-column-labels {
+  display: grid;
+  grid-template-columns: repeat(var(--bonk-column-count, 3), minmax(0, 1fr));
+  gap: 1rem;
+  min-height: 48px;
+  padding: 0 1rem;
+}
+
+.bonk-column-labels span {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.bonk-column-labels i {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border: 2px solid #000;
+}
+
+.bonk-results-source {
+  max-width: 900px;
+  margin: -1rem auto 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.bonk-takeaway {
+  padding: 3.5rem;
+  margin-right: -3.5rem;
+  margin-left: -3.5rem;
+  border-top: var(--border-width) solid var(--border-color);
+  border-bottom: var(--border-width) solid var(--border-color);
+  background: var(--accent-light);
+}
+
+.bonk-takeaway h2 {
+  max-width: 900px;
+  margin: 0 0 1rem;
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.bonk-takeaway p {
+  max-width: 980px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.bonk-takeaway-heading {
+  max-width: 980px;
+  margin-bottom: 2.5rem;
+}
+
+.bonk-map-duel-chart figcaption {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: center;
+  background: var(--accent-purple);
+}
+
+.bonk-map-duel-chart figcaption > div:first-child {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bonk-duel-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: flex-end;
+}
+
+.bonk-duel-legend span {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  color: #111;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: none;
+}
+
+.bonk-duel-legend i {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border: 3px solid #000;
+}
+
+.bonk-duel-chart-body {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.75rem;
+}
+
+.bonk-duel-axis {
+  display: grid;
+  grid-template-rows: 330px 54px;
+}
+
+.bonk-duel-axis > div {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 58px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-align: right;
+}
+
+.bonk-duel-plot {
+  min-width: 0;
+}
+
+.bonk-duel-plot-area {
+  position: relative;
+  height: 330px;
+}
+
+.bonk-duel-plot-area .bonk-grid-lines {
+  inset: 58px 0 0;
+}
+
+.bonk-duel-groups {
+  position: absolute;
+  inset: 58px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 5vw, 5rem);
+  align-items: end;
+}
+
+.bonk-duel-group {
+  display: grid;
+  width: min(100%, 330px);
+  height: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  align-items: end;
+  justify-self: center;
+}
+
+.bonk-duel-column {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+}
+
+.bonk-duel-column:not(:first-child) {
+  margin-left: -3px;
+}
+
+.bonk-duel-bar {
+  width: 100%;
+  min-height: 5px;
+  border: 3px solid #000;
+  border-bottom: 0;
+}
+
+.bonk-duel-value {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bonk-duel-map-labels {
+  display: grid;
+  min-height: 54px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 5vw, 5rem);
+  border-top: 3px solid #000;
+}
+
+.bonk-duel-map-labels strong {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0.8rem 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.bonk-takeaway .bonk-takeaway-source {
+  max-width: none;
+  margin-top: 1rem;
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.bonk-cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3rem;
+  align-items: center;
+  padding: 3rem;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 8px;
+  background: var(--accent-purple);
+  box-shadow: var(--brutal-shadow);
+}
+
+.bonk-cta h2 {
+  max-width: 780px;
+  font-size: 2.4rem;
+}
+
+.bonk-cta p {
+  max-width: 780px;
+  color: #2d2850;
+}
+
+.bonk-source-link {
+  flex: none;
+  padding: 1rem 1.4rem;
+  background: #fff;
+  white-space: nowrap;
+}
+
+.bonk-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.bonk-project-attribution {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 2px solid #000;
+  color: #2d2850;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+@media (max-width: 980px) {
+  .bonk-opening-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .bonk-section,
+  .bonk-section--reverse,
+  .bonk-dual-grid,
+  .bonk-result-grid,
+  .bonk-cta {
+    grid-template-columns: 1fr;
+  }
+
+  .bonk-map-duel-chart figcaption {
+    grid-template-columns: 1fr;
+  }
+
+  .bonk-duel-legend {
+    justify-content: flex-start;
+  }
+
+  .bonk-method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bonk-method {
+    border-right: 0;
+    border-bottom: var(--border-width) solid var(--border-color);
+  }
+
+  .bonk-method:last-child {
+    border-bottom: 0;
+  }
+
+  .bonk-cta {
+    align-items: start;
+  }
+
+  .bonk-cta-actions {
+    justify-content: flex-start;
+  }
+
+  .bonk-source-link {
+    width: fit-content;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 640px) {
+  .display-controls-button {
+    right: 0.5rem !important;
+    bottom: 0.75rem !important;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.3rem !important;
+  }
+
+  .project-detail-content {
+    padding: 1.4rem !important;
+  }
+
+  .project-detail-title {
+    font-size: 2.8rem !important;
+  }
+
+  .bonk-project {
+    gap: 4.5rem;
+  }
+
+  .bonk-opening {
+    margin-bottom: -1.5rem;
+  }
+
+  .bonk-opening-title {
+    font-size: 2.5rem;
+  }
+
+  .bonk-lead {
+    font-size: 1.12rem;
+  }
+
+  .bonk-copy h2,
+  .bonk-cta h2 {
+    font-size: 2.15rem;
+  }
+
+  .bonk-copy p,
+  .bonk-example p,
+  .bonk-cta p {
+    font-size: 1rem;
+  }
+
+  .bonk-takeaway {
+    padding: 3rem 1.4rem;
+    margin-right: -1.4rem;
+    margin-left: -1.4rem;
+  }
+
+  .bonk-takeaway h2 {
+    font-size: 2.15rem;
+  }
+
+  .bonk-cta {
+    padding: 1.5rem;
+  }
+
+  .bonk-column-chart {
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding: 1rem;
+  }
+
+  .bonk-y-axis {
+    grid-template-rows: 220px 48px;
+  }
+
+  .bonk-plot-area {
+    height: 220px;
+  }
+
+  .bonk-columns,
+  .bonk-column-labels {
+    gap: 0.55rem;
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+  }
+
+  .bonk-column-labels span {
+    font-size: 0.7rem;
+  }
+
+  .bonk-duel-chart-body {
+    min-width: 720px;
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 1rem;
+  }
+
+  .bonk-map-duel-chart {
+    overflow-x: auto;
+  }
+}

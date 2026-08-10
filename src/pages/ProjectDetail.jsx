@@ -5,6 +5,153 @@ import RainWindow from '../components/RainWindow';
 import { projectsData } from './Home';
 
 const windowProjectAssetBase = '/assets/projects/25d-window';
+const bonkProjectAssetBase = '/assets/projects/bonk-rl';
+
+function BonkVideo({ src, poster, label, caption, className = '' }) {
+  return (
+    <motion.figure
+      className={`bonk-media ${className}`.trim()}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+    >
+      <video
+        src={`${bonkProjectAssetBase}/${src}`}
+        poster={poster ? `${bonkProjectAssetBase}/${poster}` : undefined}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        aria-label={label}
+      />
+      {caption && <figcaption>{caption}</figcaption>}
+    </motion.figure>
+  );
+}
+
+function BonkBarChart({ title, metric, items, maxValue, ticks, className = '' }) {
+  const summary = items.map(item => `${item.label}: ${item.display}`).join(', ');
+  return (
+    <motion.figure
+      className={`bonk-chart ${className}`.trim()}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+      <figcaption>
+        <strong>{title}</strong>
+        <span>{metric}</span>
+      </figcaption>
+      <div className="bonk-column-chart" role="img" aria-label={`${title}. ${metric}. ${summary}`}>
+        <div className="bonk-y-axis" aria-hidden="true">
+          <div className="bonk-y-axis-values">
+            {ticks.map(tick => <span key={tick}>{tick}</span>)}
+          </div>
+          <span />
+        </div>
+        <div className="bonk-plot">
+          <div className="bonk-plot-area">
+            <div className="bonk-grid-lines" aria-hidden="true">
+              {ticks.map(tick => <span key={tick} />)}
+            </div>
+            <div className="bonk-columns" style={{ '--bonk-column-count': items.length }} aria-hidden="true">
+              {items.map(item => {
+                const height = Math.max(0, Math.min(100, (item.value / maxValue) * 100));
+                return (
+                  <div className="bonk-column" key={item.label}>
+                    <strong className="bonk-column-value" style={{ bottom: `calc(${height}% + 6px)` }}>{item.display}</strong>
+                    <motion.span
+                      className="bonk-column-bar"
+                      style={{ backgroundColor: item.color }}
+                      initial={{ height: 0 }}
+                      whileInView={{ height: `${height}%` }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.65, ease: 'easeOut' }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="bonk-column-labels" style={{ '--bonk-column-count': items.length }} aria-hidden="true">
+            {items.map(item => (
+              <span key={item.label}><i style={{ backgroundColor: item.color }} />{item.shortLabel || item.label}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.figure>
+  );
+}
+
+function BonkMapDuelChart({ title, metric, groups, ticks, legend }) {
+  const summary = groups
+    .map(group => `${group.label}: ${group.items.map(item => `${item.label} ${item.display}`).join(', ')}`)
+    .join('. ');
+
+  return (
+    <motion.figure
+      className="bonk-chart bonk-map-duel-chart"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+      <figcaption>
+        <div>
+          <strong>{title}</strong>
+          <span>{metric}</span>
+        </div>
+        <div className="bonk-duel-legend" aria-label="PPO architecture colors">
+          {legend.map(item => <span key={item.label}><i style={{ backgroundColor: item.color }} />{item.label}</span>)}
+        </div>
+      </figcaption>
+      <div className="bonk-duel-chart-body" role="img" aria-label={`${title}. ${metric}. ${summary}`}>
+        <div className="bonk-duel-axis" aria-hidden="true">
+          <div>
+            {ticks.map(tick => <span key={tick}>{tick}</span>)}
+          </div>
+          <span />
+        </div>
+        <div className="bonk-duel-plot" aria-hidden="true">
+          <div className="bonk-duel-plot-area">
+            <div className="bonk-grid-lines">
+              {ticks.map(tick => <span key={tick} />)}
+            </div>
+            <div className="bonk-duel-groups">
+              {groups.map(group => (
+                <div className="bonk-duel-group" key={group.label}>
+                  {group.items.map(item => {
+                    const height = Math.max(0, Math.min(100, item.value * 100));
+                    return (
+                      <div className="bonk-duel-column" key={item.label}>
+                        <strong className="bonk-duel-value" style={{ bottom: `calc(${height}% + 7px)` }}>{item.display}</strong>
+                        <motion.span
+                          className="bonk-duel-bar"
+                          style={{ backgroundColor: item.color }}
+                          initial={{ height: 0 }}
+                          whileInView={{ height: `${height}%` }}
+                          viewport={{ once: true, amount: 0.45 }}
+                          transition={{ duration: 0.65, ease: 'easeOut' }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bonk-duel-map-labels">
+            {groups.map(group => <strong key={group.label}>{group.label}</strong>)}
+          </div>
+        </div>
+      </div>
+    </motion.figure>
+  );
+}
 
 function WindowPlaceholderMedia({ label }) {
   return (
@@ -88,17 +235,17 @@ export default function ProjectDetail() {
 
       <div className="brutalist-panel" style={{ padding: '0', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header Image Thumbnail directly pointing to the asset */}
-        <div style={{ width: '100%', height: '350px', borderBottom: 'var(--border-width) solid var(--border-color)', backgroundColor: 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: projectId === 'bonk-rl' ? 'min(380px, 62vw)' : '350px', borderBottom: 'var(--border-width) solid var(--border-color)', backgroundColor: projectId === 'bonk-rl' ? '#272727' : 'var(--accent-purple)', position: 'relative', overflow: 'hidden' }}>
            {projectId === 'rainy-day' ? (
               <RainWindow bgIdClass={15} />
            ) : (project.headerImage || project.image || '').endsWith('.mp4') ? (
-              <video src={`/assets/projects/${projectId}/${project.headerImage || project.image}`} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <video src={`/assets/projects/${projectId}/${project.headerImage || project.image}`} poster={project.thumbnailPoster ? `/assets/projects/${projectId}/${project.thumbnailPoster}` : undefined} autoPlay loop muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
            ) : (
               <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${projectId}/${project.headerImage || project.image || 'placeholder_img_or_gif.gif'}') center/cover` }} />
            )}
         </div>
         
-        <div style={{ padding: '3.5rem', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+        <div className="project-detail-content" style={{ padding: '3.5rem', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
           <div>
             <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
               {project.category.split(' / ').map(cat => (
@@ -107,7 +254,7 @@ export default function ProjectDetail() {
                 </span>
               ))}
             </div>
-            <h1 style={{ fontSize: '4.5rem', margin: '0 0 0.5rem 0', fontWeight: 900, letterSpacing: '-2px', lineHeight: 1 }}>{project.title}</h1>
+            <h1 className="project-detail-title" style={{ fontSize: '4.5rem', margin: '0 0 0.5rem 0', fontWeight: 900, lineHeight: 1 }}>{project.title}</h1>
             <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{project.desc}</p>
           </div>
 
@@ -283,6 +430,237 @@ export default function ProjectDetail() {
              </div>
           )}
 
+          {/* Bonk reinforcement-learning system */}
+          {projectId === 'bonk-rl' && (
+            <div className="bonk-project">
+              <section className="bonk-opening">
+                <div className="bonk-opening-grid">
+                  <div className="bonk-opening-copy">
+                    <span className="bonk-project-kicker">Physics at Play / UW CSE 493</span>
+                    <h2 className="bonk-opening-title">Can an agent learn physics through play?</h2>
+                    <p className="bonk-lead">
+                      We recreated Bonk.io as a controllable research environment and used it to compare three PPO agents: a standard baseline, a curiosity-driven model, and a model with an auxiliary physics-prediction task. The study asks how reward design, predictive loss, and training environment affect movement, exploration, and transfer to new maps.
+                    </p>
+                  </div>
+                  <BonkVideo
+                    src="pyramid_climb_clean.mp4"
+                    poster="pyramid_climb_clean.webp"
+                    label="A PPO policy climbing the pyramid map"
+                    className="bonk-opening-media"
+                  />
+                </div>
+              </section>
+
+              <section className="bonk-section bonk-section--sensor">
+                <div className="bonk-copy">
+                  <span className="bonk-eyebrow">01 / THE ENVIRONMENT</span>
+                  <h2>A calibrated Bonk.io recreation.</h2>
+                  <p>
+                    Because Bonk.io is closed-source, we built a local Box2D recreation and calibrated its movement against recorded gameplay. Matching velocity, acceleration, gravity, input force, friction, and bounce behavior made the clone useful for controlled training rather than just visual imitation.
+                  </p>
+                  <p>
+                    The policy does not consume pixels. It receives a compact geometric observation containing player motion, the objective and opponent state, nearby surfaces, and raycast measurements. The split view shows a rollout alongside that spatial representation.
+                  </p>
+                </div>
+                <BonkVideo
+                  src="hero_parkour_raycast_comparison.mp4"
+                  poster="hero_parkour_clean.webp"
+                  label="The same procedural parkour rollout shown with raycasts off and on"
+                  caption="The same rollout in clean view and geometric sensor view."
+                  className="bonk-media--comparison"
+                />
+              </section>
+
+              <section className="bonk-methods">
+                <div className="bonk-copy bonk-copy--centered">
+                  <span className="bonk-eyebrow bonk-eyebrow--purple">02 / THREE PPO VARIANTS</span>
+                  <h2>Three PPO configurations.</h2>
+                  <p>Each model uses the same actor-critic PPO foundation. What changes is the signal used to guide learning.</p>
+                </div>
+                <div className="bonk-method-grid">
+                  <div className="bonk-method">
+                    <strong>Baseline PPO</strong>
+                    <p>Learns directly from game reward and establishes the comparison point.</p>
+                  </div>
+                  <div className="bonk-method">
+                    <strong>Physics Auxiliary</strong>
+                    <p>Predicts the next position and velocity, adding a physics-consistency task to PPO loss.</p>
+                  </div>
+                  <div className="bonk-method">
+                    <strong>Curiosity PPO</strong>
+                    <p>Turns surprising next-state prediction errors into an exploration reward.</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="bonk-section bonk-section--reverse">
+                <BonkVideo
+                  src="moving_ladder_generalist_clean.mp4"
+                  poster="moving_ladder_generalist_clean.webp"
+                  label="A PPO policy climbing a route with moving platforms"
+                  caption="Tracking moving surfaces while preserving jump timing and momentum."
+                />
+                <div className="bonk-copy">
+                  <span className="bonk-eyebrow">03 / PRETRAINING</span>
+                  <h2>Two pretraining environments.</h2>
+                  <p>
+                    The curriculum introduces basic control, gaps, moving objectives, procedural parkour, and mixed-map navigation in stages. Each step adds a physical behavior while revisiting earlier maps to reduce forgetting.
+                  </p>
+                  <p>
+                    A second pretraining route uses one dense playground containing many obstacles at once. Comparing the two asks whether structured progression or concentrated variety produces behavior that transfers more reliably.
+                  </p>
+                  <div className="bonk-inline-facts" aria-label="Curriculum details">
+                    <span>staged curriculum</span><span>dense playground</span><span>same PPO foundation</span>
+                  </div>
+                </div>
+              </section>
+
+              <section className="bonk-showcase">
+                <div className="bonk-copy bonk-copy--centered">
+                  <span className="bonk-eyebrow bonk-eyebrow--purple">04 / TRANSFER</span>
+                  <h2>Fine-tuning on six unseen maps.</h2>
+                  <p>
+                    The pretrained agents are moved onto six new maps covering combat, ladder climbing, lethal gaps, moving platforms, and bounce-pad control. Success rate, distance to the objective, and collision behavior show not only whether a policy succeeds, but how it adapts.
+                  </p>
+                </div>
+                <div className="bonk-dual-grid">
+                  <div className="bonk-example">
+                    <BonkVideo
+                      src="moving_death_specialist_clean.mp4"
+                      poster="moving_death_specialist_clean.webp"
+                      label="A fine-tuned policy crossing lethal moving platforms"
+                      caption="Moving platforms and death zones in the same transfer task."
+                    />
+                    <h3>Moving death platforms</h3>
+                    <p>The policy combines waiting, lateral control, and committed jumps across a route where a mistimed landing ends the episode.</p>
+                  </div>
+                  <div className="bonk-example">
+                    <BonkVideo
+                      src="bounce_arc_specialist_clean.mp4"
+                      poster="bounce_arc_specialist_clean.webp"
+                      label="A fine-tuned policy completing a precision bounce route"
+                      caption="Bounce-pad control, momentum, and hazard avoidance."
+                    />
+                    <h3>Precision bounce arc</h3>
+                    <p>The route requires dropping into bounce surfaces, carrying momentum through hazards, and converting a rebound into controlled ascent.</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="bonk-results-evidence">
+                <div className="bonk-copy bonk-copy--centered">
+                  <span className="bonk-eyebrow">05 / MATCHED TRANSFER RESULTS</span>
+                  <h2>Same map. Faster adaptation.</h2>
+                  <p>
+                    On Combat Flat, all three curriculum-pretrained agents improved during fine-tuning. At the same early checkpoint, auxiliary and curiosity PPO had already passed 85% success while baseline remained near 41%. Baseline eventually reached the same target, but required roughly one-third more steps.
+                  </p>
+                </div>
+                <div className="bonk-result-grid">
+                  <BonkBarChart
+                    title="Combat Flat / Equal Budget"
+                    metric="Success rate near 2.04M fine-tuning steps / higher is better"
+                    maxValue={1}
+                    ticks={['100%', '75%', '50%', '25%', '0']}
+                    items={[
+                      { label: 'Baseline PPO', shortLabel: 'Baseline', value: 0.4061, display: '40.6%', color: '#92979b' },
+                      { label: 'Physics auxiliary', shortLabel: 'Auxiliary', value: 0.8518, display: '85.2%', color: '#b69cff' },
+                      { label: 'Curiosity PPO', shortLabel: 'Curiosity', value: 0.8593, display: '85.9%', color: '#c9f36d' },
+                    ]}
+                  />
+                  <BonkBarChart
+                    title="Combat Flat / Speed to Target"
+                    metric="Fine-tuning steps to 85% success / lower is better"
+                    maxValue={3000000}
+                    ticks={['3.0M', '2.0M', '1.0M', '0']}
+                    items={[
+                      { label: 'Baseline PPO', shortLabel: 'Baseline', value: 2998272, display: '3.00M', color: '#92979b' },
+                      { label: 'Physics auxiliary', shortLabel: 'Auxiliary', value: 2015232, display: '2.02M', color: '#b69cff' },
+                      { label: 'Curiosity PPO', shortLabel: 'Curiosity', value: 2048000, display: '2.05M', color: '#c9f36d' },
+                    ]}
+                  />
+                </div>
+                <p className="bonk-results-source">Matched curriculum runs on Combat Flat. Equal-budget values use the nearest saved evaluation to 2.048M fine-tuning steps.</p>
+              </section>
+
+              <section className="bonk-section">
+                <div className="bonk-copy">
+                  <span className="bonk-eyebrow">06 / COMBAT</span>
+                  <h2>Combat and collision behavior.</h2>
+                  <p>
+                    An active opponent turns movement into a contact problem. The agent must approach with useful momentum, recover after impact, protect its own position, and either capture the objective or push the opponent out of bounds.
+                  </p>
+                  <p>
+                    The study also tracks collisions during combat fine-tuning. As policies improve, fewer contacts can still produce stronger outcomes, suggesting that they learn how to use force rather than merely collide more often.
+                  </p>
+                </div>
+                <BonkVideo
+                  src="combat_duel_raycasts.mp4"
+                  poster="combat_duel_raycasts.webp"
+                  label="Two PPO policies dueling with geometric observations visible"
+                  caption="Opponent-aware sensing during a physics-based duel."
+                />
+              </section>
+
+              <section className="bonk-takeaway" id="results">
+                <div className="bonk-takeaway-heading">
+                  <span className="bonk-eyebrow bonk-eyebrow--purple">WHAT WE FOUND</span>
+                  <h2>The aggregate hid task-specific behavior.</h2>
+                  <p>Direct duels between curriculum-pretrained specialists show a dominant baseline on Combat Flat, a much closer Death Gap contest, and a clear auxiliary advantage on Safe Ladder. Curiosity struggled in combat but remained competitive on the navigation tasks.</p>
+                </div>
+                <BonkMapDuelChart
+                  title="Specialist Duel Score, Map by Map"
+                  metric="Win = 1 point, draw = 1/2 point / higher is better"
+                  ticks={['100%', '75%', '50%', '25%', '0']}
+                  legend={[
+                    { label: 'Baseline', color: '#92979b' },
+                    { label: 'Auxiliary', color: '#b69cff' },
+                    { label: 'Curiosity', color: '#c9f36d' },
+                  ]}
+                  groups={[
+                    {
+                      label: 'Combat Flat',
+                      items: [
+                        { label: 'Baseline', value: 1, display: '100%', color: '#92979b' },
+                        { label: 'Auxiliary', value: 0.469, display: '46.9%', color: '#b69cff' },
+                        { label: 'Curiosity', value: 0.031, display: '3.1%', color: '#c9f36d' },
+                      ],
+                    },
+                    {
+                      label: 'Death Gap',
+                      items: [
+                        { label: 'Baseline', value: 0.688, display: '68.8%', color: '#92979b' },
+                        { label: 'Auxiliary', value: 0.25, display: '25.0%', color: '#b69cff' },
+                        { label: 'Curiosity', value: 0.562, display: '56.2%', color: '#c9f36d' },
+                      ],
+                    },
+                    {
+                      label: 'Safe Ladder',
+                      items: [
+                        { label: 'Baseline', value: 0.125, display: '12.5%', color: '#92979b' },
+                        { label: 'Auxiliary', value: 0.953, display: '95.3%', color: '#b69cff' },
+                        { label: 'Curiosity', value: 0.422, display: '42.2%', color: '#c9f36d' },
+                      ],
+                    },
+                  ]}
+                />
+                <p className="bonk-takeaway-source">Latest curriculum-pretrained specialist for each PPO architecture; 64 balanced duel episodes per model on each map. A win is an objective capture or knockout. Results were regenerated directly from the saved fine-tuned checkpoints.</p>
+              </section>
+
+              <section className="bonk-cta">
+                <div>
+                  <span className="bonk-eyebrow">PAPER + IMPLEMENTATION</span>
+                  <h2>Physics at Play</h2>
+                  <p>The full paper covers environment calibration, model architecture, curriculum design, transfer experiments, and the limits of each approach.</p>
+                </div>
+                <div className="bonk-cta-actions">
+                  <a href={`${bonkProjectAssetBase}/physics-at-play.pdf`} target="_blank" rel="noreferrer" className="brutalist-button bonk-source-link">Read the paper</a>
+                  <a href="https://github.com/danishubin/bonkio" target="_blank" rel="noreferrer" className="brutalist-button bonk-source-link">View source</a>
+                </div>
+                <p className="bonk-project-attribution">Research by Trisha Bhatawdekar, Jules Ropars, and Daniel Shubin.</p>
+              </section>
+            </div>
+          )}
+
           {/* 2.5D Window / Multi-Screen Tracked Display */}
           {projectId === '25d-window' && (
             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '7rem' }}>
@@ -338,7 +716,7 @@ export default function ProjectDetail() {
           )}
 
           {/* Placeholder Fallback */}
-          {projectId !== 'squash' && projectId !== 'rainy-day' && projectId !== '25d-window' && (
+          {projectId !== 'squash' && projectId !== 'rainy-day' && projectId !== '25d-window' && projectId !== 'bonk-rl' && (
              <div style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2.5rem', minHeight: '30vh' }}>
                 <div style={{ textAlign: 'center' }}>
                    <h3 style={{ fontSize: '3rem', fontWeight: 900, margin: '0 0 1rem 0', letterSpacing: '-1px' }}>Under Construction</h3>
