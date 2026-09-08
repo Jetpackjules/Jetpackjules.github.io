@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import RainWindow from '../components/RainWindow';
 
 const projectRecords = [
+  { id: 'robot-teleop-vision', title: 'Robot Teleop Vision', category: 'Robotics / Computer Vision', desc: 'Head-tracked 3D viewing for remote manipulation, developed in the RSE Lab.', date: '2026-09', status: 'ongoing', image: 'thumbnail.jpg', projectPage: '/research/robot-teleop-vision/index.html', github: 'https://github.com/Jetpackjules/robot-teleop-vision' },
   { id: 'bonk-rl', title: 'Bonk RL', category: 'Reinforcement Learning / Physics Simulation', desc: 'Comparing PPO architectures for movement, momentum, collisions, and transfer in a recreated Bonk.io environment.', date: '2026-08', status: 'ongoing', image: 'hero_parkour_raycasts.mp4', thumbnailPoster: 'hero_parkour_raycasts.webp', headerImage: 'hero_parkour_raycasts.mp4', github: 'https://github.com/danishubin/bonkio' },
   { id: '25d-window', title: '2.5D Window System', category: 'Computer Vision / Godot', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', date: '2026-04', status: 'ongoing', image: 'single-screen-pingpong.mp4', thumbnailPoster: 'single-screen-pingpong.webp', github: 'https://github.com/Jetpackjules/2.5D-Window-System' },
   { id: 'squash', title: 'Squash Ball Tracker', category: 'Computer Vision / ML', desc: 'Encoder-Decoder heatmap model with Kalman filtering tracking 40mm squash balls at high speeds.', date: '2026-01', image: 'wide%20squash%20gif.gif', headerImage: 'multi-ball%20squash%20gif.gif' },
@@ -87,7 +88,7 @@ export default function Home() {
            
            <div className="projects-grid">
              {projectsData.map((p, i) => (
-                <Link to={`/projects/${p.id}`} key={p.id} style={{ display: 'block', minWidth: 0, width: '100%', textDecoration: 'none', color: 'inherit' }}>
+                <Link to={p.projectPage || `/projects/${p.id}`} reloadDocument={Boolean(p.projectPage)} key={p.id} style={{ display: 'block', minWidth: 0, width: '100%', textDecoration: 'none', color: 'inherit' }}>
                   <motion.div 
                     whileHover={{ y: -8, x: 'calc(var(--pop-dir-x) * -8px)', boxShadow: 'calc(var(--pop-dir-x) * 12px) calc(var(--pop-dir-y) * 12px) 0px #000' }}
                     whileTap={{ y: 'calc(var(--pop-dir-y) * 6px)', x: 'calc(var(--pop-dir-x) * 6px)', boxShadow: '0px 0px 0px #000', transition: { duration: 0.05 } }}
