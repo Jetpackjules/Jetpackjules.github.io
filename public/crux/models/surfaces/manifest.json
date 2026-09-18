@@ -1,0 +1,111 @@
+{
+  "model": "Metric3D ViT Small",
+  "precision": "float16",
+  "bytes": 75778144,
+  "sha256": "4afcc0893dbb3c0c63e270f8bb24bfa63ccf2dc68ab9c0c3601fdae4f0aafd9b",
+  "source": "https://huggingface.co/onnx-community/metric3d-vit-small",
+  "chunks": [
+    {
+      "file": "chunk-0.bin",
+      "bytes": 19000000,
+      "sha256": "78eb729647a6b1f54c71e97291b2a5a6e9c4950ead5aa363707249933493ba9b"
+    },
+    {
+      "file": "chunk-1.bin",
+      "bytes": 19000000,
+      "sha256": "13d2be658ab6e66adf96e3f3f341a585ebcc27f8491b6545175a57c6d2128304"
+    },
+    {
+      "file": "chunk-2.bin",
+      "bytes": 19000000,
+      "sha256": "823149327d0451fed8b6cf1c4d75b13da119ed7303df6c2e174257c84c219c2f"
+    },
+    {
+      "file": "chunk-3.bin",
+      "bytes": 18778144,
+      "sha256": "ff0d6eb65dd48398b1cd413199d2a45b23d661533e6cc89daa57022542673a63"
+    }
+  ],
+  "input": {
+    "name": "pixel_values",
+    "dtype": "float16",
+    "shape": [
+      "batch_size",
+      3,
+      "height",
+      "width"
+    ],
+    "layout": "NCHW",
+    "color": "RGB",
+    "range": [
+      0,
+      255
+    ],
+    "normalization": "None externally; graph performs normalization",
+    "resize": "Preserve aspect; bicubic; short side 280, cap long side at 560, round to multiples of 14. Multiples of 28 avoid 2px output rounding.",
+    "tested_input_width_height": [
+      [
+        504,
+        280
+      ],
+      [
+        420,
+        280
+      ]
+    ]
+  },
+  "outputs": [
+    {
+      "name": "predicted_depth",
+      "dtype": "float16",
+      "shape": [
+        "batch",
+        "output_height",
+        "output_width"
+      ],
+      "meaning": "Canonical-camera predicted depth. Focal correction required before interpreting metric distance; unused by normal-only route."
+    },
+    {
+      "name": "predicted_normal",
+      "dtype": "float16",
+      "shape": [
+        "batch",
+        3,
+        "output_height",
+        "output_width"
+      ],
+      "meaning": "Camera-coordinate surface normal direction. Renormalize before dot products."
+    },
+    {
+      "name": "normal_confidence",
+      "dtype": "float16",
+      "shape": [
+        "batch",
+        "output_height",
+        "output_width"
+      ],
+      "meaning": "Concentration-like positive normal-confidence output; values are not probabilities and can exceed 1."
+    }
+  ],
+  "modifications": "Selected FP16 ONNX artifact is unchanged from publisher. Transport chunking does not modify model bytes.",
+  "licenses": [
+    {
+      "scope": "Exact ONNX export publisher declaration",
+      "spdx": "CC0-1.0",
+      "evidence": "MODEL-CARD-export.md",
+      "text": "LICENSE-export-CC0-1.0.txt",
+      "legalcode_url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+      "downloaded_text_url": "https://raw.githubusercontent.com/spdx/license-list-data/main/text/CC0-1.0.txt",
+      "text_sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "scope": "Upstream Metric3D repository code; retained as attribution and provenance",
+      "spdx": "BSD-2-Clause",
+      "copyright": "Copyright (c) 2024, Wei Yin and Mu Hu",
+      "text": "LICENSE-Metric3D-BSD-2-Clause.txt",
+      "source_url": "https://raw.githubusercontent.com/YvanYin/Metric3D/main/LICENSE",
+      "text_sha256": "cb2dba18d598b6ad0b34f0f8b0ad01f9d495e657cae9bf0544786190cb26f9f9"
+    }
+  ],
+  "limitations": "Learned surface normals and image seams are approximate. Ranges are heuristic, not calibrated confidence intervals. A still photo cannot establish precise physical wall angles."
+}

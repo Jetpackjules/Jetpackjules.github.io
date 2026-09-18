@@ -1,0 +1,339 @@
+{
+  "name": "Metric3D ViT-Small direct surface normals",
+  "publisher": "onnx-community (export by Xenova)",
+  "upstream_authors": "Metric3D authors; upstream repository copyright Wei Yin and Mu Hu, 2024",
+  "selected_variant": "fp16",
+  "selected_model": {
+    "file": "metric3d-small-fp16.onnx",
+    "bytes": 75778144,
+    "sha256": "4afcc0893dbb3c0c63e270f8bb24bfa63ccf2dc68ab9c0c3601fdae4f0aafd9b"
+  },
+  "source_url": "https://huggingface.co/onnx-community/metric3d-vit-small/resolve/main/onnx/model_fp16.onnx",
+  "source_model_card_url": "https://huggingface.co/onnx-community/metric3d-vit-small/blob/main/README.md",
+  "source_model_card_sha256": "d51642260354665c529a8e1633e40ad3e628a5f253398a930bcc6371fa69c68b",
+  "upstream_repository": "https://github.com/YvanYin/Metric3D",
+  "upstream_checkpoint_repository": "https://huggingface.co/JUGGHM/Metric3D",
+  "licenses": [
+    {
+      "scope": "Exact ONNX export publisher declaration",
+      "spdx": "CC0-1.0",
+      "evidence": "MODEL-CARD-export.md",
+      "text": "LICENSE-export-CC0-1.0.txt",
+      "legalcode_url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+      "downloaded_text_url": "https://raw.githubusercontent.com/spdx/license-list-data/main/text/CC0-1.0.txt",
+      "text_sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "scope": "Upstream Metric3D repository code; retained as attribution and provenance",
+      "spdx": "BSD-2-Clause",
+      "copyright": "Copyright (c) 2024, Wei Yin and Mu Hu",
+      "text": "LICENSE-Metric3D-BSD-2-Clause.txt",
+      "source_url": "https://raw.githubusercontent.com/YvanYin/Metric3D/main/LICENSE",
+      "text_sha256": "cb2dba18d598b6ad0b34f0f8b0ad01f9d495e657cae9bf0544786190cb26f9f9"
+    }
+  ],
+  "license_scope_note": "The export publisher declares CC0-1.0; the upstream repository LICENSE is BSD-2-Clause and its README describes the code license. No separate original-checkpoint license card was present in the checkpoint repository during inspection. Preserve both supplied notices; do not describe upstream authors as separately declaring CC0.",
+  "modifications": "Selected FP16 ONNX artifact is unchanged from publisher. Transport chunking does not modify model bytes.",
+  "input": {
+    "name": "pixel_values",
+    "dtype": "float16",
+    "shape": [
+      "batch_size",
+      3,
+      "height",
+      "width"
+    ],
+    "layout": "NCHW",
+    "color": "RGB",
+    "range": [
+      0,
+      255
+    ],
+    "normalization": "None externally; graph performs normalization",
+    "resize": "Preserve aspect; bicubic; short side 280, cap long side at 560, round to multiples of 14. Multiples of 28 avoid 2px output rounding.",
+    "tested_input_width_height": [
+      [
+        504,
+        280
+      ],
+      [
+        420,
+        280
+      ]
+    ]
+  },
+  "outputs": [
+    {
+      "name": "predicted_depth",
+      "dtype": "float16",
+      "shape": [
+        "batch",
+        "output_height",
+        "output_width"
+      ],
+      "meaning": "Canonical-camera predicted depth. Focal correction required before interpreting metric distance; unused by normal-only route."
+    },
+    {
+      "name": "predicted_normal",
+      "dtype": "float16",
+      "shape": [
+        "batch",
+        3,
+        "output_height",
+        "output_width"
+      ],
+      "meaning": "Camera-coordinate surface normal direction. Renormalize before dot products."
+    },
+    {
+      "name": "normal_confidence",
+      "dtype": "float16",
+      "shape": [
+        "batch",
+        "output_height",
+        "output_width"
+      ],
+      "meaning": "Concentration-like positive normal-confidence output; values are not probabilities and can exceed 1."
+    }
+  ],
+  "output_dimension_formula": "output_dim = 4 * floor(3.5 * floor(input_dim / 14)); read actual tensor dimensions.",
+  "runtime": {
+    "native_test": "ONNX Runtime 1.26 CPUExecutionProvider, four intra-op threads, one inter-op thread, graph optimizations disabled for FP16",
+    "optimization_caveat": "ORT1.26 CPU full optimization failed loading FP16 in SimplifiedLayerNormFusion; ORT_DISABLE_ALL succeeded. Parent independently reports browser WASM1.22 succeeds with disabled optimizations.",
+    "browser_status": "Validated ONNX Runtime Web 1.22 WASM, one thread, desktop Chromium: full model load plus cave inference about 6.8 seconds. Phone performance not measured."
+  },
+  "native_fp16_observations": {
+    "runtime": "1.26.0",
+    "providers": [
+      "CPUExecutionProvider"
+    ],
+    "threads": 4,
+    "load_seconds": 0.6266375000122935,
+    "baseline_memory": {
+      "rss": 53727232,
+      "peak_rss": 53727232,
+      "pagefile_bytes": 673476608
+    },
+    "loaded_memory": {
+      "rss": 164855808,
+      "peak_rss": 164855808,
+      "pagefile_bytes": 782364672
+    },
+    "input": [
+      {
+        "name": "pixel_values",
+        "shape": [
+          "batch_size",
+          3,
+          "height",
+          "width"
+        ],
+        "type": "tensor(float16)"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "predicted_depth",
+        "shape": [
+          "batch_size",
+          "4*floor(3.5*floor(height/14))",
+          "4*floor(3.5*floor(width/14))"
+        ],
+        "type": "tensor(float16)"
+      },
+      {
+        "name": "predicted_normal",
+        "shape": [
+          "batch_size",
+          3,
+          "4*floor(3.5*floor(height/14))",
+          "4*floor(3.5*floor(width/14))"
+        ],
+        "type": "tensor(float16)"
+      },
+      {
+        "name": "normal_confidence",
+        "shape": [
+          "batch_size",
+          "4*floor(3.5*floor(height/14))",
+          "4*floor(3.5*floor(width/14))"
+        ],
+        "type": "tensor(float16)"
+      }
+    ],
+    "trials": [
+      {
+        "name": "cave",
+        "input_size": [
+          504,
+          280
+        ],
+        "seconds": 0.5606282999797259,
+        "peak_process_rss_bytes": 347758592,
+        "memory": {
+          "rss": 348082176,
+          "peak_rss": 348082176,
+          "pagefile_bytes": 1070227456
+        },
+        "output_shapes": [
+          [
+            1,
+            280,
+            504
+          ],
+          [
+            1,
+            3,
+            280,
+            504
+          ],
+          [
+            1,
+            280,
+            504
+          ]
+        ],
+        "predicted_depth": {
+          "min": 9.859375,
+          "max": 58.59375,
+          "mean": 21.92593002319336,
+          "finite_fraction": 1.0
+        },
+        "predicted_normal": {
+          "min": -1.0,
+          "max": 1.0,
+          "mean": -0.29041311144828796,
+          "finite_fraction": 1.0
+        },
+        "normal_confidence": {
+          "min": 0.74755859375,
+          "max": 37.46875,
+          "mean": 9.172786712646484,
+          "finite_fraction": 1.0
+        }
+      },
+      {
+        "name": "overhang",
+        "input_size": [
+          420,
+          280
+        ],
+        "seconds": 0.4602990999992471,
+        "peak_process_rss_bytes": 366137344,
+        "memory": {
+          "rss": 362860544,
+          "peak_rss": 386392064,
+          "pagefile_bytes": 1082753024
+        },
+        "output_shapes": [
+          [
+            1,
+            280,
+            420
+          ],
+          [
+            1,
+            3,
+            280,
+            420
+          ],
+          [
+            1,
+            280,
+            420
+          ]
+        ],
+        "predicted_depth": {
+          "min": 6.0546875,
+          "max": 24.703125,
+          "mean": 10.62089729309082,
+          "finite_fraction": 1.0
+        },
+        "predicted_normal": {
+          "min": -1.0,
+          "max": 0.99853515625,
+          "mean": -0.17754767835140228,
+          "finite_fraction": 1.0
+        },
+        "normal_confidence": {
+          "min": 1.171875,
+          "max": 29.34375,
+          "mean": 11.172390937805176,
+          "finite_fraction": 1.0
+        }
+      }
+    ]
+  },
+  "fp16_normal_difference_from_fp32_degrees": {
+    "cave": {
+      "all": {
+        "mean": 0.06733123875883112,
+        "median": 0.023812683772241085,
+        "p90": 0.1805703695073849,
+        "max": 1.068793180842224
+      },
+      "wall": {
+        "mean": 0.14058065876105227,
+        "median": 0.06312491313835096,
+        "p90": 0.4197058050021404,
+        "max": 1.068793180842224
+      },
+      "floor": {
+        "mean": 0.004991686942644364,
+        "median": 0.004697687446395738,
+        "p90": 0.00764310874912151,
+        "max": 0.05115959289567105
+      }
+    },
+    "overhang": {
+      "all": {
+        "mean": 0.03860672977263416,
+        "median": 0.01802965059710063,
+        "p90": 0.07653026970982996,
+        "max": 1.2207927204028712
+      },
+      "wall": {
+        "mean": 0.06986709165198789,
+        "median": 0.03143746753593545,
+        "p90": 0.13545118022069935,
+        "max": 1.2207927204028712
+      },
+      "floor": {
+        "mean": 0.006079452955748556,
+        "median": 0.005952994651688555,
+        "p90": 0.00817360301156394,
+        "max": 0.012037621132684431
+      }
+    }
+  },
+  "comparison_note": "Differences are fidelity relative to FP32, not physical-angle error against measured ground truth. Wall rectangular ROIs include holds. Single observations include warmup/shape overhead, not a benchmark distribution.",
+  "limitations": [
+    "A monocular learned normal is an estimate, not a measured plane normal.",
+    "Floor/up reference is needed for gravity-relative wall incline.",
+    "Hold protrusions and ambiguous folds must be excluded or downweighted for planar fitting.",
+    "No measured physical-angle labels were available.",
+    "Native process peak RSS is not browser/WASM/phone memory; no mobile memory test was run."
+  ],
+  "alternate_artifacts": {
+    "fp32": {
+      "file": "metric3d-small-fp32.onnx",
+      "bytes": 150739433,
+      "sha256": "674a665052f01bb2b64687200182f3380f0a462f4b6ef2e51fefd06c84d8ee75"
+    },
+    "fp16": {
+      "file": "metric3d-small-fp16.onnx",
+      "bytes": 75778144,
+      "sha256": "4afcc0893dbb3c0c63e270f8bb24bfa63ccf2dc68ab9c0c3601fdae4f0aafd9b"
+    },
+    "q8": {
+      "file": "metric3d-small-q8.onnx",
+      "bytes": 76504122,
+      "sha256": "db2d53692b18314b14319dc0660ee7761403d27be85f38f9d56475860696b97d"
+    },
+    "rounded": {
+      "file": "metric3d-small-rounded.onnx",
+      "bytes": 150739433,
+      "sha256": "c4b36edc87c98cb4302abf09d11bb9f3cca281c858b46aeea7ba085e087f66ff"
+    }
+  },
+  "q8_decision": "Rejected: cave wall p90 difference from FP32 approximately 30.37 degrees; overhang approximately 14.15 degrees. Do not select naive dynamic MatMul/Gemm QInt8 for this model."
+}

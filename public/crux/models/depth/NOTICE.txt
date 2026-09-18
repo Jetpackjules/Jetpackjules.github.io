@@ -1,0 +1,26 @@
+Depth Anything V2 Metric Indoor Small
+Upstream authors: Lihe Yang, Bingyi Kang, Zilong Huang, Zhen Zhao, Xiaogang Xu,
+Jiashi Feng, and Hengshuang Zhao.
+Upstream source: https://github.com/DepthAnything/Depth-Anything-V2
+Upstream checkpoint: https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf
+The upstream project identifies the Small model as Apache-2.0 licensed.
+See LICENSE.txt and upstream-README.md.
+The official metric Hypersim Small model card explicitly declares Apache-2.0:
+https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small
+Its saved model card is metric-small-license-evidence.md.
+
+ONNX conversion distributed by pstic/spatialthings-onnx:
+https://huggingface.co/pstic/spatialthings-onnx
+Pinned source revision: 7e25d804fe6a8734148f6161315587bab04f3996
+Original SHA-256: 0d9a2394746efc2666fac8cf450c9bcf5a29e45f823be21176bd7a45fffe089a
+
+Modifications made for this application on 2026-09-17:
+- Dynamic signed-int8 weight quantization of MatMul and Gemm operators with
+  ONNX Runtime; other operators remain float32.
+- Binary file split into two contiguous chunks for static browser delivery.
+Concatenation recreates the quantized ONNX file. See manifest.json for hashes,
+tool versions, and exact input/output and preprocessing configuration.
+
+This model estimates depth from one image. Wall-angle suggestions derived from
+it are approximate, depend on camera assumptions and region selection, and are
+not measured wall geometry.

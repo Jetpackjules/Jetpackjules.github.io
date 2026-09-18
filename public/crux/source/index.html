@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRUX — Bouldering, remixed</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Turn a photo of your climbing wall into new problems. Find holds, create mixed-color routes, and test experimental difficulty estimates. All photo processing stays on your device.">
+  <meta name="theme-color" content="#f44b2b">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23f44b2b'/%3E%3Cpath d='m10 10 20 20m0-20L10 30M20 6v28M6 20h28' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css?v=18"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="CRUX home"><span class="brand-symbol">✳</span> CRUX<span class="brand-tag">BOULDERING, REMIXED</span></a>
+    <nav class="mode-nav" aria-label="Workspace"><button class="active" id="create-tab" aria-pressed="true">Create a climb</button><button id="grade-tab" aria-pressed="false">Grade a climb</button></nav>
+  </header>
+  <main>
+    <div class="workspace-heading"><div><h1 id="workspace-title">Your next problem is on this wall<span>.</span></h1></div></div>
+    <div class="workspace">
+      <aside class="controls-panel">
+        <section class="control-section wall-controls"><div class="section-label">YOUR WALL <button id="demo-button" class="text-button">Example walls</button></div>
+          <button class="camera-button" id="camera-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m8 5 1-2h6l1 2h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><circle cx="12" cy="12" r="4"/></svg> Scan with camera</button>
+          <button class="upload-button" id="upload-button"><span>↑</span> Upload a wall photo</button><input type="file" id="file-input" accept="image/*" hidden><input type="file" id="capture-input" accept="image/*" capture="environment" hidden>
+
+        </section>
+        <section class="control-section" id="create-controls"><div class="section-label">SET YOUR CHALLENGE</div>
+          <label class="field-label" for="target-grade">Requested difficulty</label><div class="grade-stepper"><button id="grade-minus" aria-label="Easier target grade">−</button><output id="target-value">V5</output><button id="grade-plus" aria-label="Harder target grade">+</button></div>
+          <input id="target-grade" type="range" min="0" max="12" value="5" aria-label="Target V grade"><div class="range-labels"><span>V0 · EASY</span><span>V12 · HARD</span></div>
+          <label class="field-label style-label" for="route-style">Movement style</label><div class="style-options" id="route-style"><button class="selected" data-style="balanced" aria-pressed="true">Balanced</button><button data-style="reachy" aria-pressed="false">Reachy</button><button data-style="technical" aria-pressed="false">Technical</button></div>
+
+        </section>
+        <section class="control-section hidden" id="grade-controls"><div class="section-label">PICK AN EXISTING CLIMB</div><div id="color-picker" class="color-picker"></div><button class="upload-button" id="clear-selection">Clear selection</button></section>
+        <details class="control-section dimensions-section wall-details"><summary>Dimensions &amp; reach <span>+</span></summary>
+          <label class="field-label">Wall height (m)<input id="wall-height-input" type="number" inputmode="decimal" min="1" max="6" step="0.1" value="4"></label>
+          <label class="field-label">Your height (cm)<input id="body-height" type="number" inputmode="decimal" min="120" max="220" step="1" value="175"></label>
+          <button id="scale-guides" class="upload-button" aria-pressed="false">Check top &amp; mat</button>
+          <div id="scale-guide-controls" class="hidden"><label class="field-label">Wall top<input id="scale-top" type="range" min="0" max="75" step="0.5" value="0"></label><label class="field-label">Mat at the wall<input id="scale-bottom" type="range" min="25" max="100" step="0.5" value="100"></label></div>
+        </details>
+        <button class="primary generate-button" id="generate-button"><span class="spark">✳</span> Shuffle problems <span>↻</span></button>
+      </aside>
+      <section class="wall-panel" aria-label="Interactive climbing wall"><div class="wall-toolbar"><div class="wall-actions"><button id="quick-photo" title="Choose your own wall photo" aria-label="Choose your own wall photo">↑ <span>Photo</span></button><button id="detect-button" title="Find hold candidates" aria-label="Find hold candidates">⌖ <span>Find holds</span></button><button id="edit-button" aria-pressed="false">＋ <span>Edit holds</span></button><button id="overlay-button" aria-pressed="true" title="Show or hide holds" aria-label="Show or hide hold overlay">◉</button></div></div>
+        <div class="demo-wall-tabs" id="demo-wall-tabs" aria-label="Demo walls"><button data-wall-example="original" aria-pressed="true"><img src="./demo-wall.jpg" alt=""><span>Straight wall</span></button><button data-wall-example="cave" aria-pressed="false"><img src="./examples/cave.png" alt=""><span>The cave</span></button><button data-wall-example="overhang" aria-pressed="false"><img src="./examples/overhang.png" alt=""><span>The overhang</span></button></div><div class="wall-stage" id="wall-stage" tabindex="0" role="group" aria-label="Climbing wall. Scroll or pinch to zoom; drag to pan. Press 0 or double-click the background to fit."><div class="wall-placeholder" id="wall-placeholder"><span class="viewfinder">⌗</span><h2>Your next climb is already here.</h2><p>Add a wall photo, or explore the demo.</p><button class="primary" id="empty-upload">Choose a photo <span>↗</span></button></div><div id="image-wrap" class="image-wrap hidden"><img id="wall-image" alt="Climbing wall ready for hold selection" draggable="false"><svg id="facet-overlay" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="scan-overlay" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="route-overlay" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="scale-overlay" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="climber-overlay" class="hidden" aria-hidden="true" preserveAspectRatio="none"></svg><svg id="focus-preview" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><div id="focus-editor" class="hidden" aria-label="Adjust wall area"></div><svg id="focus-overlay" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="contact-links" aria-hidden="true"></svg><div id="hold-layer" class="hold-layer"></div><div id="contact-labels" aria-hidden="true"></div></div><div id="image-status" class="image-status" role="status" aria-live="polite" aria-atomic="true"><span class="image-status-icon" aria-hidden="true"></span><span id="image-status-text"></span></div></div>
+        <div class="wall-view-tools"><div class="wall-display-tools"><button id="all-holds" aria-pressed="false">All detected holds</button><button id="facet-toggle" class="hidden" aria-pressed="false">Wall angles</button><button id="focus-button" aria-pressed="false" aria-describedby="focus-help">Limit area</button><button id="focus-apply" class="hidden">Apply area</button><button id="focus-clear" class="hidden">Use whole photo</button><button id="replay-scan" title="Replay holds and selection">↻ Replay reveal</button></div></div><p id="detection-note" class="sr-only"></p><p id="focus-help" class="small muted hidden" role="status"></p><div class="beta-tools"><button id="beta-toggle" disabled aria-pressed="false">Climb preview</button><div id="beta-controls" class="hidden"><button id="beta-play" aria-label="Play suggested sequence">Play</button><button id="climber-toggle" aria-pressed="true">Show climber</button><button id="beta-prev" aria-label="Previous contact position">←</button><span id="beta-description"></span><span id="climber-pose-note" class="hidden"></span><button id="beta-next" aria-label="Next contact position">→</button></div></div><div class="wall-bottom"><div class="legend"><span><i class="start-dot"></i> Start</span><span><i class="route-dot"></i> Hands + feet</span><span><i class="foot-dot"></i> Feet only</span><span><i class="finish-dot"></i> Finish</span></div><span id="wall-hint" class="sr-only"></span></div><div id="hold-inspector" class="hold-inspector hidden"></div>
+      </section>
+      <aside class="results-panel"><div id="target-feedback" class="target-feedback hidden" role="status" aria-live="polite"></div><div id="route-results"><div class="empty-result"><span>↗</span><h3>A wall full of potential.</h3><p>Add a photo, review the holds, then generate your first climbs.</p></div></div><div id="route-detail" class="hidden"></div></aside>
+    </div>
+    <footer><span>CRUX <b>✳</b> MORE CLIMBS. SAME WALL.</span><button id="history-button" class="text-button">Your grade checks <span id="history-count">0</span></button><a class="text-button" href="./source.html">Source &amp; credits</a><button id="install-app" class="text-button">Add to home screen</button></footer>
+  </main>
+  <dialog id="info-dialog"><button class="dialog-close" aria-label="Close dialog">×</button><div id="info-content"></div></dialog>
+  <dialog id="camera-dialog"><button class="dialog-close" aria-label="Close camera">×</button><h2>Frame the whole wall.</h2><video id="camera-video" playsinline autoplay muted></video><p id="camera-error" role="status"></p><div class="dialog-actions"><button class="primary" id="capture-button">Capture wall</button><button class="upload-button" id="native-camera">Use phone camera</button></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.js?v=18"></script>
+</body>
+</html>
