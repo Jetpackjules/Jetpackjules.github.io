@@ -13,6 +13,9 @@ self.addEventListener('fetch',event=>{
  const req=event.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||url.search&&url.search!=='?v=19')return;
  const key=new URL(url);key.search='';
  const relative=url.pathname.slice(new URL(self.registration.scope).pathname.length);
+ // The MoGe adapter verifies and caches its own large chunks. Do not keep a
+ // second 115 MB copy in this general static-asset cache.
+ if(/^models\/moge\/.*\.bin$/.test(relative))return;
  const large=/^(models\/|vendor\/|examples\/|demo-wall\.jpg$)/.test(relative);
  if(!large&&!CORE.some(path=>new URL(path,self.registration.scope).pathname===url.pathname))return;
  event.respondWith((async()=>{
