@@ -17,11 +17,15 @@ function context(holds,setup){
   });
   const index=new Map(hs.map((h,i)=>[h.id,i]));
   const model={height:bodyHeight,arm:.37*bodyHeight,leg:.55*bodyHeight,torso:.29*bodyHeight,shoulder:.12*bodyHeight,hip:.075*bodyHeight,clearance:.095*bodyHeight,balance:.12*bodyHeight,footMove:.62*bodyHeight};
-  return {hs,index,setup:{...setup,angle:setup.angle??0},model};
+  const c={hs,index,setup:{...setup,angle:setup.angle??0},model};
+  c.sizes=hs.map(h=>visibleCapacity(c,h));c.grips=hs.map(difficulty);
+  c.contacts=hs.map((_,i)=>LIMBS.map((_,limb)=>contact(c,i,limb)));
+  return c;
 }
 function canHand(h){return !h.footOnly&&!['foot','foothold'].includes(h.role)&&h.use!=='foot';}
 function canFoot(h){return !h.handOnly&&h.use!=='hand';}
 function visibleCapacity(c,h){
+  if(c.sizes){const i=c.index.get(h.id);if(i!==undefined)return c.sizes[i];}
   const width=(finite(h.silhouetteBounds?.width,0,1)?h.silhouetteBounds.width:h.w||0)*c.setup.width;
   const height=(finite(h.silhouetteBounds?.height,0,1)?h.silhouetteBounds.height:h.h||0)*c.setup.height;
   const fraction=h.areaFraction??h.shape?.areaFraction??h.appearance?.areaFraction;
@@ -41,6 +45,7 @@ function canShare(c,h,type){
 }
 function canMatch(c,h){return canShare(c,h,'handHand');}
 function contact(c,index,limb){
+  if(c.contacts)return c.contacts[index][limb];
   const h=c.hs[index],size=visibleCapacity(c,h);let X=h.X,Y=h.Y;
   // Stable per-limb points: joining/leaving another contact does not move the
   // stationary contact. These are assumed usable parts of the visible hold.
@@ -149,7 +154,7 @@ function startStances(c,hands,feet,finish,max=16){
   const picked=[],counts=new Map();for(const s of result){const key=s.contacts.slice(0,2).join(',');if((counts.get(key)||0)>=2)continue;counts.set(key,(counts.get(key)||0)+1);picked.push(s);if(picked.length===max)break;}
   return picked;
 }
-function search(c,{hands,feet,finish,starts=null,maxExpanded=2400,neighborLimit=14,target=null,style='balanced',random=()=>.5,heuristicWeight=1.65,footCost=.075}){
+function search(c,{hands,feet,finish,starts=null,maxExpanded=2400,neighborLimit=14,target=null,style='balanced',random=()=>.5,heuristicWeight=1.65,footCost=.075,effortLimit=Infinity}){
   if(!canMatch(c,c.hs[finish]))return {beta:[],expanded:0,searchLimited:false,optimal:false,reason:'The finish appears too small for a matched finish. Choose a larger finish or confirm matching capacity.'};
   const handGraph=graph(c,hands,c.setup.reach),footGraphs=[graph(c,feet,c.model.footMove,2),graph(c,feet,c.model.footMove,3)],dist=handDistances(handGraph,finish);
   const initial=starts||startStances(c,hands,feet,finish),heap=new Heap(),best=new Map();let expanded=0,generated=0;
@@ -173,14 +178,15 @@ function search(c,{hands,feet,finish,starts=null,maxExpanded=2400,neighborLimit=
         return true;
       }).map(e=>{
         let order=hand?(dist.get(e.i)||0)*2-(e.i===other?.12:0):-c.hs[e.i].Y;
-        if(target!==null&&hand){const desired=clamp((target+1)/2,1,5);order+=Math.abs(difficulty(c.hs[e.i]).value-desired)*.2+Math.abs(e.distance/c.setup.reach-(style==='reachy'?.85:style==='technical'?.48:.67))*.4+random()*.35;}
+        if(target!==null&&hand){const desired=.5+target*4.5/12,moveTarget=clamp(.35+target*.045+(style==='reachy'?.12:style==='technical'?-.12:0),.3,.97);order+=Math.abs(c.grips[e.i].value-desired)*.3+Math.abs(e.distance/c.setup.reach-moveTarget)*.75+random()*.3;}
         return {...e,order};
       }).sort((a,b)=>a.order-b.order).slice(0,neighborLimit);
       for(const e of candidates){
         const next=[...n.contacts];next[limb]=e.i;
         const body=pose(c,next,{index:current,limb},limb);if(!body)continue;
+        if(Number.isFinite(effortLimit)&&movementDemand(c,n.contacts,next,limb,e.distance,body).value>effortLimit+.00001)continue;
         const action={limb:LIMBS[limb],from:c.hs[current].id,to:c.hs[e.i].id,distance:e.distance};
-        const penalty=target!==null&&hand?Math.abs(difficulty(c.hs[e.i]).value-clamp((target+1)/2,1,5))*.045:0;
+        const penalty=target!==null&&hand?Math.abs(c.grips[e.i].value-(.5+target*4.5/12))*.055:0;
         push(next,n,action,body,n.cost+(hand?1:footCost)+penalty);
       }
     }
@@ -195,15 +201,47 @@ function inclineSummary(c,hands){
   const values=records.map(r=>r.angle),localValues=records.filter(r=>r.local).map(r=>r.angle),localCount=localValues.length;
   return {localCount,total:records.length,coverage:records.length?localCount/records.length:0,localRange:localCount?[Math.min(...localValues),Math.max(...localValues)]:null,range:values.length?[Math.min(...values),Math.max(...values)]:[c.setup.angle,c.setup.angle],effectiveAngle:values.length?mean(values):c.setup.angle,effortAngle:values.length?mean(values.map(v=>Math.max(0,v))):Math.max(0,c.setup.angle),fallbackAngle:c.setup.angle,basis:'Used handholds; missing or non-finite local angles use wall setup',geometry:'2D unchanged',records};
 }
+// Movement-demand proxies, not a learned or calibrated V-grade model. In
+// particular a hold silhouette says nothing reliable about its usable depth.
+// Score actual supporting contacts; deleting an unused hold earns no points.
+function movementDemand(c,before,after,limb,distance,body){
+  const hand=limb<2,hs=c.hs,H=c.model.height,grips=after.slice(0,2).map(i=>c.grips[i].value);
+  const angle=mean(after.slice(0,2).map(i=>Math.max(0,Number.isFinite(hs[i].incline?.angle)?clamp(hs[i].incline.angle,-90,90):c.setup.angle)));
+  const grip=Math.max(0,.70*Math.max(...grips)+.25*mean(grips)-.55);
+  const ratio=distance/(hand?c.setup.reach:c.model.footMove);
+  const reach=3.6*clamp((ratio-.30)/.70,0,1)**2;
+  const footIndices=hand?after.slice(2):[before[limb^1],after[limb]];
+  const precision=mean(footIndices.map(i=>clamp((.075*H/1.7-c.sizes[i].width)/(.075*H/1.7),0,1)))*1.65;
+  const hands=after.slice(0,2).map((i,k)=>contact(c,i,k)),feet=after.slice(2).map((i,k)=>contact(c,i,k+2));
+  const gap=(mean(hands.map(p=>p.Y))-mean(feet.map(p=>p.Y)))/H;
+  const offset=Math.abs(mean(hands.map(p=>p.X))-mean(feet.map(p=>p.X)))/H;
+  const extension=clamp((gap-.58)/.35,0,1)*.9;
+  const tension=clamp((offset-.12)/.30,0,1)*(.55+angle/90)+extension*(.45+angle/60);
+  const incline=angle*.045;
+  const value=hand?grip+reach+precision+tension+incline:grip*.6+reach*.35+precision*.8+tension*.7+incline;
+  return {value,grip,reach,precision,tension,incline,limb:LIMBS[limb],ratio};
+}
+function demandSummary(c,beta){
+  const moves=[];
+  for(let n=1;n<beta.length;n++){
+    const b=beta[n-1],a=beta[n],limb=LIMBS.indexOf(a.move?.limb);if(limb<0)continue;
+    const before=LIMBS.map(k=>c.index.get(b[k])),after=LIMBS.map(k=>c.index.get(a[k]));
+    moves.push({...movementDemand(c,before,after,limb,a.move.distance,a.body),step:n});
+  }
+  const sorted=[...moves].sort((a,b)=>b.value-a.value),crux=sorted[0]??null;
+  const raw=crux?.value??0;
+  return {raw,crux:crux?{...crux}:null,topMoves:sorted.slice(0,3),movementCount:moves.length,
+    basis:'Hardest supported contact change; grip, reach, visible foot precision, body extension and incline proxies',calibrated:false};
+}
 function gradeEstimate(c,handIds,beta,searchResult=null){
   const usedIds=beta.length?[...new Set(beta.flatMap(s=>[s.lh,s.rh]))]:handIds;
   const hands=usedIds.map(id=>c.hs[c.index.get(id)]).filter(Boolean),grips=hands.map(difficulty),known=grips.filter(g=>g.known).length;
   const moves=beta.slice(1).map(s=>s.move).filter(m=>m&&['lh','rh'].includes(m.limb)),lengths=moves.map(m=>m.distance),maxMove=Math.max(0,...lengths),stretch=maxMove/c.setup.reach;
-  const gripMean=mean(grips.map(g=>g.value)),gripMax=Math.max(0,...grips.map(g=>g.value));
   const incline=inclineSummary(c,hands);
-  const raw=.65*gripMean+.22*gripMax+incline.effortAngle*.055+Math.max(0,stretch-.45)*4+Math.max(0,moves.length-8)*.035-.8;
+  const demands=demandSummary(c,beta);
+  const raw=beta.length?demands.raw:Math.max(0,.65*mean(grips.map(g=>g.value))+.22*Math.max(0,...grips.map(g=>g.value))+incline.effortAngle*.045-.8);
   const grade=clamp(Math.round(raw),0,12),geometryUnverified=!beta.length,spread=known===hands.length&&!geometryUnverified?2:3;
-  return {grade,low:Math.max(0,grade-spread),high:Math.min(12,grade+spread),maxMove,meanMove:mean(lengths),known,total:hands.length,allowedTotal:handIds.length,usedHandIds:usedIds,stretch,unreachable:maxMove>c.setup.reach+.003,provisional:true,geometryUnverified,handMoves:moves.length,footMoves:Math.max(0,beta.length-1-moves.length),incline,basis:'Unvalidated grip, apparent size, incline and bounded configuration-search heuristic',reason:geometryUnverified?searchResult?.reason||'No supported beta available; spacing difficulty is not established.':null};
+  return {grade,rawGrade:raw,demands,low:Math.max(0,grade-spread),high:Math.min(12,grade+spread),maxMove,meanMove:mean(lengths),known,total:hands.length,allowedTotal:handIds.length,usedHandIds:usedIds,stretch,unreachable:maxMove>c.setup.reach+.003,provisional:true,geometryUnverified,handMoves:moves.length,footMoves:Math.max(0,beta.length-1-moves.length),incline,basis:'Unvalidated movement-demand proxies and bounded easier-beta search; not a calibrated V-grade',reason:geometryUnverified?searchResult?.reason||'No supported beta available; spacing difficulty is not established.':null};
 }
 function personalEstimate(c,beta,actual,reference){
   if(c.setup.bodyHeight==null)return null;
@@ -216,16 +254,16 @@ function personalEstimate(c,beta,actual,reference){
 }
 function estimate(c,handIds,beta,searchResult=null,referenceResult=null){
   const actual=gradeEstimate(c,handIds,beta,searchResult),reference=referenceResult?gradeEstimate(referenceResult.c,handIds,referenceResult.r.beta,referenceResult.r):actual;
-  return {...actual,grade:reference.grade,low:reference.low,high:reference.high,incline:reference.incline,gradeGeometryUnverified:reference.geometryUnverified,reference:{bodyHeight:1.7,grade:reference.grade,geometryUnverified:reference.geometryUnverified,maxMove:reference.maxMove,handMoves:reference.handMoves,usedHandIds:reference.usedHandIds,searchLimited:referenceResult?.r.searchLimited??searchResult?.searchLimited??false},personal:personalEstimate(c,beta,actual,reference)};
+  return {...actual,grade:reference.grade,rawGrade:reference.rawGrade,demands:reference.demands,low:reference.low,high:reference.high,incline:reference.incline,gradeGeometryUnverified:reference.geometryUnverified,reference:{bodyHeight:1.7,grade:reference.grade,geometryUnverified:reference.geometryUnverified,maxMove:reference.maxMove,handMoves:reference.handMoves,usedHandIds:reference.usedHandIds,searchLimited:referenceResult?.r.searchLimited??searchResult?.searchLimited??false},personal:personalEstimate(c,beta,actual,reference)};
 }
 function referenceFor(c,p,r,autoStart=false){
   if(c.model.height===1.7)return null;
   const rc=context(c.hs,{...c.setup,bodyHeight:1.7,reach:c.setup.referenceReach??c.setup.reach});let rr;
-  if(autoStart){const hs=new Set(p.handIds),fs=new Set([...p.handIds,...p.footIds]),hands=rc.hs.flatMap((h,i)=>hs.has(h.id)&&canHand(h)?[i]:[]),feet=rc.hs.flatMap((h,i)=>fs.has(h.id)&&canFoot(h)?[i]:[]),finish=rc.index.get(p.finishId);rr=finish===undefined?{beta:[],expanded:0,searchLimited:false,reason:'No finish selected.'}:search(rc,{hands,feet,finish,maxExpanded:3600,neighborLimit:18});}
+  if(autoStart){const hs=new Set(p.handIds),fs=new Set([...p.handIds,...p.footIds]),hands=rc.hs.flatMap((h,i)=>hs.has(h.id)&&canHand(h)?[i]:[]),feet=rc.hs.flatMap((h,i)=>fs.has(h.id)&&canFoot(h)?[i]:[]),finish=rc.index.get(p.finishId);rr=finish===undefined?{beta:[],expanded:0,searchLimited:false,reason:'No finish selected.'}:search(rc,{hands,feet,finish,maxExpanded:3600,neighborLimit:18});if(rr.beta.length){const first=rr.beta[0];rr=fixedSearch(rc,{...p,start:{hands:[first.lh,first.rh],feet:[first.lf,first.rf]},beta:rr.beta});}}
   else rr=fixedSearch(rc,p);
   return {c:rc,r:rr};
 }
-function finishStats(c,r,extras={}){const shared=r.beta.reduce((out,s)=>{if(s.lf===s.rf)out.matchedFeet++;if([s.lh,s.rh].some(id=>id===s.lf||id===s.rf))out.handFoot++;return out;},{matchedFeet:0,handFoot:0});return {status:r.beta.length?'feasible':'unverified',expanded:r.expanded,searchLimited:r.searchLimited,optimal:false,bodyHeight:c.model.height,bodyHeightAssumed:c.setup.bodyHeight==null,matchCapacityVerified:false,matchCheck:'Occupancy-specific visible size checks only; confirm usable shared surface',sharedContacts:shared,model:'Upright 2D reach disks and three-contact support proxy; no force or joint model',reason:r.reason,...extras};}
+function finishStats(c,r,extras={}){const shared=r.beta.reduce((out,s)=>{if(s.lf===s.rf)out.matchedFeet++;if([s.lh,s.rh].some(id=>id===s.lf||id===s.rf))out.handFoot++;return out;},{matchedFeet:0,handFoot:0});return {status:r.beta.length?'feasible':'unverified',expanded:r.expanded,searchLimited:r.searchLimited,optimal:false,easierBetaChecks:r.easierBetaChecks??0,easierBetaFound:r.easierBetaFound??false,bodyHeight:c.model.height,bodyHeightAssumed:c.setup.bodyHeight==null,matchCapacityVerified:false,matchCheck:'Occupancy-specific visible size checks only; confirm usable shared surface',sharedContacts:shared,model:'Upright 2D reach disks and three-contact support proxy; no force or joint model',reason:r.reason,...extras};}
 function problemFrom(c,r,finish,extra={}){
   const handIds=[...new Set(r.beta.flatMap(s=>[s.lh,s.rh]))],handSet=new Set(handIds),footIds=[...new Set(r.beta.flatMap(s=>[s.lf,s.rf]))].filter(id=>!handSet.has(id)),first=r.beta[0];
   const p={...extra,handIds,footIds,start:first?{hands:[first.lh,first.rh],feet:[first.lf,first.rf]}:null,finishId:c.hs[finish].id,beta:r.beta};
@@ -239,7 +277,35 @@ function fixedSearch(c,p,maxExpanded=1600){
   if(contacts.some(i=>i===undefined)||contacts.slice(0,2).some(i=>!hands.includes(i))||contacts.slice(2).some(i=>!feet.includes(i)))return {beta:[],expanded:0,searchLimited:false,reason:'Starting contacts are outside the allowed set.'};
   if(contacts[0]===finish&&contacts[1]===finish)return {beta:[],expanded:0,searchLimited:false,reason:'The finish must require climbing above the starting holds.'};
   const body=pose(c,contacts);if(!body)return {beta:[],expanded:0,searchLimited:false,reason:'The chosen start lacks a supported body position.'};
-  return search(c,{hands,feet,finish,starts:[{contacts,body}],maxExpanded,neighborLimit:32,heuristicWeight:1,footCost:.001});
+  const options={hands,feet,finish,starts:[{contacts,body}],neighborLimit:24,heuristicWeight:1.65,footCost:.02};
+  let incumbent=null;
+  if(p.beta?.length&&validateProblem(p,c.hs,c.setup).valid){
+    // Rebuild action distances from contacts; caller-supplied preview metadata
+    // is not evidence of movement difficulty.
+    const beta=p.beta.map((step,n)=>{
+      const a=LIMBS.map(k=>c.index.get(step[k])),b=n?LIMBS.map(k=>c.index.get(p.beta[n-1][k])):null,limb=b?a.findIndex((i,k)=>i!==b[k]):-1;
+      return {...Object.fromEntries(LIMBS.map((k,i)=>[k,c.hs[a[i]].id])),body:pose(c,a),move:limb<0?null:{limb:LIMBS[limb],from:c.hs[b[limb]].id,to:c.hs[a[limb]].id,distance:d(contact(c,b[limb],limb),contact(c,a[limb],limb))}};
+    });
+    incumbent={beta,expanded:0,searchLimited:false,reason:null};
+  }
+  let expanded=0,limited=false,checks=0,improved=false;
+  // Always run the same target-free baseline, even when generation supplied
+  // a witness. A biased initial sequence must not define the route's grade.
+  const baseline=search(c,{...options,maxExpanded:Math.max(250,Math.floor(maxExpanded*.55))});
+  expanded+=baseline.expanded;limited||=baseline.searchLimited;
+  if(!incumbent||baseline.beta.length&&demandSummary(c,baseline.beta).raw<demandSummary(c,incumbent.beta).raw){improved=!!incumbent;incumbent=baseline;}
+  if(!incumbent.beta.length)return incumbent;
+  let bestEffort=demandSummary(c,incumbent.beta).raw;
+  // Search below the incumbent's crux. Failed bounded searches are not proof
+  // that no easier beta exists; preserve the feasible witness in every case.
+  const remaining=Math.max(0,maxExpanded-expanded),perCheck=Math.floor(remaining/2);
+  for(const reduction of [.28,.07]){
+    if(perCheck<100||bestEffort<.08)break;
+    const r=search(c,{...options,maxExpanded:perCheck,effortLimit:Math.max(0,bestEffort*(1-reduction)-.015)});
+    expanded+=r.expanded;limited||=r.searchLimited;checks++;
+    if(r.beta.length){const score=demandSummary(c,r.beta).raw;if(score<bestEffort-1e-6){incumbent=r;bestEffort=score;improved=true;}}
+  }
+  return {...incumbent,expanded,searchLimited:limited,easierBetaChecks:checks,easierBetaFound:improved,optimal:false};
 }
 export function generateProblems(holds,setup,target,style='balanced',seed=42){
   if(!finite(target,0,12)||!['balanced','reachy','technical'].includes(style))throw Error('Choose a target from V0–V12 and a supported movement style.');
@@ -249,28 +315,75 @@ export function generateProblems(holds,setup,target,style='balanced',seed=42){
   if(span<.8)return [];
   const locked=hands.filter(i=>c.hs[i].role==='finish');if(locked.length>1)throw Error('Choose one finish hold.');
   const random=rng(seed),finishes=locked.length?locked:hands.filter(i=>c.hs[i].Y>=high-span*.12).sort((a,b)=>c.hs[b].Y-c.hs[a].Y);
-  const candidates=[],signatures=new Set();
-  for(let trial=0;trial<Math.min(6,Math.max(3,finishes.length));trial++){
+  const candidates=[],signatures=new Set(),tried=new Set(),audit={subsetTrials:0,subsetAccepted:0,handRemovals:0,footRemovals:0,swaps:0,additions:0,easierBetaChecks:0,expanded:0};
+  const signature=p=>[...p.handIds].sort().join(',')+'|'+[...p.footIds].sort().join(',')+'|'+[...p.start.hands,...p.start.feet].join(',')+'|'+p.finishId;
+  const rank=p=>Math.abs(p.estimate.rawGrade-target)*4+Math.abs(p.estimate.maxMove/setup.reach-(style==='reachy'?.9:style==='technical'?.55:.72))*.3+.003*p.beta.length;
+  const addCandidate=p=>{
+    if(p.handIds.length<2||p.beta.length<3)return false;
+    const key=signature(p);if(signatures.has(key))return false;signatures.add(key);
+    p.stats.targetDifference=p.estimate.grade-target;p.stats.finishInTopBand=c.hs[c.index.get(p.finishId)].Y>=high-span*.12;
+    p.score=rank(p);candidates.push(p);return true;
+  };
+  const seedTrials=Math.min(6,Math.max(3,finishes.length));
+  for(let trial=0;trial<seedTrials*(target>=6?2:1);trial++){
     const finish=finishes[trial%finishes.length];if(finish===undefined)break;
     let starts=startStances(c,hands,feet,finish,16);if(!starts.length)continue;
     // All starts are low and supported; vary their horizontal placement.
     const offset=trial%3;starts=starts.filter((_,i)=>i%3===offset);if(!starts.length)continue;
-    const r=search(c,{hands,feet,finish,starts,maxExpanded:1800,neighborLimit:12,target,style,random});
+    const r=search(c,{hands,feet,finish,starts,maxExpanded:1500,neighborLimit:16,target,style,random:trial<seedTrials?random:()=>.5});audit.expanded+=r.expanded;
     if(!r.beta.length)continue;
     let p=problemFrom(c,r,finish,{id:`p-${seed}-${trial}`,name:'New problem',style});
     // Re-evaluate exactly the selected set. No unselected foothold is available.
-    const checked=fixedSearch(c,p,1600);
+    const checked=fixedSearch(c,p,1000);audit.expanded+=checked.expanded;audit.easierBetaChecks+=checked.easierBetaChecks??0;
     if(checked.beta.length){p=problemFrom(c,checked,finish,{id:p.id,name:p.name,style});p.stats.initialHandMoves=r.beta.filter(s=>s.move&&['lh','rh'].includes(s.move.limb)).length;p.stats.shortcutsChecked=true;}
     else{p.stats.shortcutsChecked=false;p.stats.shortcutSearchLimited=checked.searchLimited;}
-    if(p.handIds.length<4||p.beta.length<5)continue;
-    const key=[...p.handIds].sort().join(',')+'|'+[...p.footIds].sort().join(',');if(signatures.has(key))continue;signatures.add(key);
-    p.stats.targetDifference=p.estimate.grade-target;p.stats.finishInTopBand=c.hs[finish].Y>=high-span*.12;
-    p.score=Math.abs(p.estimate.grade-target)*4+Math.abs(p.estimate.maxMove/setup.reach-(style==='reachy'?.9:style==='technical'?.55:.72))+.03*p.beta.length;
-    candidates.push(p);
+    addCandidate(p);
+  }
+  // Bounded beam over allowed sets. Every mutation re-solves exactly that set;
+  // starts/finish remain fixed. The target chooses which sets to investigate,
+  // never the estimate assigned to an unchanged set.
+  const explored=new Set(),maxTrials=12+Math.round(target*2),maxExpanded=26000;
+  while(audit.subsetTrials<maxTrials&&audit.expanded<maxExpanded){
+    const parent=candidates.filter(p=>!explored.has(signature(p))).sort((a,b)=>rank(a)-rank(b))[0];if(!parent)break;
+    explored.add(signature(parent));
+    const protectedIds=new Set([...parent.start.hands,...parent.start.feet,parent.finishId]);
+    const usage=new Map();for(const s of parent.beta)for(const id of [s.lf,s.rf])usage.set(id,(usage.get(id)||0)+1);
+    const easyFirst=ids=>ids.filter(id=>!protectedIds.has(id)).map(id=>({id,key:c.grips[c.index.get(id)].value+random()*.15})).sort((a,b)=>a.key-b.key).map(p=>p.id);
+    const proposals=[];
+    const propose=(handIds,footIds,kind,removed=null)=>{const q={...parent,handIds,footIds,beta:null};if(handIds.length>=2)proposals.push({q,kind,removed});};
+    for(const id of easyFirst(parent.handIds)){
+      propose(parent.handIds.filter(x=>x!==id),parent.footIds.filter(x=>x!==id),'hand',id);
+      if(usage.has(id))propose(parent.handIds.filter(x=>x!==id),[...new Set([...parent.footIds,id])],'hand',id);
+      const old=c.hs[c.index.get(id)],replacement=hands.filter(i=>!parent.handIds.includes(c.hs[i].id)&&!protectedIds.has(c.hs[i].id)&&d(old,c.hs[i])<.65&&c.grips[i].value>difficulty(old).value+.15).sort((a,b)=>d(old,c.hs[a])-d(old,c.hs[b]))[0];
+      if(replacement!==undefined)propose(parent.handIds.map(x=>x===id?c.hs[replacement].id:x),parent.footIds.filter(x=>x!==id),'swap',id);
+    }
+    for(const id of [...parent.footIds].filter(id=>!protectedIds.has(id)).sort((a,b)=>(usage.get(b)||0)-(usage.get(a)||0))){
+      propose(parent.handIds,parent.footIds.filter(x=>x!==id),'foot',id);
+      const old=c.hs[c.index.get(id)],replacement=feet.filter(i=>!parent.handIds.includes(c.hs[i].id)&&!parent.footIds.includes(c.hs[i].id)&&d(old,c.hs[i])<.4&&c.sizes[i].width<c.sizes[c.index.get(id)].width*.8).sort((a,b)=>d(old,c.hs[a])-d(old,c.hs[b]))[0];
+      if(replacement!==undefined)propose(parent.handIds,parent.footIds.map(x=>x===id?c.hs[replacement].id:x),'swap',id);
+    }
+    if(parent.estimate.rawGrade>target-.5){
+      const near=i=>Math.min(...parent.handIds.map(id=>d(c.hs[i],c.hs[c.index.get(id)])));
+      const extraHands=hands.filter(i=>!parent.handIds.includes(c.hs[i].id)&&near(i)<.65).sort((a,b)=>c.grips[a].value-c.grips[b].value).slice(0,3).map(i=>c.hs[i].id);
+      const extraFeet=feet.filter(i=>!parent.handIds.includes(c.hs[i].id)&&!parent.footIds.includes(c.hs[i].id)&&near(i)<.85).sort((a,b)=>c.sizes[b].width-c.sizes[a].width).slice(0,3).map(i=>c.hs[i].id);
+      if(extraHands.length||extraFeet.length)proposals.unshift({q:{...parent,handIds:[...parent.handIds,...extraHands],footIds:[...parent.footIds,...extraFeet],beta:parent.beta},kind:'add'});
+    }
+    // Interleave foot and hand restrictions, rather than exhaust one list.
+    const interleaved=[],groups=['add','hand','foot','swap'].map(kind=>proposals.filter(p=>p.kind===kind));
+    for(let i=0;groups.some(g=>i<g.length);i++)for(const g of groups)if(g[i])interleaved.push(g[i]);
+    for(const {q,kind,removed} of interleaved.slice(0,8)){
+      if(audit.subsetTrials>=maxTrials||audit.expanded>=maxExpanded)break;
+      const key=signature(q);if(tried.has(key))continue;tried.add(key);audit.subsetTrials++;
+      const checked=fixedSearch(c,q,700);audit.expanded+=checked.expanded;audit.easierBetaChecks+=checked.easierBetaChecks??0;
+      if(!checked.beta.length)continue;
+      const p=problemFrom(c,checked,c.index.get(q.finishId),{id:`p-${seed}-subset-${audit.subsetTrials}`,name:'New problem',style});
+      p.stats.mutation={kind,removed,parentGrade:parent.estimate.grade,parentRawGrade:parent.estimate.rawGrade};p.stats.shortcutsChecked=true;
+      if(addCandidate(p)){audit.subsetAccepted++;if(kind==='hand')audit.handRemovals++;else if(kind==='foot')audit.footRemovals++;else if(kind==='swap')audit.swaps++;else audit.additions++;}
+    }
   }
   candidates.sort((a,b)=>a.score-b.score);const selected=[];
-  for(const p of candidates){if(selected.some(s=>p.handIds.filter(id=>s.handIds.includes(id)).length/Math.max(p.handIds.length,s.handIds.length)>.85))continue;selected.push(p);if(selected.length===3)break;}
-  return selected.map((p,i)=>({...p,name:['Fresh perspective','Side quest','A different angle'][i]}));
+  for(const p of candidates){if(selected.some(s=>{const a=new Set([...p.handIds,...p.footIds]),b=new Set([...s.handIds,...s.footIds]);return [...a].filter(id=>b.has(id)).length/Math.max(a.size,b.size)>.9&&Math.abs(p.estimate.rawGrade-s.estimate.rawGrade)<.3;}))continue;selected.push(p);if(selected.length===3)break;}
+  return selected.map((p,i)=>({...p,name:['Fresh perspective','Side quest','A different angle'][i],stats:{...p.stats,...audit,candidateCount:candidates.length,searchBudgetExhausted:audit.subsetTrials>=maxTrials||audit.expanded>=maxExpanded,targetPolicy:{gripPreference:.5+target*4.5/12,subsetBudget:maxTrials},grading:'Target-independent; lowest demand found in bounded beta searches',optimal:false}}));
 }
 export function estimateProblem(problem,holds,setup){
   const c=context(holds,setup),r=fixedSearch(c,problem);return {...estimate(c,problem.handIds||[],r.beta,r,referenceFor(c,problem,r)),search:finishStats(c,r)};
@@ -279,9 +392,10 @@ export function analyzeColorProblem(holds,setup,color){
   const selected=holds.filter(h=>(color==null||h.color===color)&&h.role!=='excluded'),c=context(selected,setup),hands=c.hs.flatMap((h,i)=>canHand(h)?[i]:[]),feet=c.hs.flatMap((h,i)=>canFoot(h)?[i]:[]),locked=hands.filter(i=>c.hs[i].role==='finish');
   if(locked.length>1)throw Error('Choose one finish hold.');
   const finish=locked[0]??hands.reduce((best,i)=>best===undefined||c.hs[i].Y>c.hs[best].Y?i:best,undefined);
-  const r=finish===undefined?{beta:[],expanded:0,searchLimited:false,reason:'No handholds selected.'}:search(c,{hands,feet,finish,maxExpanded:3600,neighborLimit:18});
+  let r=finish===undefined?{beta:[],expanded:0,searchLimited:false,reason:'No handholds selected.'}:search(c,{hands,feet,finish,maxExpanded:3600,neighborLimit:18});
   const handIds=hands.map(i=>c.hs[i].id),footIds=feet.filter(i=>!hands.includes(i)).map(i=>c.hs[i].id),first=r.beta[0];
   const p={id:`color-${color??'selected'}`,name:color==null?'Your selected problem':`${color} problem`,color,handIds,footIds,start:first?{hands:[first.lh,first.rh],feet:[first.lf,first.rf]}:null,finishId:finish===undefined?null:c.hs[finish].id,beta:r.beta};
+  if(r.beta.length){r=fixedSearch(c,p);p.beta=r.beta;}
   return {...p,estimate:estimate(c,handIds,r.beta,r,referenceFor(c,p,r,true)),stats:finishStats(c,r,{allowedHoldCount:handIds.length+footIds.length})};
 }
 export function validateProblem(problem,holds,setup){

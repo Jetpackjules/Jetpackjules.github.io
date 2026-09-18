@@ -1,27 +1,42 @@
-// All photos use the same local model and pixel-derived surface extraction.
-import {inferSurfaceFrame} from './surface-model.mjs?v=18';
-import {detectAdaptiveStraightSurfaces as detectWallSurfaces} from './adaptive-straight-surfaces.mjs?v=18';
-let frame,cachedPhoto,cachedPixels,pixelWidth,pixelHeight,queue=Promise.resolve();
+// Classic worker for OpenCV/LSD; neural normals attach angles to fixed RGB faces.
+let cache,latest,queue=Promise.resolve();
+const modules=Promise.all([import('./rgb/detect.mjs?v=19'),import('./rgb-face-inclines.mjs?v=19')]);
+const current=r=>latest?.id===r.id&&latest?.photo===r.photo;
+function publish(request,local,partial,extra={}){
+ if(!current(request))return;
+ const known=local.perHold.filter(h=>h.status==='estimated'&&Number.isFinite(h.angle)).sort((a,b)=>a.angle-b.angle);
+ const representative=known[Math.floor(known.length/2)]||local.facets.find(f=>f.status==='estimated'&&Number.isFinite(f.angle));
+ const result=representative?{status:'estimated',angle:representative.angle,range:representative.range,confidence:representative.confidence||'low',source:'moge2-rgb-face',floorReference:local.floorReference}:
+  {status:'uncertain',reason:partial?'Estimating face inclines…':'Angle unavailable; using the vertical assumption.'};
+ self.postMessage({id:request.id,photo:request.photo,depthReady:true,partial,result,local:{...local,labels:undefined},...extra});
+}
 async function run(request){
- const {id,photo}=request,progress=message=>self.postMessage({id,photo,progress:message});
+ const {id,photo}=request,progress=message=>{if(current(request))self.postMessage({id,photo,progress:message});};
  try{
-  if(!frame||cachedPhoto!==photo){
+  const [{detectRgbFaces},{estimateRgbFaceInclines}]=await modules;if(!current(request))return;
+  if(!cache||cache.photo!==photo||request.kind==='analyze'){
    if(!request.pixels)throw Error('Capture the wall again');
    const pixels=new Uint8ClampedArray(request.pixels);
-   const next=await inferSurfaceFrame({...request,pixels},progress);
-   frame=next;cachedPhoto=photo;cachedPixels=pixels;pixelWidth=request.width;pixelHeight=request.height;
+   const geometry=await detectRgbFaces({...request,pixels},progress);
+   if(!current(request))return;
+   cache={photo,pixels,pixelWidth:request.width,pixelHeight:request.height,geometry};
   }
-  progress('Finding seams and fitting wall faces…');
-  const wallRoi=request.localRoi||request.wallRoi;
-  const surfaces=detectWallSurfaces({...frame,pixels:cachedPixels,pixelWidth,pixelHeight,holds:request.holds||[],wallRoi});
-  const facets=surfaces.regions.filter(f=>f.polygon.length>=3).map(f=>({...f,boundary:'automatic-image-and-normal'}));
-  const known=surfaces.perHold.filter(h=>h.status==='estimated'),angles=known.map(h=>h.angle).sort((a,b)=>a-b);
-  const local={...surfaces,labels:undefined,seams:undefined,wallRoi,facets,regions:[],facetSource:'automatic-image-and-normal',patches:facets.map(f=>({...f,x:f.anchor.x,y:f.anchor.y})),angleRange:angles.length?[angles[0],angles.at(-1)]:null};
-  const representative=known.sort((a,b)=>a.angle-b.angle)[Math.floor(known.length/2)]||facets.find(f=>f.status==='estimated'&&Number.isFinite(f.angle));
-  const result=representative?{status:'estimated',angle:representative.angle,range:representative.range,confidence:'low',source:'surface-normal-model',reason:'Approximate photo angle; not a physical measurement.',floorReference:surfaces.floorReference}:{status:'uncertain',reason:'No reliable wall surface found. Using the vertical assumption.'};
-  self.postMessage({id,photo,depthReady:true,result,local});
+  const entry=cache;
+  const fit=normalFrame=>estimateRgbFaceInclines({...entry.geometry,normalFrame,holds:request.holds||[],pixelWidth:entry.pixelWidth,pixelHeight:entry.pixelHeight,wallRoi:request.localRoi||{x:0,y:0,w:1,h:1},backgroundLabel:0});
+  if(entry.normalFrame){publish(request,fit(entry.normalFrame),false);return;}
+  // First-time model download never prevents route generation.
+  publish(request,fit(null),true,{geometryMs:entry.geometry.processingMs});
+  if(!entry.normalPromise)entry.normalPromise=(async()=>{
+   const {inferMoGeSurfaceFrame}=await import('./moge-surface-model.mjs?v=19');
+   return inferMoGeSurfaceFrame({pixels:entry.pixels,width:entry.pixelWidth,height:entry.pixelHeight,photo},message=>{if(cache===entry&&latest?.photo===photo)self.postMessage({id:latest.id,photo,progress:message,anglesOnly:true});});
+  })().catch(error=>({status:'unavailable',reason:String(error.message||error)}));
+  // Leave the queue free for a new photo/focus while a model load is pending.
+  entry.normalPromise.then(frame=>{
+   if(frame.status==='ready')entry.normalFrame=frame;
+   if(current(request))publish(request,fit(frame.status==='ready'?frame:null),false,{normalStatus:frame.status,normalReason:frame.reason,normalTimings:frame.timings});
+  }).catch(error=>{if(current(request))publish(request,fit(null),false,{normalStatus:'unavailable',error:String(error.message||error)});});
  }catch(error){
-  self.postMessage({id,photo,depthReady:!!frame&&cachedPhoto===photo,result:{status:'uncertain',reason:'Wall geometry unavailable on this device. Using the vertical assumption.'},error:String(error.message||error)});
+  if(current(request))self.postMessage({id,photo,result:{status:'uncertain',reason:'Wall geometry unavailable on this device.'},error:String(error.message||error)});
  }
 }
-self.onmessage=({data})=>{queue=queue.then(()=>run(data));};
+self.onmessage=({data})=>{latest=data;queue=queue.then(()=>run(data));};

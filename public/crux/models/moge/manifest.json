@@ -1,0 +1,38 @@
+{
+  "id": "moge-2-vits-normal-only-fp32-v1",
+  "model": "MoGe-2 Small normal-only",
+  "bytes": 114625194,
+  "sha256": "df1edd6088b3bba3016373868fa62f70513d1cec24c230ec24828e2b2b0df3e8",
+  "chunks": [
+    {
+      "file": "small-normal-fp32-00.bin",
+      "bytes": 67108864,
+      "sha256": "7c392b873b0cdedfb29befdeb5f42ac9851ed5167864af53bbd4cfca4a489eaa"
+    },
+    {
+      "file": "small-normal-fp32-01.bin",
+      "bytes": 47516330,
+      "sha256": "578aa4b7f1f0b42340c9e6ab2e0a287c67b30a5130a000991361a22f96545412"
+    }
+  ],
+  "source": {
+    "repository": "Ruicheng/moge-2-vits-normal-onnx",
+    "revision": "e50ffda41565591092adea54c6ac83d6212e1e23",
+    "file": "model.onnx",
+    "sha256": "24eacb5dc7a2c54c7bc98f7de085ffbed79ad006ea5b664c2c2cdc02ff3a52f0",
+    "url": "https://huggingface.co/Ruicheng/moge-2-vits-normal-onnx/resolve/e50ffda41565591092adea54c6ac83d6212e1e23/model.onnx",
+    "license": "MIT; DINOv2 component Apache-2.0"
+  },
+  "transformation": "onnx.utils.extract_model: inputs image,num_tokens; output normal. Learned weights unchanged.",
+  "input": {
+    "image": "float32 NCHW RGB [0,1]",
+    "num_tokens": "int64 scalar 1200",
+    "maxEdge": 480
+  },
+  "rawOutput": {
+    "name": "normal",
+    "layout": "NHWC",
+    "coordinateConvention": "opencv-camera-x-right-y-down-z-forward",
+    "normalOrientation": "camera-facing"
+  }
+}

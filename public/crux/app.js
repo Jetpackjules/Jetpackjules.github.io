@@ -1,23 +1,20 @@
-import {createImageStatus} from './image-status.mjs?v=18';
-import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=18';
-import {climberProfile} from './climber-profile.mjs?v=18';
-import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=18';
-import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=18';
-import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=18';
-import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=18';
-import {createClimberOverlay} from './climber-ik.mjs?v=18';
-import {setupInstall} from './pwa.js?v=18';
-import {placeContacts,visibleBox} from './contact-labels.mjs?v=18';
-import {attachWallZoom} from './wall-interaction.js?v=18';
-import {clamp} from './engine.js?v=18';
-import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=18';
-// Portfolio preview: unreliable wall geometry stays paused. Hold detection and
-// movement planning continue with the existing vertical-wall baseline.
-const WALL_ANGLES_ENABLED=false;
+import {createImageStatus} from './image-status.mjs?v=19';
+import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=19';
+import {climberProfile} from './climber-profile.mjs?v=19';
+import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=19';
+import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=19';
+import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=19';
+import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=19';
+import {createClimberOverlay} from './climber-ik.mjs?v=19';
+import {setupInstall} from './pwa.js?v=19';
+import {placeContacts,visibleBox} from './contact-labels.mjs?v=19';
+import {attachWallZoom} from './wall-interaction.js?v=19';
+import {clamp} from './engine.js?v=19';
+import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=19';
 const $ = id=>document.getElementById(id);
 const state={mode:'create',resultTarget:null,updating:false,holds:[],routes:[],selected:0,selectedHolds:[],style:'balanced',edit:false,overlay:true,activeHold:null,demo:false,photo:null,busy:false,seed:Date.now(),imageToken:0,example:null,focus:null,focusPicking:false,focusDraft:null,angleMode:'auto',angleEstimate:null,gradeProblem:null,planning:false,planError:null,betaMode:false,betaIndex:0,climberMode:true,showAll:false,scanReveal:false,hasProblem:false,localInclines:null,scaleMode:'auto',photoHeight:4,baseAngle:0,scaleSpan:null,scaleGuides:false};
 const colors={red:'#e95952',orange:'#eb984e',yellow:'#e3c82c',green:'#44ba6c',blue:'#4e90df',purple:'#9363bc',pink:'#ee80b2',white:'#eeeae2',black:'#414640',cyan:'#6cbbbb',gray:'#92999d'};
-state.palette=[];state.facetMode=false;state.scanPhase='idle';state.anglePending=false;state.scanPending=false;state.liveScan={active:false};
+state.palette=[];state.facetMode=false;state.scanPhase='idle';state.anglePending=false;state.inclinePending=false;state.scanPending=false;state.liveScan={active:false};
 const colorLabel=id=>state.palette.find(p=>p.id===id)?.label||id;
 const colorSwatch=id=>state.palette.find(p=>p.id===id)?.hex||colors[id]||'#888';
 const sourceCanvas=document.createElement('canvas'),sourceContext=sourceCanvas.getContext('2d',{willReadFrequently:true});
@@ -74,7 +71,7 @@ function finishAngleReveal(){
 function renderFacets(){
  const geometry=visibleWallFaces(),regions=state.angleMode==='auto'?facetRegions(geometry,geometryCrop):[],shown=state.overlay&&(state.liveScan.showFacets||state.scanPhase==='facets'||state.facetMode&&state.scanPhase==='idle')&&!state.edit&&!state.focusPicking;
  $('facet-overlay').classList.toggle('hidden',!state.overlay||!regions.length);$('facet-overlay').classList.toggle('is-visible',shown);
- $('facet-toggle').setAttribute('aria-pressed',state.facetMode);$('facet-toggle').disabled=!WALL_ANGLES_ENABLED||!state.photo;$('replay-scan').disabled=!state.holds.length||state.busy||state.scanPending||state.planning;
+ $('facet-toggle').setAttribute('aria-pressed',state.facetMode);$('facet-toggle').disabled=!state.photo;$('replay-scan').disabled=!state.holds.length||state.busy||state.scanPending||state.planning;
  const node=$('facet-overlay'),markup=facetOverlay(regions,$('image-wrap').clientWidth||1000,$('image-wrap').clientHeight||1000,wallZoom?.scale||1);
  if(node.innerHTML!==markup)node.innerHTML=markup;
 
@@ -96,7 +93,7 @@ function showScanOutlines(batch){
 function cancelPlan(){stopBeta();clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planId++;state.planning=false;planPending?.reject(new Error('Cancelled'));planPending=null;showPlanningIndicator(false);}
 function runPlanner(request){
  cancelPlan();const id=planId;state.planning=true;state.planError=null;showPlanningIndicator(true);
- planWorker=new Worker('./problem-worker.js?v=18',{type:'module'});
+ planWorker=new Worker('./problem-worker.js?v=19',{type:'module'});
  return new Promise((resolve,reject)=>{
   planPending={resolve,reject};
   const finish=(error,result)=>{if(id!==planId)return;clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planPending=null;state.planning=false;showPlanningIndicator(false);error?reject(error):resolve(result);};
@@ -113,7 +110,7 @@ async function enrichHolds(boxes,id){
   let v,timer,finished=false;
   const done=result=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();if(outlinePending?.id===id)outlinePending=null;if(token!==state.imageToken||id!==scanJob||state.suspended){resolve([]);return;}const grouped=result?.palette?result:fallback();state.palette=grouped.palette;resolve(makeHolds(grouped.holds));};
   outlinePending={id,cancel:()=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();resolve([]);}};
-  try{v=new Worker('./vision-worker.js?v=18',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
+  try{v=new Worker('./vision-worker.js?v=19',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
   catch{done();}
  });
 }
@@ -130,15 +127,16 @@ function colorAt(h){
  return hue<16||hue>=348?'red':hue<44?'orange':hue<72?'yellow':hue<168?'green':hue<250?'blue':hue<295?'purple':'pink';
 }
 function resetAngle(){
- angleWorker?.terminate();angleWorker=null;clearTimeout(angleTimer);angleDepthReady=false;angleJob++;
+ clearTimeout(angleTimer);angleDepthReady=false;angleJob++;state.inclinePending=false;
  state.angleMode='auto';state.angleEstimate=null;state.localInclines=null;state.anglePending=false;state.baseAngle=0;updateAngleUI('Looking for the floor and wall…');
 }
-function updateAngleUI(){if(state.anglePending)imageStatus.start('walls','Detecting walls…');}
+function updateAngleUI(message){if(state.anglePending||state.inclinePending)imageStatus.start('walls',message||'Detecting walls…');}
 function finishWallStatus(){const n=facetRegions(state.localInclines,geometryCrop).length;imageStatus.complete('walls',n?`${n} wall${n===1?'':'s'} detected`:'Wall angles unavailable');}
 function geometrySignature(local,angle){return JSON.stringify([angle,local?.perHold?.map(h=>[h.id,h.status,h.angle,h.normal,h.facetId])]);}
 function angleUnavailable(){
  const scanning=state.scanPending;
- clearTimeout(angleTimer);angleWorker?.terminate();angleWorker=null;angleDepthReady=false;state.anglePending=false;state.localInclines=null;state.baseAngle=0;
+ angleJob++;
+ clearTimeout(angleTimer);angleWorker?.terminate();angleWorker=null;angleDepthReady=false;state.anglePending=false;state.inclinePending=false;state.baseAngle=0;
  state.angleEstimate={status:'uncertain',reason:'Wall angle unavailable on this device. Using the vertical assumption.'};
  renderFacets();finishWallStatus();finishAngleReveal();if(!scanning)scheduleRegenerate();
 }
@@ -152,28 +150,24 @@ function angleRegion(){
  return {x:q(xs,.18),y:q(ys,.2),w:Math.max(.15,q(xs,.82)-q(xs,.18)),h:Math.max(.2,q(ys,.76)-q(ys,.2))};
 }
 function requestAngleEstimate(fresh=false){
- if(!WALL_ANGLES_ENABLED){
-  state.anglePending=false;state.localInclines=null;state.baseAngle=0;
-  state.angleEstimate={status:'unavailable',reason:'Wall-angle estimation is paused in this preview. Grades use a vertical-wall assumption.'};
-  imageStatus.clear('walls');finishAngleReveal();return;
- }
  if(state.suspended||!state.photo||state.angleMode!=='auto')return;
  const id=++angleJob,photo=state.imageToken;clearTimeout(angleTimer);
  state.anglePending=true;updateAngleUI('Estimating the wall against the floor…');renderFacets();
  try{
- if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=18',{type:'module'});fresh=true;angleWorker.onmessage=({data})=>{
+ if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=19');fresh=true;angleWorker.onmessage=({data})=>{
    if(data.id!==angleJob||data.photo!==state.imageToken)return;
    if(data.progress){if(state.angleMode==='auto')updateAngleUI(data.progress);return;}
-   clearTimeout(angleTimer);state.anglePending=false;angleDepthReady=!!data.depthReady;
+   if(!data.partial)clearTimeout(angleTimer);state.anglePending=false;state.inclinePending=!!data.partial;angleDepthReady=!!data.depthReady;
    const previousGeometry=geometrySignature(state.localInclines,state.baseAngle);
-   state.localInclines=data.local||null;state.angleEstimate=data.result||{status:'uncertain',reason:'Wall angle unavailable; using the vertical assumption.'};
+   state.localInclines=data.local||state.localInclines;state.angleEstimate=data.result||{status:'uncertain',reason:'Wall angle unavailable; using the vertical assumption.'};
    if(state.angleMode==='auto'){
      state.baseAngle=state.angleEstimate.status==='estimated'?clamp(Math.round(state.angleEstimate.angle/5)*5,-30,75):0;
-     updateAngleUI();if(!state.scanPending&&previousGeometry!==geometrySignature(state.localInclines,state.baseAngle))scheduleRegenerate();renderFacets();finishWallStatus();finishAngleReveal();
+     if(!state.scanPending&&previousGeometry!==geometrySignature(state.localInclines,state.baseAngle))scheduleRegenerate();renderFacets();finishWallStatus();finishAngleReveal();
+     if(data.partial)imageStatus.start('walls','Estimating face inclines…');
    }
  };const owner=angleWorker;angleWorker.onerror=()=>{if(angleWorker===owner)angleUnavailable();};}
  const r=state.focus||{x:0,y:0,w:1,h:1},localRoi={x:geometryCrop.x+r.x*geometryCrop.w,y:geometryCrop.y+r.y*geometryCrop.h,w:r.w*geometryCrop.w,h:r.h*geometryCrop.h};
- const holds=planningHolds().map(h=>({id:h.id,x:geometryCrop.x+h.x*geometryCrop.w,y:geometryCrop.y+h.y*geometryCrop.h,w:h.w*geometryCrop.w,h:h.h*geometryCrop.h}));
+ const holds=state.holds.map(h=>({id:h.id,x:geometryCrop.x+h.x*geometryCrop.w,y:geometryCrop.y+h.y*geometryCrop.h,w:h.w*geometryCrop.w,h:h.h*geometryCrop.h}));
  const request={id,photo,kind:fresh||!angleDepthReady?'analyze':'estimate',wallRoi:angleRegion(),localRoi,holds,imageAspect:geometryCanvas.width/geometryCanvas.height};
  if(request.kind==='analyze'){const pixels=geometryContext.getImageData(0,0,geometryCanvas.width,geometryCanvas.height);request.pixels=pixels.data.buffer;request.width=pixels.width;request.height=pixels.height;angleWorker.postMessage(request,[pixels.data.buffer]);}else angleWorker.postMessage(request);
  angleTimer=setTimeout(()=>{if(id===angleJob)angleUnavailable();},75000);
@@ -206,7 +200,7 @@ function makeHolds(boxes){return [...boxes].sort((a,b)=>b.y-a.y||a.x-b.x).map((h
 async function loadPhoto(src,{demo=false,crop=null,example=null}={}){
  if(state.busy){if(src.startsWith('blob:'))URL.revokeObjectURL(src);notify('Wait for the current scan to finish.');return;}
  clearTimeout(regenerateTimer);cancelPlan();imageStatus.reset();const token=++state.imageToken;const img=new Image();img.src=src;
- try{await img.decode();if(token!==state.imageToken)return;const c=crop||[0,0,img.naturalWidth,img.naturalHeight],scale=Math.min(1,1600/Math.max(c[2],c[3]));const gs=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));geometryCanvas.width=Math.round(img.naturalWidth*gs);geometryCanvas.height=Math.round(img.naturalHeight*gs);geometryContext.drawImage(img,0,0,geometryCanvas.width,geometryCanvas.height);geometryCrop={x:c[0]/img.naturalWidth,y:c[1]/img.naturalHeight,w:c[2]/img.naturalWidth,h:c[3]/img.naturalHeight};resetAngle();sourceCanvas.width=Math.round(c[2]*scale);sourceCanvas.height=Math.round(c[3]*scale);sourceContext.drawImage(img,...c,0,0,sourceCanvas.width,sourceCanvas.height);wallZoom?.reset();cancelScanReveal();scanJob++;outlinePending?.cancel();outlinePending=null;state.scanPending=false;state.hasProblem=false;state.scanReveal=false;state.localInclines=null;state.photo=sourceCanvas.toDataURL('image/jpeg',.9);$('wall-image').src=state.photo;await $('wall-image').decode();if(token!==state.imageToken)return;state.demo=demo;state.example=example;state.scaleMode='auto';state.scaleSpan=null;state.scaleGuides=false;$('wall-height-input').value=demo&&!example?3:4;$('scale-top').value=0;$('scale-bottom').value=100;state.photoHeight=demo&&!example?3:4;state.focus=null;state.focusPicking=false;state.focusDraft=null;state.holds=[];state.palette=[];state.routes=[];state.gradeProblem=null;state.planError=null;state.betaMode=false;state.selectedHolds=[];state.activeHold=null;state.edit=false;$('edit-button').setAttribute('aria-pressed','false');$('wall-placeholder').classList.add('hidden');$('image-wrap').classList.remove('hidden');render();
+ try{await img.decode();if(token!==state.imageToken)return;const c=crop||[0,0,img.naturalWidth,img.naturalHeight],scale=Math.min(1,1600/Math.max(c[2],c[3]));const gs=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight),Math.sqrt(2100000/(img.naturalWidth*img.naturalHeight)));geometryCanvas.width=Math.round(img.naturalWidth*gs);geometryCanvas.height=Math.round(img.naturalHeight*gs);geometryContext.drawImage(img,0,0,geometryCanvas.width,geometryCanvas.height);geometryCrop={x:c[0]/img.naturalWidth,y:c[1]/img.naturalHeight,w:c[2]/img.naturalWidth,h:c[3]/img.naturalHeight};resetAngle();sourceCanvas.width=Math.round(c[2]*scale);sourceCanvas.height=Math.round(c[3]*scale);sourceContext.drawImage(img,...c,0,0,sourceCanvas.width,sourceCanvas.height);wallZoom?.reset();cancelScanReveal();scanJob++;outlinePending?.cancel();outlinePending=null;state.scanPending=false;state.hasProblem=false;state.scanReveal=false;state.localInclines=null;state.photo=sourceCanvas.toDataURL('image/jpeg',.9);$('wall-image').src=state.photo;await $('wall-image').decode();if(token!==state.imageToken)return;state.demo=demo;state.example=example;state.scaleMode='auto';state.scaleSpan=null;state.scaleGuides=false;$('wall-height-input').value=demo&&!example?3:4;$('scale-top').value=0;$('scale-bottom').value=100;state.photoHeight=demo&&!example?3:4;state.focus=null;state.focusPicking=false;state.focusDraft=null;state.holds=[];state.palette=[];state.routes=[];state.gradeProblem=null;state.planError=null;state.betaMode=false;state.selectedHolds=[];state.activeHold=null;state.edit=false;$('edit-button').setAttribute('aria-pressed','false');$('wall-placeholder').classList.add('hidden');$('image-wrap').classList.remove('hidden');render();
  if(demo&&!example){try{const res=await fetch('./demo-holds.json');if(!res.ok)throw Error();const boxes=await res.json();if(token!==state.imageToken)return;await detect(boxes);return;}catch{}}
  if(token!==state.imageToken)return;await detect();
  }catch(e){notify('Could not open this image. Try a JPEG, PNG or WebP photo.');}finally{if(src.startsWith('blob:'))URL.revokeObjectURL(src);}
@@ -226,7 +220,7 @@ async function detect(cachedBoxes=null){
  try{
  let boxes=cachedBoxes;
  if(!boxes){
-  if(!worker)worker=new Worker('./detector-worker.js?v=18',{type:'module'});
+  if(!worker)worker=new Worker('./detector-worker.js?v=19',{type:'module'});
   const pixels=sourceContext.getImageData(0,0,sourceCanvas.width,sourceCanvas.height);
   boxes=await new Promise((resolve,reject)=>{
    const timer=setTimeout(()=>{worker?.terminate();worker=null;detectorPending=null;reject(Error('The model took too long on this device.'));},90000);
@@ -435,9 +429,9 @@ document.querySelectorAll('.dialog-close').forEach(b=>b.onclick=()=>b.closest('d
 $('wall-stage').addEventListener('dragover',e=>e.preventDefault());$('wall-stage').addEventListener('drop',e=>{e.preventDefault();readFile(e.dataTransfer.files[0]);});
 let resumeScan=false,resumeAngles=false,resumePlan=false;
 window.addEventListener('pagehide',()=>{
- state.suspended=true;resumeScan=state.busy||state.scanPending||state.liveScan.active;resumeAngles=state.anglePending;resumePlan=state.planning;
+ state.suspended=true;resumeScan=state.busy||state.scanPending||state.liveScan.active;resumeAngles=state.anglePending||state.inclinePending;resumePlan=state.planning;
  cancelScanReveal();scanJob++;state.scanPending=false;outlinePending?.cancel();outlinePending=null;stopBeta();climberPreview?.hide();stopCamera();cancelPlan();
- worker?.terminate();worker=null;angleWorker?.terminate();angleWorker=null;angleDepthReady=false;state.anglePending=false;angleJob++;
+ worker?.terminate();worker=null;angleWorker?.terminate();angleWorker=null;angleDepthReady=false;state.anglePending=false;state.inclinePending=false;angleJob++;
  clearTimeout(angleTimer);clearTimeout(regenerateTimer);if(detectorPending){clearTimeout(detectorPending.timer);detectorPending.reject(Error('Suspended'));detectorPending=null;}setBusy(false);
 });
 window.addEventListener('pageshow',event=>{state.suspended=false;if(!event.persisted)return;if(resumeScan)detect();else {if(resumeAngles)requestAngleEstimate(true);if(resumePlan)scheduleRegenerate();}resumeScan=resumeAngles=resumePlan=false;});

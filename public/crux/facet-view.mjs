@@ -1,9 +1,9 @@
 // Polygon boundaries and angle certainty are separate pieces of evidence.
-import {clipToRect,inPolygon} from './wall-facets.mjs?v=18';
+import {clipToRect,inPolygon} from './wall-facets.mjs?v=19';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const validRect=r=>r&&[r.x,r.y,r.w,r.h].every(Number.isFinite)&&r.w>0&&r.h>0;
 const color=angle=>angle< -5?'#8fd8fa':angle<=5?'#cfee89':angle<=25?'#ffd384':angle<=45?'#ffab79':'#ec94c3';
-export const slopeLabel=angle=>!Number.isFinite(angle)?'Unresolved surface':angle===0?'≈ 0° vertical':`≈ ${Math.abs(angle)}° ${angle<0?'slab':'overhang'}`;
+export const slopeLabel=angle=>!Number.isFinite(angle)?'Angle unavailable':angle===0?'≈ 0° vertical':`≈ ${Math.abs(angle)}° ${angle<0?'slab':'overhang'}`;
 const point=(x,y)=>`${x.toFixed(3)} ${y.toFixed(3)}`;
 function segmentPath(a,b,crop){
  let lo=0,hi=1;const dx=b[0]-a[0],dy=b[1]-a[1];
@@ -20,11 +20,12 @@ export function facetRegions(local,crop={x:0,y:0,w:1,h:1}){
   const polygon=clipToRect(f.polygon,crop).map(([x,y])=>[(x-crop.x)/crop.w,(y-crop.y)/crop.h]);
   if(polygon.length<3)return [];
   const area=Math.abs(polygon.reduce((s,p,i)=>{const q=polygon[(i+1)%polygon.length];return s+p[0]*q[1]-q[0]*p[1];},0))/2;
-  if(area<.002)return [];
+  if(area<(f.boundary==='rgb-seam-graph'?.0001:.002))return [];
   const holes=(f.holes||[]).map(h=>clipToRect(h,crop).map(([x,y])=>[(x-crop.x)/crop.w,(y-crop.y)/crop.h])).filter(h=>h.length>=3);
   const path=[polygon,...holes].map(ring=>ring.map((p,i)=>`${i?'L':'M'} ${point(p[0]*1000,p[1]*1000)}`).join(' ')+' Z').join(' '),cells=[];
   // Candidate label positions must remain inside the actual concave polygon.
   for(let y=.025;y<1;y+=.05)for(let x=.025;x<1;x+=.05)if(inPolygon(x,y,polygon)&&!holes.some(h=>inPolygon(x,y,h)))cells.push({x:x-.012,y:y-.012,w:.024,h:.024});
+  if(!cells.length&&f.anchor){const x=(f.anchor.x-crop.x)/crop.w,y=(f.anchor.y-crop.y)/crop.h;if(inPolygon(x,y,polygon))cells.push({x:x-.012,y:y-.012,w:.024,h:.024});}
   if(!cells.length)return [];
   const center={x:cells.reduce((s,c)=>s+c.x+.012,0)/cells.length,y:cells.reduce((s,c)=>s+c.y+.012,0)/cells.length};
   const c=cells.reduce((a,b)=>Math.hypot(a.x+.012-center.x,a.y+.012-center.y)<Math.hypot(b.x+.012-center.x,b.y+.012-center.y)?a:b);

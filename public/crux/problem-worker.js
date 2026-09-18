@@ -1,4 +1,4 @@
-import {generateProblems,analyzeColorProblem} from './problem-engine.mjs?v=18';
+import {generateProblems,analyzeColorProblem} from './problem-engine.mjs?v=19';
 self.onmessage=({data})=>{
  try{
   const {id,kind,holds,setup,target,style,seed}=data;

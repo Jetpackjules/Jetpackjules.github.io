@@ -1,0 +1,20 @@
+[
+  {
+    "file": "ort.webgpu.min.mjs",
+    "url": "https://unpkg.com/onnxruntime-web@1.22.0/dist/ort.webgpu.min.mjs",
+    "bytes": 357582,
+    "sha256": "e131e81c9324807e1e6f9103e8f8e936112827dcc9993cde9407a333b1f07ae0"
+  },
+  {
+    "file": "ort-wasm-simd-threaded.jsep.mjs",
+    "url": "https://unpkg.com/onnxruntime-web@1.22.0/dist/ort-wasm-simd-threaded.jsep.mjs",
+    "bytes": 44677,
+    "sha256": "1cbcba8f2c769c1eecbab66a1b1e55ef11704515bf4306373e3db3c37cf6dcd8"
+  },
+  {
+    "file": "ort-wasm-simd-threaded.jsep.wasm",
+    "url": "https://unpkg.com/onnxruntime-web@1.22.0/dist/ort-wasm-simd-threaded.jsep.wasm",
+    "bytes": 21872216,
+    "sha256": "b45970d0632383a057c27ca5b660b216f8e00c17cf8db9f6207b5e4abc839368"
+  }
+]

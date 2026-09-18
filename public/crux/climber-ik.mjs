@@ -1,5 +1,5 @@
-import {poseFacets,mixBasis} from './facet-pose.mjs?v=18';
-import {previewContactGeometry} from './problem-engine.mjs?v=18';
+import {poseFacets,mixBasis} from './facet-pose.mjs?v=19';
+import {previewContactGeometry} from './problem-engine.mjs?v=19';
 
 const limbs=['lh','rh','lf','rf'];
 const mix=(a,b,t)=>a+(b-a)*t;
