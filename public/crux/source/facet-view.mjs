@@ -1,10 +1,11 @@
 // Polygon boundaries and angle certainty are separate pieces of evidence.
-import {clipToRect,inPolygon} from './wall-facets.mjs?v=19';
+import {clipToRect,inPolygon} from './wall-facets.mjs?v=20';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const validRect=r=>r&&[r.x,r.y,r.w,r.h].every(Number.isFinite)&&r.w>0&&r.h>0;
 const color=angle=>angle< -5?'#8fd8fa':angle<=5?'#cfee89':angle<=25?'#ffd384':angle<=45?'#ffab79':'#ec94c3';
 export const slopeLabel=angle=>!Number.isFinite(angle)?'Angle unavailable':angle===0?'≈ 0° vertical':`≈ ${Math.abs(angle)}° ${angle<0?'slab':'overhang'}`;
 const point=(x,y)=>`${x.toFixed(3)} ${y.toFixed(3)}`;
+const escapeText=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function segmentPath(a,b,crop){
  let lo=0,hi=1;const dx=b[0]-a[0],dy=b[1]-a[1];
  for(const [p,q] of [[-dx,a[0]-crop.x],[dx,crop.x+crop.w-a[0]],[-dy,a[1]-crop.y],[dy,crop.y+crop.h-a[1]]]){
@@ -34,7 +35,7 @@ export function facetRegions(local,crop={x:0,y:0,w:1,h:1}){
   const segments=f.boundarySegments;
   const boundary=segments?segments.filter(s=>s.source==='approximate-normal-boundary').map(s=>segmentPath(s.a,s.b,crop)).join(' '):path;
   const seams=segments?segments.filter(s=>s.source==='image-seam').map(s=>segmentPath(s.a,s.b,crop)).join(' '):'';
-  return [{id:f.id,angle,localAngleRange:f.localAngleRange,color:angle===null?'#bed7d9':color(angle),path:singleVertical?'':path,boundary:singleVertical?'':boundary,seams:singleVertical?'':seams,polygon,holes,area,cells,anchor:{x:c.x+.012,y:c.y+.012},source:f.boundary}];
+  return [{id:f.id,angle,reason:f.reason,localAngleRange:f.localAngleRange,color:angle===null?'#bed7d9':color(angle),path:singleVertical?'':path,boundary:singleVertical?'':boundary,seams:singleVertical?'':seams,polygon,holes,area,cells,anchor:{x:c.x+.012,y:c.y+.012},source:f.boundary}];
  });
  if(!validRect(crop)||!validRect(local?.wallRoi)||!local?.patches?.length)return [];
  const patches=local.patches.filter(p=>Number.isInteger(p.row)&&Number.isInteger(p.column));
@@ -64,6 +65,9 @@ export function facetLabels(regions,width,height,zoom=1){
  if(!(width>=80&&height>=80))return [];
  const used=[],font=13/Math.max(1,zoom),pad=7/Math.max(1,zoom);
  for(const r of [...regions].sort((a,b)=>b.cells.length-a.cells.length)){
+  // Keep unresolved edge fragments outlined, without filling the photo with
+  // repeated badges much larger than those fragments. Their SVG title remains.
+  if(r.angle===null&&r.area<.006)continue;
   const mixed=r.localAngleRange,label=r.angle===null&&mixed?`≈ ${mixed[0]===mixed[1]?mixed[0]:mixed.join('–')}° · mixed`:slopeLabel(r.angle),w=(label.length*font*.56+pad*2)/width,h=(font+pad*1.5)/height;
   const centers=[r.anchor,...r.cells.map(c=>({x:c.x+c.w/2,y:c.y+c.h/2}))],candidates=[...centers,...centers.flatMap(c=>[-1,1].map(d=>({x:c.x,y:c.y+d*h*1.4})))];
   for(const c of candidates){
@@ -79,7 +83,7 @@ export function facetOverlay(regions,width=1000,height=1000,zoom=1){
  const labels=new Map(facetLabels(regions,width,height,zoom).map(p=>[p.id,p]));
  return regions.map((r,i)=>{
   const p=labels.get(r.id),tag=p?`<g class="facet-angle"><path d="M ${point(r.anchor.x*1000,r.anchor.y*1000)} L ${point(p.x*1000,p.y*1000)}" stroke="${r.color}" stroke-width="1" vector-effect="non-scaling-stroke"/><g transform="translate(${(p.x*1000).toFixed(2)} ${(p.y*1000).toFixed(2)}) scale(${1000/width} ${1000/height})"><rect x="${-p.w*width/2}" y="${-p.h*height/2}" width="${p.w*width}" height="${p.h*height}" rx="${4/Math.max(1,zoom)}" fill="#1e2827" fill-opacity=".93" stroke="${r.color}" stroke-width="${1/Math.max(1,zoom)}"/><text fill="${r.color}" font-size="${p.font}" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-weight="600">${p.label}</text></g></g>`:'';
-  return `<g class="facet-region" data-boundary-source="${r.source||'legacy-samples'}" style="--facet-color:${r.color};--facet-delay:${Math.min(i,8)*60}ms"><path class="facet-surface" d="${r.path}" fill-rule="evenodd" fill="${r.color}" fill-opacity="${r.angle===null?'.035':'.13'}"/><path d="${r.boundary||''}" fill="none" stroke="${r.color}" stroke-opacity=".28" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="${r.seams||''}" fill="none" stroke="${r.color}" stroke-opacity=".95" stroke-width="2" vector-effect="non-scaling-stroke"/>${tag}</g>`;
+  return `<g class="facet-region" data-boundary-source="${r.source||'legacy-samples'}" style="--facet-color:${r.color};--facet-delay:${Math.min(i,8)*60}ms"><title>${escapeText(slopeLabel(r.angle)+(r.reason?' — '+r.reason:''))}</title><path class="facet-surface" d="${r.path}" fill-rule="evenodd" fill="${r.color}" fill-opacity="${r.angle===null?'.035':'.13'}"/><path d="${r.boundary||''}" fill="none" stroke="${r.color}" stroke-opacity=".28" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="${r.seams||''}" fill="none" stroke="${r.color}" stroke-opacity=".95" stroke-width="2" vector-effect="non-scaling-stroke"/>${tag}</g>`;
  }).join('');
 }
 

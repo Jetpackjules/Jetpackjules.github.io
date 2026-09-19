@@ -28,6 +28,24 @@ function fitNormal(samples,minCount=24){
  return {status:'estimated',normal,spread,diagnostics};
 }
 
+// Inclination depends on the vertical component of a normal, not its azimuth.
+// A model can disagree about which way a face turns while agreeing on its tilt.
+// Keep that usable scalar estimate without inventing a reliable 3D orientation.
+function fitInclination(samples,floorReference,orientationFit,minCount=24){
+ if(orientationFit.status==='estimated'||samples.length<minCount||!floorReference.normal)return orientationFit;
+ const points=samples.map(p=>({...p,tilt:angle(p.n,floorReference.normal)-90}));
+ const center=quantile(points.map(p=>p.tilt),.5);
+ const deviations=points.map(p=>Math.abs(p.tilt-center)),cutoff=clamp(3*quantile(deviations,.5),4,10);
+ const inliers=points.filter((p,i)=>deviations[i]<=cutoff),fraction=inliers.length/points.length;
+ if(inliers.length<minCount||fraction<.8)return orientationFit;
+ const rawAngle=quantile(inliers.map(p=>p.tilt),.5),spread=quantile(inliers.map(p=>Math.abs(p.tilt-rawAngle)),.9);
+ let x0=1,x1=0,y0=1,y1=0;for(const p of points){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);}
+ const tiles=Array.from({length:9},()=>[]);for(const p of points){const col=Math.min(2,Math.floor(3*(p.x-x0)/Math.max(1e-8,x1-x0))),row=Math.min(2,Math.floor(3*(p.y-y0)/Math.max(1e-8,y1-y0)));tiles[row*3+col].push(p);}
+ const tileDeviations=tiles.filter(s=>s.length>=8).map(s=>Math.abs(quantile(s.map(p=>p.tilt),.5)-rawAngle));
+ if(spread>6||tileDeviations.some(a=>a>8))return orientationFit;
+ return {status:'estimated',normal:null,spread,rawAngle,orientationStatus:'uncertain',inclinationOnly:true,diagnostics:{...orientationFit.diagnostics,orientationRejection:orientationFit.reason,tiltSampleCount:points.length,tiltInlierCount:inliers.length,tiltInlierFraction:fraction,tiltSpread90:spread,tiltTileDeviations:tileDeviations,tiltAngularCutoff:cutoff}};
+}
+
 function frameSamples(labels,width,height,frame,holds,backgroundLabel){
  const w=frame.width,h=frame.height,N=w*h,ids=new Int32Array(N),boundary=new Uint8Array(N),blocked=new Uint8Array(N);
  const index=(x,y)=>clamp(Math.floor(y*h/height),0,h-1)*w+clamp(Math.floor(x*w/width),0,w-1);
@@ -96,15 +114,17 @@ export function estimateRgbFaceInclines({labels,width,height,regions=[],normalFr
   const points=p=>p?.map(q=>Array.isArray(q)?q:[q.x,q.y]);
   const region={...input,polygon:points(input.polygon),polygons:input.polygons?.map(points),holes:input.holes?.map(points)};
   const labelId=region.labelId??(typeof region.id==='number'?region.id:null),roi=regionRoi(region);
-  let fit=invalid?unknown(invalid):!Number.isInteger(labelId)||labelId===backgroundLabel?unknown('The RGB region has no valid label ID.'):fitNormal(samples.faces.get(labelId)||[]);
+  const faceSamples=samples?.faces.get(labelId)||[];
+  let fit=invalid?unknown(invalid):!Number.isInteger(labelId)||labelId===backgroundLabel?unknown('The RGB region has no valid label ID.'):fitInclination(faceSamples,floorReference,fitNormal(faceSamples));
   const eligible=samples?.eligible.get(labelId)||0,usable=samples?.faces.get(labelId)?.length||0;
   if(fit.status==='estimated'&&usable/Math.max(1,eligible)<.35)fit={...unknown('Most face-interior normals are invalid.'),diagnostics:fit.diagnostics};
   const boundarySegments=region.boundarySegments||region.polygon?.map((a,i)=>({a,b:region.polygon[(i+1)%region.polygon.length],source:'image-seam',verifiedPhysicalSeam:false}));
   const base={...region,labelId,roi,...fit,source,confidence:'low',angleReference:floorReference.source,boundary:region.boundary||'rgb-seam-graph',boundarySource:'rgb-seam-graph',boundarySegments,diagnostics:{...fit.diagnostics,eligibleInteriorSamples:eligible,usableInteriorSamples:usable,geometryPreserved:true}};
   if(fit.status!=='estimated')return base;
-  const rawAngle=angle(fit.normal,floorReference.normal)-90,rounded=Math.abs(rawAngle)<2.5?0:Math.round(rawAngle/5)*5;
+  const rawAngle=Number.isFinite(fit.rawAngle)?fit.rawAngle:angle(fit.normal,floorReference.normal)-90,rounded=Math.abs(rawAngle)<2.5?0:Math.round(rawAngle/5)*5;
   const margin=Math.max(10,Math.ceil((fit.spread+(floorReference.spread??15)+5)/5)*5);
-  return {...base,angle:rounded,rawAngle,range:[Math.max(-90,rounded-margin),Math.min(90,rounded+margin)],reason:floorReference.status==='estimated'?'Rough face orientation from model normals and a possible floor reference.':'Rough face orientation assuming an upright camera.',metadata:{rangeMeaning:'Heuristic angular dispersion and reference allowance; not a calibrated confidence interval',physicalMeasurement:false}};
+  const reason=fit.inclinationOnly?(floorReference.status==='estimated'?'Rough inclination from model normals and a possible floor reference; full 3D orientation remains uncertain.':'Rough inclination assuming an upright camera; full 3D orientation remains uncertain.'):(floorReference.status==='estimated'?'Rough face orientation from model normals and a possible floor reference.':'Rough face orientation assuming an upright camera.');
+  return {...base,angle:rounded,rawAngle,range:[Math.max(-90,rounded-margin),Math.min(90,rounded+margin)],reason,metadata:{rangeMeaning:'Heuristic angular dispersion and reference allowance; not a calibrated confidence interval',physicalMeasurement:false}};
  });
  const byLabel=new Map(inferred.map(r=>[r.labelId,r]));
  const perHold=holds.map((hold,i)=>{
@@ -116,7 +136,7 @@ export function estimateRgbFaceInclines({labels,width,height,regions=[],normalFr
    const v=labels[y*width+x];if(v===backgroundLabel||id!==null&&id!==v)return no;id=v;
   }
   const r=byLabel.get(id);if(r?.status!=='estimated')return no;
-  return {id:no.id,status:'estimated',angle:r.angle,rawAngle:r.rawAngle,range:r.range,normal:r.normal,spread:r.spread,facetId:r.id,labelId:id,source,confidence:'low',angleReference:r.angleReference,reason:r.reason};
+  return {id:no.id,status:'estimated',angle:r.angle,rawAngle:r.rawAngle,range:r.range,normal:r.normal,spread:r.spread,facetId:r.id,labelId:id,source,confidence:'low',angleReference:r.angleReference,reason:r.reason,inclinationOnly:!!r.inclinationOnly,orientationStatus:r.orientationStatus||'estimated'};
  });
  const known=perHold.filter(p=>p.status==='estimated').length,knownRegions=inferred.filter(r=>r.status==='estimated'),angles=knownRegions.map(r=>r.angle),total=holds.length||regions.length,count=holds.length?known:knownRegions.length;
  const patches=inferred.map(r=>({...r,x:r.roi?r.roi.x+r.roi.w/2:null,y:r.roi?r.roi.y+r.roi.h/2:null}));

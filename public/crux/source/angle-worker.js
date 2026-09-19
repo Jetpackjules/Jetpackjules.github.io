@@ -1,6 +1,6 @@
 // Classic worker for OpenCV/LSD; neural normals attach angles to fixed RGB faces.
 let cache,latest,queue=Promise.resolve();
-const modules=Promise.all([import('./rgb/detect.mjs?v=19'),import('./rgb-face-inclines.mjs?v=19')]);
+const modules=Promise.all([import('./rgb/detect.mjs?v=20'),import('./rgb-face-inclines.mjs?v=20')]);
 const current=r=>latest?.id===r.id&&latest?.photo===r.photo;
 function publish(request,local,partial,extra={}){
  if(!current(request))return;
@@ -27,7 +27,7 @@ async function run(request){
   // First-time model download never prevents route generation.
   publish(request,fit(null),true,{geometryMs:entry.geometry.processingMs});
   if(!entry.normalPromise)entry.normalPromise=(async()=>{
-   const {inferMoGeSurfaceFrame}=await import('./moge-surface-model.mjs?v=19');
+   const {inferMoGeSurfaceFrame}=await import('./moge-surface-model.mjs?v=20');
    return inferMoGeSurfaceFrame({pixels:entry.pixels,width:entry.pixelWidth,height:entry.pixelHeight,photo},message=>{if(cache===entry&&latest?.photo===photo)self.postMessage({id:latest.id,photo,progress:message,anglesOnly:true});});
   })().catch(error=>({status:'unavailable',reason:String(error.message||error)}));
   // Leave the queue free for a new photo/focus while a model load is pending.

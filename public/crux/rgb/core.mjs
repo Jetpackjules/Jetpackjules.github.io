@@ -145,6 +145,31 @@ export function intersect(first, second) {
   return {point: at(a, u, p), p, q};
 }
 
+/** Reconcile strong seams at a shared junction after independent extensions.
+ * Each line was snapped against the original (not yet extended) neighbours.
+ * Those intersections can differ by a few pixels and leave a raster leak.
+ * Fit one common junction from the incident lines; never attract to a faint
+ * panel mark, or bridge a gap larger than the local endpoint tolerance.
+ */
+export function closeSeamJunctions(segments, strong, tolerance) {
+  const result=segments.map(s=>s.map(p=>[...p]));
+  const endpoints=segments.flatMap((s,i)=>strong[i]?s.map((p,e)=>({p,i,e})):[]);
+  const used=new Set();
+  for(let a=0;a<endpoints.length;a++){
+    if(used.has(a))continue;
+    const seed=endpoints[a], group=[a];
+    for(let b=a+1;b<endpoints.length;b++)if(!used.has(b)&&endpoints[b].i!==seed.i&&norm(sub(seed.p,endpoints[b].p))<=tolerance)group.push(b);
+    if(group.length<2)continue;
+    let xx=0,xy=0,yy=0,bx=0,by=0;
+    for(const j of group){const {i,p}=endpoints[j],{n}=axis(segments[i]),c=dot(n,p);xx+=n[0]*n[0];xy+=n[0]*n[1];yy+=n[1]*n[1];bx+=n[0]*c;by+=n[1]*c;}
+    const det=xx*yy-xy*xy;if(det<.08)continue;
+    const p=[(bx*yy-by*xy)/det,(by*xx-bx*xy)/det];
+    if(group.some(j=>norm(sub(p,endpoints[j].p))>tolerance))continue;
+    for(const j of group){const {i,e}=endpoints[j];result[i][e]=[...p];used.add(j);}
+  }
+  return result;
+}
+
 /** Mask and polygon fitting are external; no OpenCV objects escape this function. */
 export function assembleSegments(d, lines, clean, polygons, {filterFaint = true, strongStep = 6} = {}) {
   const outline = polygons.flatMap(p => p.map((a, i) => [a, p[(i + 1) % p.length]])), selected = [];
@@ -186,5 +211,7 @@ export function assembleSegments(d, lines, clean, polygons, {filterFaint = true,
     }));
     segments = segments.filter((_, i) => retain[i]); keep = keep.filter((_, i) => retain[i]);
   }
+  const strong=keep.map(k=>k.color_jump>=strongStep&&Math.max(...k.strip_valid.slice(1))>=.30);
+  segments=closeSeamJunctions(segments,strong,d.w*.006);
   return {segments, lines: keep};
 }

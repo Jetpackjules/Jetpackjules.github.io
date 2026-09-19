@@ -1,6 +1,6 @@
 // Inference stays inside this browser worker. Images never leave the device.
 import * as ort from './vendor/ort-runtime.mjs';
-import {nms} from './engine.js?v=19';
+import {nms} from './engine.js?v=20';
 ort.env.wasm.wasmPaths=new URL('./vendor/',self.location.href).href;
 ort.env.wasm.numThreads=1;
 let session;

@@ -1,16 +1,16 @@
-import {createImageStatus} from './image-status.mjs?v=19';
-import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=19';
-import {climberProfile} from './climber-profile.mjs?v=19';
-import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=19';
-import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=19';
-import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=19';
-import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=19';
-import {createClimberOverlay} from './climber-ik.mjs?v=19';
-import {setupInstall} from './pwa.js?v=19';
-import {placeContacts,visibleBox} from './contact-labels.mjs?v=19';
-import {attachWallZoom} from './wall-interaction.js?v=19';
-import {clamp} from './engine.js?v=19';
-import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=19';
+import {createImageStatus} from './image-status.mjs?v=20';
+import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=20';
+import {climberProfile} from './climber-profile.mjs?v=20';
+import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=20';
+import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=20';
+import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=20';
+import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=20';
+import {createClimberOverlay} from './climber-ik.mjs?v=20';
+import {setupInstall} from './pwa.js?v=20';
+import {placeContacts,visibleBox} from './contact-labels.mjs?v=20';
+import {attachWallZoom} from './wall-interaction.js?v=20';
+import {clamp} from './engine.js?v=20';
+import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=20';
 const $ = id=>document.getElementById(id);
 const state={mode:'create',resultTarget:null,updating:false,holds:[],routes:[],selected:0,selectedHolds:[],style:'balanced',edit:false,overlay:true,activeHold:null,demo:false,photo:null,busy:false,seed:Date.now(),imageToken:0,example:null,focus:null,focusPicking:false,focusDraft:null,angleMode:'auto',angleEstimate:null,gradeProblem:null,planning:false,planError:null,betaMode:false,betaIndex:0,climberMode:true,showAll:false,scanReveal:false,hasProblem:false,localInclines:null,scaleMode:'auto',photoHeight:4,baseAngle:0,scaleSpan:null,scaleGuides:false};
 const colors={red:'#e95952',orange:'#eb984e',yellow:'#e3c82c',green:'#44ba6c',blue:'#4e90df',purple:'#9363bc',pink:'#ee80b2',white:'#eeeae2',black:'#414640',cyan:'#6cbbbb',gray:'#92999d'};
@@ -93,7 +93,7 @@ function showScanOutlines(batch){
 function cancelPlan(){stopBeta();clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planId++;state.planning=false;planPending?.reject(new Error('Cancelled'));planPending=null;showPlanningIndicator(false);}
 function runPlanner(request){
  cancelPlan();const id=planId;state.planning=true;state.planError=null;showPlanningIndicator(true);
- planWorker=new Worker('./problem-worker.js?v=19',{type:'module'});
+ planWorker=new Worker('./problem-worker.js?v=20',{type:'module'});
  return new Promise((resolve,reject)=>{
   planPending={resolve,reject};
   const finish=(error,result)=>{if(id!==planId)return;clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planPending=null;state.planning=false;showPlanningIndicator(false);error?reject(error):resolve(result);};
@@ -110,7 +110,7 @@ async function enrichHolds(boxes,id){
   let v,timer,finished=false;
   const done=result=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();if(outlinePending?.id===id)outlinePending=null;if(token!==state.imageToken||id!==scanJob||state.suspended){resolve([]);return;}const grouped=result?.palette?result:fallback();state.palette=grouped.palette;resolve(makeHolds(grouped.holds));};
   outlinePending={id,cancel:()=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();resolve([]);}};
-  try{v=new Worker('./vision-worker.js?v=19',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
+  try{v=new Worker('./vision-worker.js?v=20',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
   catch{done();}
  });
 }
@@ -154,7 +154,7 @@ function requestAngleEstimate(fresh=false){
  const id=++angleJob,photo=state.imageToken;clearTimeout(angleTimer);
  state.anglePending=true;updateAngleUI('Estimating the wall against the floor…');renderFacets();
  try{
- if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=19');fresh=true;angleWorker.onmessage=({data})=>{
+ if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=20');fresh=true;angleWorker.onmessage=({data})=>{
    if(data.id!==angleJob||data.photo!==state.imageToken)return;
    if(data.progress){if(state.angleMode==='auto')updateAngleUI(data.progress);return;}
    if(!data.partial)clearTimeout(angleTimer);state.anglePending=false;state.inclinePending=!!data.partial;angleDepthReady=!!data.depthReady;
@@ -220,7 +220,7 @@ async function detect(cachedBoxes=null){
  try{
  let boxes=cachedBoxes;
  if(!boxes){
-  if(!worker)worker=new Worker('./detector-worker.js?v=19',{type:'module'});
+  if(!worker)worker=new Worker('./detector-worker.js?v=20',{type:'module'});
   const pixels=sourceContext.getImageData(0,0,sourceCanvas.width,sourceCanvas.height);
   boxes=await new Promise((resolve,reject)=>{
    const timer=setTimeout(()=>{worker?.terminate();worker=null;detectorPending=null;reject(Error('The model took too long on this device.'));},90000);
