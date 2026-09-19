@@ -1,20 +1,23 @@
-import {createImageStatus} from './image-status.mjs?v=20';
-import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=20';
-import {climberProfile} from './climber-profile.mjs?v=20';
-import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=20';
-import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=20';
-import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=20';
-import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=20';
-import {createClimberOverlay} from './climber-ik.mjs?v=20';
-import {setupInstall} from './pwa.js?v=20';
-import {placeContacts,visibleBox} from './contact-labels.mjs?v=20';
-import {attachWallZoom} from './wall-interaction.js?v=20';
-import {clamp} from './engine.js?v=20';
-import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=20';
+import {createImageStatus} from './image-status.mjs?v=21';
+import {demoNormalKey} from './demo-normal-frames.mjs?v=21';
+import {inclineFailureMessage} from './incline-status.mjs?v=21';
+import {retryDetection} from './detection-retry.mjs?v=21';
+import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=21';
+import {climberProfile} from './climber-profile.mjs?v=21';
+import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=21';
+import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=21';
+import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=21';
+import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=21';
+import {createClimberOverlay} from './climber-ik.mjs?v=21';
+import {setupInstall} from './pwa.js?v=21';
+import {placeContacts,visibleBox} from './contact-labels.mjs?v=21';
+import {attachWallZoom} from './wall-interaction.js?v=21';
+import {clamp} from './engine.js?v=21';
+import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=21';
 const $ = id=>document.getElementById(id);
 const state={mode:'create',resultTarget:null,updating:false,holds:[],routes:[],selected:0,selectedHolds:[],style:'balanced',edit:false,overlay:true,activeHold:null,demo:false,photo:null,busy:false,seed:Date.now(),imageToken:0,example:null,focus:null,focusPicking:false,focusDraft:null,angleMode:'auto',angleEstimate:null,gradeProblem:null,planning:false,planError:null,betaMode:false,betaIndex:0,climberMode:true,showAll:false,scanReveal:false,hasProblem:false,localInclines:null,scaleMode:'auto',photoHeight:4,baseAngle:0,scaleSpan:null,scaleGuides:false};
 const colors={red:'#e95952',orange:'#eb984e',yellow:'#e3c82c',green:'#44ba6c',blue:'#4e90df',purple:'#9363bc',pink:'#ee80b2',white:'#eeeae2',black:'#414640',cyan:'#6cbbbb',gray:'#92999d'};
-state.palette=[];state.facetMode=false;state.scanPhase='idle';state.anglePending=false;state.inclinePending=false;state.scanPending=false;state.liveScan={active:false};
+state.palette=[];state.facetMode=false;state.scanPhase='idle';state.anglePending=false;state.inclinePending=false;state.inclineFailure=null;state.inclineExecution=null;state.normalReference=null;state.scanPending=false;state.liveScan={active:false};
 const colorLabel=id=>state.palette.find(p=>p.id===id)?.label||id;
 const colorSwatch=id=>state.palette.find(p=>p.id===id)?.hex||colors[id]||'#888';
 const sourceCanvas=document.createElement('canvas'),sourceContext=sourceCanvas.getContext('2d',{willReadFrequently:true});
@@ -72,7 +75,8 @@ function renderFacets(){
  const geometry=visibleWallFaces(),regions=state.angleMode==='auto'?facetRegions(geometry,geometryCrop):[],shown=state.overlay&&(state.liveScan.showFacets||state.scanPhase==='facets'||state.facetMode&&state.scanPhase==='idle')&&!state.edit&&!state.focusPicking;
  $('facet-overlay').classList.toggle('hidden',!state.overlay||!regions.length);$('facet-overlay').classList.toggle('is-visible',shown);
  $('facet-toggle').setAttribute('aria-pressed',state.facetMode);$('facet-toggle').disabled=!state.photo;$('replay-scan').disabled=!state.holds.length||state.busy||state.scanPending||state.planning;
- const node=$('facet-overlay'),markup=facetOverlay(regions,$('image-wrap').clientWidth||1000,$('image-wrap').clientHeight||1000,wallZoom?.scale||1);
+ const labeled=regions.map(r=>({...r,suppressAngleLabel:r.angle===null&&(state.anglePending||state.inclinePending||!!state.inclineFailure)}));
+ const node=$('facet-overlay'),markup=facetOverlay(labeled,$('image-wrap').clientWidth||1000,$('image-wrap').clientHeight||1000,wallZoom?.scale||1);
  if(node.innerHTML!==markup)node.innerHTML=markup;
 
 }
@@ -93,7 +97,7 @@ function showScanOutlines(batch){
 function cancelPlan(){stopBeta();clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planId++;state.planning=false;planPending?.reject(new Error('Cancelled'));planPending=null;showPlanningIndicator(false);}
 function runPlanner(request){
  cancelPlan();const id=planId;state.planning=true;state.planError=null;showPlanningIndicator(true);
- planWorker=new Worker('./problem-worker.js?v=20',{type:'module'});
+ planWorker=new Worker('./problem-worker.js?v=21',{type:'module'});
  return new Promise((resolve,reject)=>{
   planPending={resolve,reject};
   const finish=(error,result)=>{if(id!==planId)return;clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planPending=null;state.planning=false;showPlanningIndicator(false);error?reject(error):resolve(result);};
@@ -110,7 +114,7 @@ async function enrichHolds(boxes,id){
   let v,timer,finished=false;
   const done=result=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();if(outlinePending?.id===id)outlinePending=null;if(token!==state.imageToken||id!==scanJob||state.suspended){resolve([]);return;}const grouped=result?.palette?result:fallback();state.palette=grouped.palette;resolve(makeHolds(grouped.holds));};
   outlinePending={id,cancel:()=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();resolve([]);}};
-  try{v=new Worker('./vision-worker.js?v=20',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
+  try{v=new Worker('./vision-worker.js?v=21',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
   catch{done();}
  });
 }
@@ -127,16 +131,22 @@ function colorAt(h){
  return hue<16||hue>=348?'red':hue<44?'orange':hue<72?'yellow':hue<168?'green':hue<250?'blue':hue<295?'purple':'pink';
 }
 function resetAngle(){
- clearTimeout(angleTimer);angleDepthReady=false;angleJob++;state.inclinePending=false;
+ clearTimeout(angleTimer);angleDepthReady=false;angleJob++;state.inclinePending=false;state.inclineFailure=null;state.inclineExecution=null;
  state.angleMode='auto';state.angleEstimate=null;state.localInclines=null;state.anglePending=false;state.baseAngle=0;updateAngleUI('Looking for the floor and wall…');
 }
 function updateAngleUI(message){if(state.anglePending||state.inclinePending)imageStatus.start('walls',message||'Detecting walls…');}
-function finishWallStatus(){const n=facetRegions(state.localInclines,geometryCrop).length;imageStatus.complete('walls',n?`${n} wall${n===1?'':'s'} detected`:'Wall angles unavailable');}
+function finishWallStatus(){const n=facetRegions(state.localInclines,geometryCrop).length;imageStatus.complete('walls',state.inclineFailure?inclineFailureMessage(state.inclineFailure.code):n?`${n} wall${n===1?'':'s'} detected`:'Wall angles unavailable');}
+function touchAngleTimeout(id,photo){
+ clearTimeout(angleTimer);
+ // This is a stall limit, not a deadline for a progressing cold download.
+ angleTimer=setTimeout(()=>{if(id===angleJob&&photo===state.imageToken)angleUnavailable('incline-timeout');},75000);
+}
 function geometrySignature(local,angle){return JSON.stringify([angle,local?.perHold?.map(h=>[h.id,h.status,h.angle,h.normal,h.facetId])]);}
-function angleUnavailable(){
+function angleUnavailable(code='incline-worker-failed'){
  const scanning=state.scanPending;
  angleJob++;
  clearTimeout(angleTimer);angleWorker?.terminate();angleWorker=null;angleDepthReady=false;state.anglePending=false;state.inclinePending=false;state.baseAngle=0;
+ state.inclineFailure={code};state.inclineExecution=null;
  state.angleEstimate={status:'uncertain',reason:'Wall angle unavailable on this device. Using the vertical assumption.'};
  renderFacets();finishWallStatus();finishAngleReveal();if(!scanning)scheduleRegenerate();
 }
@@ -152,12 +162,15 @@ function angleRegion(){
 function requestAngleEstimate(fresh=false){
  if(state.suspended||!state.photo||state.angleMode!=='auto')return;
  const id=++angleJob,photo=state.imageToken;clearTimeout(angleTimer);
- state.anglePending=true;updateAngleUI('Estimating the wall against the floor…');renderFacets();
+ state.anglePending=true;state.inclineFailure=null;updateAngleUI('Estimating the wall against the floor…');renderFacets();
  try{
- if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=20');fresh=true;angleWorker.onmessage=({data})=>{
+ if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=21');fresh=true;angleWorker.onmessage=({data})=>{
    if(data.id!==angleJob||data.photo!==state.imageToken)return;
-   if(data.progress){if(state.angleMode==='auto')updateAngleUI(data.progress);return;}
+   if(data.progress){touchAngleTimeout(data.id,data.photo);if(state.angleMode==='auto')updateAngleUI(data.progress);return;}
    if(!data.partial)clearTimeout(angleTimer);state.anglePending=false;state.inclinePending=!!data.partial;angleDepthReady=!!data.depthReady;
+   if(data.partial)touchAngleTimeout(data.id,data.photo);
+   state.inclineFailure=data.normalStatus==='unavailable'||data.error?{code:data.normalCode||'incline-model-failed',reason:data.normalReason||data.error}:null;
+   if(!data.partial)state.inclineExecution=data.normalExecution||null;
    const previousGeometry=geometrySignature(state.localInclines,state.baseAngle);
    state.localInclines=data.local||state.localInclines;state.angleEstimate=data.result||{status:'uncertain',reason:'Wall angle unavailable; using the vertical assumption.'};
    if(state.angleMode==='auto'){
@@ -168,9 +181,9 @@ function requestAngleEstimate(fresh=false){
  };const owner=angleWorker;angleWorker.onerror=()=>{if(angleWorker===owner)angleUnavailable();};}
  const r=state.focus||{x:0,y:0,w:1,h:1},localRoi={x:geometryCrop.x+r.x*geometryCrop.w,y:geometryCrop.y+r.y*geometryCrop.h,w:r.w*geometryCrop.w,h:r.h*geometryCrop.h};
  const holds=state.holds.map(h=>({id:h.id,x:geometryCrop.x+h.x*geometryCrop.w,y:geometryCrop.y+h.y*geometryCrop.h,w:h.w*geometryCrop.w,h:h.h*geometryCrop.h}));
- const request={id,photo,kind:fresh||!angleDepthReady?'analyze':'estimate',wallRoi:angleRegion(),localRoi,holds,imageAspect:geometryCanvas.width/geometryCanvas.height};
+ const request={id,photo,normalReference:state.normalReference,kind:fresh||!angleDepthReady?'analyze':'estimate',wallRoi:angleRegion(),localRoi,holds,imageAspect:geometryCanvas.width/geometryCanvas.height};
  if(request.kind==='analyze'){const pixels=geometryContext.getImageData(0,0,geometryCanvas.width,geometryCanvas.height);request.pixels=pixels.data.buffer;request.width=pixels.width;request.height=pixels.height;angleWorker.postMessage(request,[pixels.data.buffer]);}else angleWorker.postMessage(request);
- angleTimer=setTimeout(()=>{if(id===angleJob)angleUnavailable();},75000);
+ touchAngleTimeout(id,photo);
  }catch{angleUnavailable();}
 }
 function renderScale(){
@@ -200,7 +213,7 @@ function makeHolds(boxes){return [...boxes].sort((a,b)=>b.y-a.y||a.x-b.x).map((h
 async function loadPhoto(src,{demo=false,crop=null,example=null}={}){
  if(state.busy){if(src.startsWith('blob:'))URL.revokeObjectURL(src);notify('Wait for the current scan to finish.');return;}
  clearTimeout(regenerateTimer);cancelPlan();imageStatus.reset();const token=++state.imageToken;const img=new Image();img.src=src;
- try{await img.decode();if(token!==state.imageToken)return;const c=crop||[0,0,img.naturalWidth,img.naturalHeight],scale=Math.min(1,1600/Math.max(c[2],c[3]));const gs=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight),Math.sqrt(2100000/(img.naturalWidth*img.naturalHeight)));geometryCanvas.width=Math.round(img.naturalWidth*gs);geometryCanvas.height=Math.round(img.naturalHeight*gs);geometryContext.drawImage(img,0,0,geometryCanvas.width,geometryCanvas.height);geometryCrop={x:c[0]/img.naturalWidth,y:c[1]/img.naturalHeight,w:c[2]/img.naturalWidth,h:c[3]/img.naturalHeight};resetAngle();sourceCanvas.width=Math.round(c[2]*scale);sourceCanvas.height=Math.round(c[3]*scale);sourceContext.drawImage(img,...c,0,0,sourceCanvas.width,sourceCanvas.height);wallZoom?.reset();cancelScanReveal();scanJob++;outlinePending?.cancel();outlinePending=null;state.scanPending=false;state.hasProblem=false;state.scanReveal=false;state.localInclines=null;state.photo=sourceCanvas.toDataURL('image/jpeg',.9);$('wall-image').src=state.photo;await $('wall-image').decode();if(token!==state.imageToken)return;state.demo=demo;state.example=example;state.scaleMode='auto';state.scaleSpan=null;state.scaleGuides=false;$('wall-height-input').value=demo&&!example?3:4;$('scale-top').value=0;$('scale-bottom').value=100;state.photoHeight=demo&&!example?3:4;state.focus=null;state.focusPicking=false;state.focusDraft=null;state.holds=[];state.palette=[];state.routes=[];state.gradeProblem=null;state.planError=null;state.betaMode=false;state.selectedHolds=[];state.activeHold=null;state.edit=false;$('edit-button').setAttribute('aria-pressed','false');$('wall-placeholder').classList.add('hidden');$('image-wrap').classList.remove('hidden');render();
+ try{await img.decode();if(token!==state.imageToken)return;const c=crop||[0,0,img.naturalWidth,img.naturalHeight],scale=Math.min(1,1600/Math.max(c[2],c[3]));const gs=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight),Math.sqrt(2100000/(img.naturalWidth*img.naturalHeight)));geometryCanvas.width=Math.round(img.naturalWidth*gs);geometryCanvas.height=Math.round(img.naturalHeight*gs);geometryContext.drawImage(img,0,0,geometryCanvas.width,geometryCanvas.height);geometryCrop={x:c[0]/img.naturalWidth,y:c[1]/img.naturalHeight,w:c[2]/img.naturalWidth,h:c[3]/img.naturalHeight};resetAngle();sourceCanvas.width=Math.round(c[2]*scale);sourceCanvas.height=Math.round(c[3]*scale);sourceContext.drawImage(img,...c,0,0,sourceCanvas.width,sourceCanvas.height);wallZoom?.reset();cancelScanReveal();scanJob++;outlinePending?.cancel();outlinePending=null;state.scanPending=false;state.hasProblem=false;state.scanReveal=false;state.localInclines=null;state.photo=sourceCanvas.toDataURL('image/jpeg',.9);$('wall-image').src=state.photo;await $('wall-image').decode();if(token!==state.imageToken)return;state.demo=demo;state.example=example;state.normalReference=demo?demoNormalKey(src,new URL('./',location.href)):null;state.scaleMode='auto';state.scaleSpan=null;state.scaleGuides=false;$('wall-height-input').value=demo&&!example?3:4;$('scale-top').value=0;$('scale-bottom').value=100;state.photoHeight=demo&&!example?3:4;state.focus=null;state.focusPicking=false;state.focusDraft=null;state.holds=[];state.palette=[];state.routes=[];state.gradeProblem=null;state.planError=null;state.betaMode=false;state.selectedHolds=[];state.activeHold=null;state.edit=false;$('edit-button').setAttribute('aria-pressed','false');$('wall-placeholder').classList.add('hidden');$('image-wrap').classList.remove('hidden');render();
  if(demo&&!example){try{const res=await fetch('./demo-holds.json');if(!res.ok)throw Error();const boxes=await res.json();if(token!==state.imageToken)return;await detect(boxes);return;}catch{}}
  if(token!==state.imageToken)return;await detect();
  }catch(e){notify('Could not open this image. Try a JPEG, PNG or WebP photo.');}finally{if(src.startsWith('blob:'))URL.revokeObjectURL(src);}
@@ -216,19 +229,22 @@ async function detect(cachedBoxes=null){
  if(state.anglePending)resetAngle();else {angleJob++;clearTimeout(angleTimer);}
  state.localInclines=null;state.scanPending=true;state.routes=[];state.gradeProblem=null;state.selectedHolds=[];state.holds=[];state.hasProblem=false;state.betaMode=false;state.activeHold=null;state.planError=null;state.edit=false;$('edit-button').setAttribute('aria-pressed','false');
  imageStatus.reset();setBusy(true);state.liveToken=liveScan.begin();$('scan-overlay').innerHTML='';render();
- let receivedBoxes=false;
+ let receivedBoxes=false;state.detectionFailure=null;
  try{
  let boxes=cachedBoxes;
  if(!boxes){
-  if(!worker)worker=new Worker('./detector-worker.js?v=20',{type:'module'});
+  boxes=await retryDetection(async()=>{
+  if(!worker)worker=new Worker('./detector-worker.js?v=21',{type:'module'});
+  const owner=worker;
   const pixels=sourceContext.getImageData(0,0,sourceCanvas.width,sourceCanvas.height);
-  boxes=await new Promise((resolve,reject)=>{
-   const timer=setTimeout(()=>{worker?.terminate();worker=null;detectorPending=null;reject(Error('The model took too long on this device.'));},90000);
+  return new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>{owner.terminate();if(worker===owner){worker=null;detectorPending=null;}reject(Error('The model took too long on this device.'));},90000);
    detectorPending={reject,timer};
-   worker.onmessage=({data})=>{if(data.id!==job||!current())return;if(data.status){imageStatus.start('holds','Finding holds…');return;}clearTimeout(timer);detectorPending=null;if(data.error)reject(Error(data.error));else resolve(data.boxes);};
-   worker.onerror=e=>{clearTimeout(timer);detectorPending=null;reject(Error(e.message||'The hold model could not run on this browser.'));};
-   worker.postMessage({id:job,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height},[pixels.data.buffer]);
+   owner.onmessage=({data})=>{if(worker!==owner||data.id!==job||!current())return;if(data.status){imageStatus.start('holds',data.status);return;}clearTimeout(timer);detectorPending=null;if(data.error)reject(Object.assign(Error(data.error),{retryable:true}));else resolve(data.boxes);};
+   owner.onerror=e=>{if(worker!==owner)return;clearTimeout(timer);detectorPending=null;reject(Object.assign(Error(e.message||'The hold model could not run on this browser.'),{retryable:true}));};
+   owner.postMessage({id:job,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height},[pixels.data.buffer]);
   });
+  },{isCurrent:current,onRetry:()=>{worker?.terminate();worker=null;if(detectorPending)clearTimeout(detectorPending.timer);detectorPending=null;imageStatus.start('holds','Retrying hold detection…');}});
  }
  if(!current())return;
  // Stable IDs are assigned once. Wall fitting needs boxes, so it can overlap
@@ -239,7 +255,7 @@ async function detect(cachedBoxes=null){
  state.holds=holds;refreshPhotoScale();if(state.mode==='grade')selectInitialColor();
  liveScan.update(state.liveToken,{holdsReady:true});render();
  if(boxes.length<5){state.edit=true;$('edit-button').setAttribute('aria-pressed','true');cancelScanReveal();render();notify('Few holds found. Use Edit holds and tap missing holds to add them.');}
- }catch(e){if(!current()||e.message==='Suspended')return;console.warn('Hold detector:',e.message);worker?.terminate();worker=null;state.edit=true;cancelScanReveal();$('edit-button').setAttribute('aria-pressed','true');render();notify('Automatic detection is unavailable here. Tap the wall to add holds manually.');}
+ }catch(e){if(!current()||e.message==='Suspended')return;state.detectionFailure=String(e.message);console.warn('Hold detector:',e.message);worker?.terminate();worker=null;state.edit=true;cancelScanReveal();$('edit-button').setAttribute('aria-pressed','true');render();notify('Hold detection did not finish. Tap Find holds to retry.');}
  finally{if(current()){setBusy(false);if(!receivedBoxes)state.scanPending=false;finishScanStage();renderScanReveal();}}
 }
 async function generate(showToast=true){
@@ -439,7 +455,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopBeta();
 function registerTools(){
  const context=document.modelContext;if(!context?.registerTool)return;const lifetime=new AbortController();
  const brief=p=>({name:p.name,handIds:p.handIds,footIds:p.footIds,start:p.start,finishId:p.finishId,estimate:p.estimate,stats:p.stats,beta:p.beta});
- const tools=[{name:'get_climbing_wall',description:'Read hold outlines, allowed problem sets, start contacts, finish, optional candidate beta and provisional grade. Does not return the photo.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({mode:state.mode,holdCount:state.holds.length,outlinedHolds:state.holds.filter(h=>h.polygon&&!h.fallback).length,planning:state.planning,setup:setup(),angleMode:state.angleMode,angleEstimate:state.angleEstimate,localInclines:state.localInclines?{coverage:state.localInclines.coverage,angleRange:state.localInclines.angleRange}:null,focus:state.focus,problems:state.routes.map(brief),gradeProblem:state.gradeProblem?brief(state.gradeProblem):null})}];
+ const tools=[{name:'get_climbing_wall',description:'Read hold outlines, allowed problem sets, start contacts, finish, optional candidate beta and provisional grade. Does not return the photo.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({mode:state.mode,holdCount:state.holds.length,outlinedHolds:state.holds.filter(h=>h.polygon&&!h.fallback).length,planning:state.planning,setup:setup(),angleMode:state.angleMode,angleEstimate:state.angleEstimate,inclineFailure:state.inclineFailure,inclineExecution:state.inclineExecution,detectionFailure:state.detectionFailure,localInclines:state.localInclines?{coverage:state.localInclines.coverage,angleRange:state.localInclines.angleRange}:null,focus:state.focus,problems:state.routes.map(brief),gradeProblem:state.gradeProblem?brief(state.gradeProblem):null})}];
  for(const tool of tools){try{Promise.resolve(context.registerTool(tool,{signal:lifetime.signal})).catch(()=>{});}catch{}}
  window.addEventListener('pagehide',()=>lifetime.abort(),{once:true});
 }

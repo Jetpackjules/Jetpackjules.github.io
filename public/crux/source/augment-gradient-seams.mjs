@@ -1,4 +1,4 @@
-import {detectSurfaceSeams as edgeChains} from './automatic-surfaces.mjs?v=20';
+import {detectSurfaceSeams as edgeChains} from './automatic-surfaces.mjs?v=21';
 const gradientRegions=input=>edgeChains({...input,fullGradient:true});
 const unit=n=>{const l=Math.hypot(...n);return l>1e-8?n.map(v=>v/l):null;};
 export function augmentGradientSeams(input){

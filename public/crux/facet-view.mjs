@@ -1,5 +1,5 @@
 // Polygon boundaries and angle certainty are separate pieces of evidence.
-import {clipToRect,inPolygon} from './wall-facets.mjs?v=20';
+import {clipToRect,inPolygon} from './wall-facets.mjs?v=21';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const validRect=r=>r&&[r.x,r.y,r.w,r.h].every(Number.isFinite)&&r.w>0&&r.h>0;
 const color=angle=>angle< -5?'#8fd8fa':angle<=5?'#cfee89':angle<=25?'#ffd384':angle<=45?'#ffab79':'#ec94c3';
@@ -67,7 +67,7 @@ export function facetLabels(regions,width,height,zoom=1){
  for(const r of [...regions].sort((a,b)=>b.cells.length-a.cells.length)){
   // Keep unresolved edge fragments outlined, without filling the photo with
   // repeated badges much larger than those fragments. Their SVG title remains.
-  if(r.angle===null&&r.area<.006)continue;
+  if(r.suppressAngleLabel||r.angle===null&&r.area<.006)continue;
   const mixed=r.localAngleRange,label=r.angle===null&&mixed?`≈ ${mixed[0]===mixed[1]?mixed[0]:mixed.join('–')}° · mixed`:slopeLabel(r.angle),w=(label.length*font*.56+pad*2)/width,h=(font+pad*1.5)/height;
   const centers=[r.anchor,...r.cells.map(c=>({x:c.x+c.w/2,y:c.y+c.h/2}))],candidates=[...centers,...centers.flatMap(c=>[-1,1].map(d=>({x:c.x,y:c.y+d*h*1.4})))];
   for(const c of candidates){

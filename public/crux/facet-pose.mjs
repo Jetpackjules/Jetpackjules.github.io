@@ -1,4 +1,4 @@
-import {inPolygon} from './wall-facets.mjs?v=20';
+import {inPolygon} from './wall-facets.mjs?v=21';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
 const unit=v=>{const l=Math.hypot(...v);return l>1e-6?v.map(x=>x/l):null;};

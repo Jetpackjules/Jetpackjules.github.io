@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "encoding": "int16-le-chw-unit",
+  "model": "MoGe-2 Small normal-only",
+  "modelSha256": "df1edd6088b3bba3016373868fa62f70513d1cec24c230ec24828e2b2b0df3e8",
+  "modelSource": {
+    "repository": "Ruicheng/moge-2-vits-normal-onnx",
+    "revision": "e50ffda41565591092adea54c6ac83d6212e1e23",
+    "file": "model.onnx",
+    "sha256": "24eacb5dc7a2c54c7bc98f7de085ffbed79ad006ea5b664c2c2cdc02ff3a52f0",
+    "url": "https://huggingface.co/Ruicheng/moge-2-vits-normal-onnx/resolve/e50ffda41565591092adea54c6ac83d6212e1e23/model.onnx",
+    "license": "MIT; DINOv2 component Apache-2.0"
+  },
+  "tokens": 1200,
+  "frames": {
+    "straight": {
+      "file": "straight.bin",
+      "photo": "demo-wall.jpg",
+      "photoSha256": "b2906d047dee5edbe09b59ef6f68ddd3d51c8138802326ea35a82c72e5dd0fc5",
+      "width": 480,
+      "height": 360,
+      "inputWidth": 1600,
+      "inputHeight": 1200,
+      "layout": "CHW",
+      "coordinateConvention": "opencv-camera-x-right-y-down-z-forward",
+      "normalOrientation": "camera-facing",
+      "bytes": 1036800,
+      "sha256": "3988b526298454a632b040b6edf2a8c7e20ef8847dd2089b9bc558bf153b6ae6",
+      "rawSha256": "f03dd14f78fa62d869335e0bd165d94aae693acadd8f0d0597aa98884b1a45f1",
+      "maxComponentError": 0.000015259016443114337
+    },
+    "overhang": {
+      "file": "overhang.bin",
+      "photo": "examples/overhang.png",
+      "photoSha256": "9c6aecd7d00fd8cc7dd0ddbb0f748b049f403d5c05962e1082f3ddcd7d214bdc",
+      "width": 480,
+      "height": 320,
+      "inputWidth": 1600,
+      "inputHeight": 1067,
+      "layout": "CHW",
+      "coordinateConvention": "opencv-camera-x-right-y-down-z-forward",
+      "normalOrientation": "camera-facing",
+      "bytes": 921600,
+      "sha256": "d1af560ffe17adb1c8502ad592ab56eac2e22a8fb696bb5aa6a7ddd4189ee4cd",
+      "rawSha256": "0cb138d48dcaad1c01d0e3560000f9ed5098217d09668be3fe661e6433c344ea",
+      "maxComponentError": 0.000015259201985751147
+    },
+    "cave": {
+      "file": "cave.bin",
+      "photo": "examples/cave.png",
+      "photoSha256": "21607026b696879950faff006044cb7445690dc0395b2292e8739b604da4feed",
+      "width": 480,
+      "height": 270,
+      "inputWidth": 1600,
+      "inputHeight": 900,
+      "layout": "CHW",
+      "coordinateConvention": "opencv-camera-x-right-y-down-z-forward",
+      "normalOrientation": "camera-facing",
+      "bytes": 777600,
+      "sha256": "ddb57214175aeb8318b387a4e95a06489d876d0f66f9b780d90975c765b9b52a",
+      "rawSha256": "8352fa806f9e2586d4547805a91d8ed73dd47fea02439f934e69cf408b4178c1",
+      "maxComponentError": 0.000015259252918953248
+    }
+  }
+}

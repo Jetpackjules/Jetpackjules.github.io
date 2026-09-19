@@ -99,14 +99,23 @@ async function getRuntime(progress) {
     ort.env.wasm.wasmPaths = RUNTIME_BASE.href;
     ort.env.wasm.numThreads = 1; // GitHub Pages does not provide COOP/COEP isolation headers.
     ort.env.wasm.proxy = false;
-    ort.env.webgpu.adapter = adapter;
     ort.env.webgpu.powerPreference = 'high-performance';
     const start = performance.now(), bytes = await loadModelBytes(progress), downloadMs = performance.now() - start;
+    // The cold model download can take minutes on a mobile connection.
+    // WebGPU permits an adapter to expire; do not initialize with the old probe.
+    const readyAdapter = await navigator.gpu.requestAdapter({powerPreference: 'high-performance'});
+    if (!readyAdapter) return unavailable('gpu-adapter-unavailable', 'The GPU became unavailable while loading inclines. Try again.');
+    ort.env.webgpu.adapter = readyAdapter;
     announce(progress, 'Starting incline model…');
     const setup = performance.now();
     const session = await ort.InferenceSession.create(bytes, {executionProviders: ['webgpu'], graphOptimizationLevel: 'disabled'});
     return {status: 'ready', ort, session, downloadMs, setupMs: performance.now() - setup};
-  })().catch(error => { runtimePromise = undefined; throw error; });
+  })().then(runtime => {
+    // Missing/temporarily unavailable devices are not a successful runtime.
+    // Recheck capabilities on the next explicit request instead of requiring a reload.
+    if (runtime.status !== 'ready') runtimePromise = undefined;
+    return runtime;
+  }).catch(error => { runtimePromise = undefined; throw error; });
   return runtimePromise;
 }
 
@@ -148,6 +157,13 @@ async function run({pixels, width, height, signal}, progress) {
     frame.execution = 'webgpu-with-cpu-operator-fallback';
     frames.set(key, frame); while (frames.size > 2) frames.delete(frames.keys().next().value);
     return {...frame, normals: frame.normals.slice(), cacheHit: false};
+  } catch(error) {
+    // A lost GPU/session must not poison subsequent explicit retries.
+    if(error.name!=='AbortError'){
+      runtimePromise=undefined;
+      try{await session.release();}catch{}
+    }
+    throw error;
   } finally { image.dispose(); tokens.dispose(); if (output) Object.values(output).forEach(t => t.dispose()); }
 }
 
