@@ -37,7 +37,7 @@ function setMode(mode){
  $('edit-button').setAttribute('aria-pressed','false');
  for(const [id,on] of [['create-tab',mode==='create'],['grade-tab',mode==='grade']]){$(id).classList.toggle('active',on);$(id).setAttribute('aria-pressed',on);}
  $('create-controls').classList.toggle('hidden',mode!=='create');$('grade-controls').classList.toggle('hidden',mode!=='grade');
- $('workspace-title').innerHTML=mode==='create'?'Your next problem is on this wall<span>.</span>':'One color. One complete problem<span>.</span>';
+ $('workspace-title').closest('.workspace-heading').classList.toggle('hidden',mode==='create');
  $('generate-button').innerHTML=mode==='create'?'<span class="spark">✳</span> Shuffle problems <span>↻</span>':'<span class="spark">≈</span> Recheck problem <span>↗</span>';
  if(mode==='grade'&&!state.selectedHolds.length)selectInitialColor();render();scheduleRegenerate();
 }

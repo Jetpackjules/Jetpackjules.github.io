@@ -1,5 +1,5 @@
 // Only static app assets are cached. Camera/uploaded photos never pass here.
-const APP='crux-app-v19',ASSETS='crux-model-assets-v1';
+const APP='crux-app-v19-heading',ASSETS='crux-model-assets-v1';
 const CORE=['./','index.html','style.css','app.js','image-status.mjs','scan-progress.mjs','climber-profile.mjs','straight-surface-cells.mjs','surface-evidence.mjs','adaptive-straight-surfaces.mjs','augment-gradient-seams.mjs','engine.js','problem-engine.mjs','problem-worker.js','problem-view.js','hold-segmentation.mjs','hold-colors.mjs','vision-worker.js','detector-worker.js','angle-worker.js','incline-geometry.mjs','local-incline.mjs','wall-scale.mjs','facet-pose.mjs','facet-view.mjs','wall-facets.mjs','automatic-surfaces.mjs','surface-model.mjs','focus-area.mjs','climber-ik.mjs','contact-labels.mjs','wall-interaction.js','pwa.js','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','demo-holds.json'];
 const cacheable=(response,url)=>response.ok&&!response.redirected&&new URL(response.url).pathname===url.pathname;
 CORE.push('moge-surface-model.mjs','rgb-face-inclines.mjs',...['detect.mjs','core.mjs','opencv-core.mjs','support.mjs','support-cleanup.mjs','lsd.mjs','lsd-wasm.mjs','lsd.wasm'].map(f=>'rgb/'+f));
