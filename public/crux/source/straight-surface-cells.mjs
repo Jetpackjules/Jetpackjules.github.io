@@ -1,6 +1,6 @@
-import {retainLocalSurfaceEvidence} from './surface-evidence.mjs?v=22';
+import {retainLocalSurfaceEvidence} from './surface-evidence.mjs?v=23';
 // Straight image seams partition the wall; model normals estimate each plane.
-import {detectWallSurfaces as baseSurfaces,pointInSurface,traceSurfaceRings} from './automatic-surfaces.mjs?v=22';
+import {detectWallSurfaces as baseSurfaces,pointInSurface,traceSurfaceRings} from './automatic-surfaces.mjs?v=23';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
 const unit=a=>{const l=Math.hypot(...a);return l>1e-8?a.map(v=>v/l):null;};

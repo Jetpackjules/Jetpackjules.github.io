@@ -3,7 +3,9 @@ const MODEL_BASE = new URL('./models/moge/', import.meta.url);
 const RUNTIME_BASE = new URL('./vendor/moge/', import.meta.url);
 const CACHE_NAME = 'crux-moge-small-normal-v1';
 const TOKENS = 1200;
-let runtimePromise, queue = Promise.resolve();
+let runtimePromise, warmupPromise, queue = Promise.resolve();
+let prefetched = false;
+const chunkLoads = new Map();
 const runtimeListeners=new Set();
 let runtimeMessage;
 function runtimeProgress(message){runtimeMessage=message;for(const listener of runtimeListeners)announce(listener,message);}
@@ -52,17 +54,31 @@ async function sha256(bytes) {
   return Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function loadModelBytes(progress) {
+async function loadModelManifest() {
   const response = await fetch(new URL('manifest.json', MODEL_BASE));
   if (!response.ok) throw new Error('Incline model manifest unavailable');
   const manifest = await response.json();
   if (!Number.isSafeInteger(manifest.bytes) || manifest.bytes < 1 || manifest.bytes > 200e6 || !manifest.chunks?.length)
     throw new Error('Invalid incline model manifest');
-  const bytes = new Uint8Array(manifest.bytes);
-  let offset = 0, cache;
-  try { cache = await caches.open(CACHE_NAME); } catch { /* HTTP cache remains usable. */ }
-  for (const chunk of manifest.chunks) {
-    const url = new URL(chunk.file, MODEL_BASE), cached = await cache?.match(url).catch(() => undefined);
+  if (manifest.chunks.some(chunk => !Number.isSafeInteger(chunk.bytes) || chunk.bytes < 1 || chunk.bytes > manifest.bytes) ||
+      manifest.chunks.reduce((total, chunk) => total + chunk.bytes, 0) !== manifest.bytes)
+    throw new Error('Invalid incline model chunks');
+  return manifest;
+}
+
+// Foreground loading can join a prefetch already in flight. Retain at most the
+// current chunk; the cache, rather than a second full model buffer, owns warmup.
+function loadModelChunk(chunk, cache, progress, offset, total) {
+  const url = new URL(chunk.file, MODEL_BASE), key = `${url.href}:${chunk.sha256}`;
+  let entry = chunkLoads.get(key);
+  if (!entry) {
+    entry = {listeners: new Set(), message: null};
+    const report = loaded => {
+      entry.message = `Loading incline model (${Math.round((offset + loaded) / 1e6)} / ${Math.round(total / 1e6)} MB)…`;
+      for (const listener of entry.listeners) announce(listener, entry.message);
+    };
+    entry.promise = (async () => {
+    const cached = await cache?.match(url).catch(() => undefined);
     let part, source = cached;
     if (source) {
       part = new Uint8Array(await source.arrayBuffer());
@@ -71,7 +87,7 @@ async function loadModelBytes(progress) {
       }
     }
     if (!part) {
-      announce(progress, `Loading incline model (${Math.round(offset / 1e6)} / ${Math.round(manifest.bytes / 1e6)} MB)…`);
+      report(0);
       source = await fetch(url, {cache: 'force-cache'});
       if (!source.ok) throw new Error('Incline model download unavailable');
       const reader = source.body?.getReader();
@@ -82,13 +98,29 @@ async function loadModelBytes(progress) {
           if (position + value.length > part.length) { await reader.cancel(); throw new Error('Invalid incline model size'); }
           part.set(value, position); position += value.length;
           const mb = Math.round((offset + position) / 1e6);
-          if (mb !== last) { announce(progress, `Loading incline model (${mb} / ${Math.round(manifest.bytes / 1e6)} MB)…`); last = mb; }
+          if (mb !== last) { report(position); last = mb; }
         }
         if (position !== part.length) throw new Error('Incomplete incline model download');
       } else part = new Uint8Array(await source.arrayBuffer());
       if (part.length !== chunk.bytes || await sha256(part) !== chunk.sha256) throw new Error('Incline model checksum mismatch');
-      try { await cache?.put(url, new Response(part, {headers: {'Content-Type': 'application/octet-stream'}})); } catch { /* Storage quota must not prevent inference. */ }
+      let stored = false;
+      try { if (cache) { await cache.put(url, new Response(part, {headers: {'Content-Type': 'application/octet-stream'}})); stored = true; } } catch { /* Storage quota must not prevent inference. */ }
+      return {part, stored};
     }
+    return {part, stored: true};
+    })().finally(() => { if (chunkLoads.get(key) === entry) chunkLoads.delete(key); });
+    chunkLoads.set(key, entry);
+  }
+  entry.listeners.add(progress); if (entry.message) announce(progress, entry.message);
+  return entry.promise.finally(() => entry.listeners.delete(progress));
+}
+
+async function loadModelBytes(progress) {
+  const manifest = await loadModelManifest(), bytes = new Uint8Array(manifest.bytes);
+  let offset = 0, cache;
+  try { cache = await caches.open(CACHE_NAME); } catch { /* HTTP cache remains usable. */ }
+  for (const chunk of manifest.chunks) {
+    const {part} = await loadModelChunk(chunk, cache, progress, offset, manifest.bytes);
     bytes.set(part, offset); offset += part.length;
   }
   if (offset !== manifest.bytes || await sha256(bytes) !== manifest.sha256) throw new Error('Incomplete incline model');
@@ -127,10 +159,25 @@ async function getRuntime(progress) {
   return followRuntime(progress);
 }
 
-// Shares the exact download/session with a later scan; no photo or inference needed.
+// Optional prefetch only. A 115 MB model buffer plus an idle ORT/GPU session can
+// crowd out the hold detector on phones, even though no incline inference runs.
 export async function warmMoGeSurfaceModel(){
- try{const runtime=await getRuntime(()=>{});return {status:runtime.status,code:runtime.code};}
- catch(error){return unavailable('incline-model-failed',String(error.message||error));}
+ // Keep only a completion flag. Foreground loading still checks the actual
+ // cache after eviction; visibility events need not reread/hash 115 MB.
+ if(prefetched)return {status:'cached'};
+ if(warmupPromise)return warmupPromise;
+ warmupPromise=(async()=>{
+  if(!globalThis.navigator?.gpu)return unavailable('webgpu-unavailable','Inclines need WebGPU on this device.');
+  let cache;try{cache=await caches.open(CACHE_NAME);}catch{return {status:'skipped',code:'cache-unavailable'};}
+  const manifest=await loadModelManifest();let offset=0;
+  for(const chunk of manifest.chunks){
+   const {stored}=await loadModelChunk(chunk,cache,()=>{},offset,manifest.bytes);
+   if(!stored)return {status:'skipped',code:'cache-unavailable'};
+   offset+=chunk.bytes;
+  }
+  prefetched=true;return {status:'cached'};
+ })().catch(error=>unavailable('incline-model-failed',String(error.message||error))).finally(()=>{warmupPromise=undefined;});
+ return warmupPromise;
 }
 
 async function run({pixels, width, height, signal}, progress) {
