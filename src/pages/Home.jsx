@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import RainWindow from '../components/RainWindow';
 
 const projectRecords = [
+  { id: 'crux', title: 'CRUX', category: 'Computer Vision / Web App', desc: 'Turn a climbing-wall photo into new boulder problems.', date: '2026-09', image: 'overhang-loop.mp4', thumbnailPoster: 'overhang-poster.jpg', thumbnailFit: 'contain', previewLabel: 'Overhang photo, detected wall faces, hold outlines, and a generated climb', projectPage: '/crux/' },
   { id: 'robot-teleop-vision', title: 'Robot Teleop Vision', category: 'Robotics / Computer Vision', desc: 'Head-tracked 3D viewing for remote manipulation, developed in the RSE Lab.', date: '2026-09', status: 'ongoing', image: 'thumbnail.mp4', thumbnailPoster: 'thumbnail.jpg', projectPage: '/research/robot-teleop-vision/index.html', github: 'https://github.com/Jetpackjules/robot-teleop-vision' },
   { id: 'bonk-rl', title: 'Bonk RL', category: 'Reinforcement Learning / Physics Simulation', desc: 'Comparing PPO architectures for movement, momentum, collisions, and transfer in a recreated Bonk.io environment.', date: '2026-08', status: 'ongoing', image: 'hero_parkour_raycasts.mp4', thumbnailPoster: 'hero_parkour_raycasts.webp', headerImage: 'hero_parkour_raycasts.mp4', github: 'https://github.com/danishubin/bonkio' },
   { id: '25d-window', title: '2.5D Window System', category: 'Computer Vision / Godot', desc: 'An interactive 2.5D window management system built with real-time rendering logic.', date: '2026-04', status: 'ongoing', image: 'single-screen-pingpong.mp4', thumbnailPoster: 'single-screen-pingpong.webp', github: 'https://github.com/Jetpackjules/2.5D-Window-System' },
@@ -95,11 +96,11 @@ export default function Home() {
                     className="brutalist-panel" 
                     style={{ minWidth: 0, height: '360px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s ease', boxShadow: 'calc(var(--pop-dir-x) * 6px) calc(var(--pop-dir-y) * 6px) 0px #000' }}
                   >
-                     <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', position: 'relative', overflow: 'hidden', backgroundColor: ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
+                     <div style={{ flex: 1, borderBottom: 'var(--border-width) solid var(--border-color)', position: 'relative', overflow: 'hidden', backgroundColor: p.thumbnailFit === 'contain' ? '#17211b' : ['var(--accent)', 'var(--accent-light)', 'var(--accent-purple)'][i%3] }}>
                         {p.id === 'rainy-day' ? (
                            <RainWindow bgIdClass={8} />
                         ) : (p.image || '').endsWith('.mp4') ? (
-                           <video src={`/assets/projects/${p.id}/${p.image}`} poster={p.thumbnailPoster ? `/assets/projects/${p.id}/${p.thumbnailPoster}` : undefined} autoPlay loop muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                           <video src={`/assets/projects/${p.id}/${p.image}`} poster={p.thumbnailPoster ? `/assets/projects/${p.id}/${p.thumbnailPoster}` : undefined} aria-label={p.previewLabel || `${p.title} preview`} autoPlay loop muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: p.thumbnailFit || 'cover' }} />
                         ) : (
                            <div style={{ width: '100%', height: '100%', background: `url('/assets/projects/${p.id}/${p.image || 'placeholder_img_or_gif.gif'}') center/cover`, transform: p.id === 'squash' ? 'scale(1.15)' : 'none' }} />
                         )}
