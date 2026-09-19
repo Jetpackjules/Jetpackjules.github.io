@@ -1,6 +1,6 @@
 // Classic worker for OpenCV/LSD; neural normals attach angles to fixed RGB faces.
 let cache,latest,queue=Promise.resolve();
-const modules=Promise.all([import('./rgb/detect.mjs?v=23'),import('./rgb-face-inclines.mjs?v=23')]);
+const modules=Promise.all([import('./rgb/detect.mjs?v=24'),import('./rgb-face-inclines.mjs?v=24')]);
 const current=r=>latest?.id===r.id&&latest?.photo===r.photo;
 function publish(request,local,partial,extra={}){
  if(!current(request))return;
@@ -30,12 +30,12 @@ async function run(request){
    const onProgress=message=>{if(cache===entry&&latest?.photo===photo)self.postMessage({id:latest.id,photo,progress:message,anglesOnly:true});};
    if(entry.normalReference){
     try{
-     const {loadDemoNormalFrame}=await import('./demo-normal-frames.mjs?v=23');
+     const {loadDemoNormalFrame}=await import('./demo-normal-frames.mjs?v=24');
      const frame=await loadDemoNormalFrame(entry.normalReference,{width:entry.pixelWidth,height:entry.pixelHeight},onProgress);
      if(frame?.status==='ready')return frame;
     }catch{/* A missing saved example can still use live inference. */}
    }
-   const {inferMoGeSurfaceFrame}=await import('./moge-surface-model.mjs?v=23');
+   const {inferMoGeSurfaceFrame}=await import('./moge-surface-model.mjs?v=24');
    return inferMoGeSurfaceFrame({pixels:entry.pixels,width:entry.pixelWidth,height:entry.pixelHeight,photo},onProgress);
   })().catch(error=>({status:'unavailable',code:'incline-model-failed',reason:String(error.message||error)})).then(frame=>{
    // Preserve successful frames only. A download/device failure must be retryable
@@ -55,7 +55,7 @@ async function run(request){
 self.onmessage=({data})=>{
  if(data.kind==='warmup'){
   // Never replace photo ownership or hold up the RGB processing queue.
-  import('./moge-surface-model.mjs?v=23').then(m=>m.warmMoGeSurfaceModel()).then(result=>self.postMessage({kind:'model-warmup',...result})).catch(()=>self.postMessage({kind:'model-warmup',status:'unavailable'}));
+  import('./moge-surface-model.mjs?v=24').then(m=>m.warmMoGeSurfaceModel()).then(result=>self.postMessage({kind:'model-warmup',...result})).catch(()=>self.postMessage({kind:'model-warmup',status:'unavailable'}));
   return;
  }
  latest=data;queue=queue.then(()=>run(data));

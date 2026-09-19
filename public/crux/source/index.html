@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CRUX — Bouldering, remixed</title>
-  <meta name="description" content="Turn a photo of your climbing wall into new problems. Find holds, create mixed-color routes, and test experimental difficulty estimates. All photo processing stays on your device.">
+  <meta name="description" content="Turn a photo of your climbing wall into new challenges. Find holds, create mixed-color routes, and test experimental difficulty estimates. All photo processing stays on your device.">
   <meta name="theme-color" content="#f44b2b">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23f44b2b'/%3E%3Cpath d='m10 10 20 20m0-20L10 30M20 6v28M6 20h28' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=23"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="style.css?v=24"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
   <header class="app-header">
@@ -14,7 +14,7 @@
     <nav class="mode-nav" aria-label="Workspace"><button class="active" id="create-tab" aria-pressed="true">Create a climb</button><button id="grade-tab" aria-pressed="false">Grade a climb</button></nav>
   </header>
   <main>
-    <div class="workspace-heading hidden"><div><h1 id="workspace-title">One color. One complete problem<span>.</span></h1></div></div>
+    <div class="workspace-heading hidden"><div><h1 id="workspace-title">One color. One complete challenge<span>.</span></h1></div></div>
     <div class="workspace">
       <aside class="controls-panel">
         <section class="control-section wall-controls"><div class="section-label">YOUR WALL <button id="demo-button" class="text-button">Example walls</button></div>
@@ -35,7 +35,7 @@
           <button id="scale-guides" class="upload-button" aria-pressed="false">Check top &amp; mat</button>
           <div id="scale-guide-controls" class="hidden"><label class="field-label">Wall top<input id="scale-top" type="range" min="0" max="75" step="0.5" value="0"></label><label class="field-label">Mat at the wall<input id="scale-bottom" type="range" min="25" max="100" step="0.5" value="100"></label></div>
         </details>
-        <button class="primary generate-button" id="generate-button"><span class="spark">✳</span> Shuffle problems <span>↻</span></button>
+        <button class="primary generate-button" id="generate-button"><span class="spark">✳</span> Shuffle challenges <span>↻</span></button>
       </aside>
       <section class="wall-panel" aria-label="Interactive climbing wall"><div class="wall-toolbar"><div class="wall-actions"><button id="quick-photo" title="Choose your own wall photo" aria-label="Choose your own wall photo">↑ <span>Photo</span></button><button id="detect-button" title="Find hold candidates" aria-label="Find hold candidates">⌖ <span>Find holds</span></button><button id="edit-button" aria-pressed="false">＋ <span>Edit holds</span></button><button id="overlay-button" aria-pressed="true" title="Show or hide holds" aria-label="Show or hide hold overlay">◉</button></div></div>
         <div class="demo-wall-tabs" id="demo-wall-tabs" aria-label="Demo walls"><button data-wall-example="original" aria-pressed="true"><img src="./demo-wall.jpg" alt=""><span>Straight wall</span></button><button data-wall-example="cave" aria-pressed="false"><img src="./examples/cave.png" alt=""><span>The cave</span></button><button data-wall-example="overhang" aria-pressed="false"><img src="./examples/overhang.png" alt=""><span>The overhang</span></button></div><div class="wall-stage" id="wall-stage" tabindex="0" role="group" aria-label="Climbing wall. Scroll or pinch to zoom; drag to pan. Press 0 or double-click the background to fit."><div class="wall-placeholder" id="wall-placeholder"><span class="viewfinder">⌗</span><h2>Your next climb is already here.</h2><p>Add a wall photo, or explore the demo.</p><button class="primary" id="empty-upload">Choose a photo <span>↗</span></button></div><div id="image-wrap" class="image-wrap hidden"><img id="wall-image" alt="Climbing wall ready for hold selection" draggable="false"><svg id="facet-overlay" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="scan-overlay" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="route-overlay" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="scale-overlay" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="climber-overlay" class="hidden" aria-hidden="true" preserveAspectRatio="none"></svg><svg id="focus-preview" class="hidden" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><div id="focus-editor" class="hidden" aria-label="Adjust wall area"></div><svg id="focus-overlay" aria-hidden="true" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg><svg id="contact-links" aria-hidden="true"></svg><div id="hold-layer" class="hold-layer"></div><div id="contact-labels" aria-hidden="true"></div></div><div id="image-status" class="image-status" role="status" aria-live="polite" aria-atomic="true"><span class="image-status-icon" aria-hidden="true"></span><span id="image-status-text"></span></div></div>
@@ -48,6 +48,6 @@
   <dialog id="info-dialog"><button class="dialog-close" aria-label="Close dialog">×</button><div id="info-content"></div></dialog>
   <dialog id="camera-dialog"><button class="dialog-close" aria-label="Close camera">×</button><h2>Frame the whole wall.</h2><video id="camera-video" playsinline autoplay muted></video><p id="camera-error" role="status"></p><div class="dialog-actions"><button class="primary" id="capture-button">Capture wall</button><button class="upload-button" id="native-camera">Use phone camera</button></div></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="app.js?v=23"></script>
+  <script type="module" src="app.js?v=24"></script>
 </body>
 </html>

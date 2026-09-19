@@ -1,6 +1,6 @@
 {
  "id":"./", "name":"CRUX — Bouldering Lab", "short_name":"CRUX",
- "description":"Explore new boulder problems on your own wall, with on-device hold detection.",
+ "description":"Explore new bouldering challenges on your own wall, with on-device hold detection.",
  "start_url":"./", "scope":"./", "display":"standalone",
  "background_color":"#f6f7f3", "theme_color":"#232620",
  "icons":[

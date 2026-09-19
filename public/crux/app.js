@@ -1,20 +1,20 @@
-import {createImageStatus} from './image-status.mjs?v=23';
-import {demoNormalKey} from './demo-normal-frames.mjs?v=23';
-import {loadDemoHoldBoxes} from './demo-hold-boxes.mjs?v=23';
-import {inclineFailureMessage} from './incline-status.mjs?v=23';
-import {retryDetection} from './detection-retry.mjs?v=23';
-import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=23';
-import {climberProfile} from './climber-profile.mjs?v=23';
-import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=23';
-import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=23';
-import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=23';
-import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=23';
-import {createClimberOverlay} from './climber-ik.mjs?v=23';
-import {setupInstall} from './pwa.js?v=23';
-import {placeContacts,visibleBox} from './contact-labels.mjs?v=23';
-import {attachWallZoom} from './wall-interaction.js?v=23';
-import {clamp} from './engine.js?v=23';
-import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=23';
+import {createImageStatus} from './image-status.mjs?v=24';
+import {demoNormalKey} from './demo-normal-frames.mjs?v=24';
+import {loadDemoHoldBoxes} from './demo-hold-boxes.mjs?v=24';
+import {inclineFailureMessage} from './incline-status.mjs?v=24';
+import {retryDetection} from './detection-retry.mjs?v=24';
+import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=24';
+import {climberProfile} from './climber-profile.mjs?v=24';
+import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=24';
+import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=24';
+import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=24';
+import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=24';
+import {createClimberOverlay} from './climber-ik.mjs?v=24';
+import {setupInstall} from './pwa.js?v=24';
+import {placeContacts,visibleBox} from './contact-labels.mjs?v=24';
+import {attachWallZoom} from './wall-interaction.js?v=24';
+import {clamp} from './engine.js?v=24';
+import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=24';
 const $ = id=>document.getElementById(id);
 const state={mode:'create',resultTarget:null,updating:false,holds:[],routes:[],selected:0,selectedHolds:[],style:'balanced',edit:false,overlay:true,activeHold:null,demo:false,photo:null,busy:false,seed:Date.now(),imageToken:0,example:null,focus:null,focusPicking:false,focusDraft:null,angleMode:'auto',angleEstimate:null,gradeProblem:null,planning:false,planError:null,betaMode:false,betaIndex:0,climberMode:true,showAll:false,scanReveal:false,hasProblem:false,localInclines:null,scaleMode:'auto',photoHeight:4,baseAngle:0,scaleSpan:null,scaleGuides:false};
 const colors={red:'#e95952',orange:'#eb984e',yellow:'#e3c82c',green:'#44ba6c',blue:'#4e90df',purple:'#9363bc',pink:'#ee80b2',white:'#eeeae2',black:'#414640',cyan:'#6cbbbb',gray:'#92999d'};
@@ -42,7 +42,7 @@ function setMode(mode){
  for(const [id,on] of [['create-tab',mode==='create'],['grade-tab',mode==='grade']]){$(id).classList.toggle('active',on);$(id).setAttribute('aria-pressed',on);}
  $('create-controls').classList.toggle('hidden',mode!=='create');$('grade-controls').classList.toggle('hidden',mode!=='grade');
  $('workspace-title').closest('.workspace-heading').classList.toggle('hidden',mode==='create');
- $('generate-button').innerHTML=mode==='create'?'<span class="spark">✳</span> Shuffle problems <span>↻</span>':'<span class="spark">≈</span> Recheck problem <span>↗</span>';
+ $('generate-button').innerHTML=mode==='create'?'<span class="spark">✳</span> Shuffle challenges <span>↻</span>':'<span class="spark">≈</span> Recheck challenge <span>↗</span>';
  if(mode==='grade'&&!state.selectedHolds.length)selectInitialColor();render();scheduleRegenerate();
 }
 function activeRoute(){return state.mode==='grade'?state.gradeProblem:state.routes[state.selected]||null;}
@@ -98,7 +98,7 @@ function showScanOutlines(batch){
 function cancelPlan(){stopBeta();clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planId++;state.planning=false;planPending?.reject(new Error('Cancelled'));planPending=null;showPlanningIndicator(false);}
 function runPlanner(request){
  cancelPlan();const id=planId;state.planning=true;state.planError=null;showPlanningIndicator(true);
- planWorker=new Worker('./problem-worker.js?v=23',{type:'module'});
+ planWorker=new Worker('./problem-worker.js?v=24',{type:'module'});
  return new Promise((resolve,reject)=>{
   planPending={resolve,reject};
   const finish=(error,result)=>{if(id!==planId)return;clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planPending=null;state.planning=false;showPlanningIndicator(false);error?reject(error):resolve(result);};
@@ -117,7 +117,7 @@ async function enrichHolds(boxes,id){
   // Large walls can take longer than a fixed deadline while still making progress.
   const touch=()=>{clearTimeout(timer);timer=setTimeout(()=>done(),30000);};
   outlinePending={id,cancel:()=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();resolve([]);}};
-  try{v=new Worker('./vision-worker.js?v=23',{type:'module'});touch();v.onmessage=({data})=>{if(finished||data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){touch();if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
+  try{v=new Worker('./vision-worker.js?v=24',{type:'module'});touch();v.onmessage=({data})=>{if(finished||data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){touch();if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
   catch{done();}
  });
 }
@@ -166,7 +166,7 @@ function warmInclines(){
  if(state.suspended||document.hidden||state.busy||state.scanPending||state.planning)return;
  try{
   if(!angleWorker){
-   angleWorker=new Worker('./angle-worker.js?v=23');const owner=angleWorker;
+   angleWorker=new Worker('./angle-worker.js?v=24');const owner=angleWorker;
    owner.onmessage=({data})=>{if(angleWorker===owner&&data.kind==='model-warmup')state.modelWarmup=data.status;};
    owner.onerror=()=>{if(angleWorker===owner){owner.terminate();angleWorker=null;}};
   }
@@ -178,7 +178,7 @@ function requestAngleEstimate(fresh=false){
  const id=++angleJob,photo=state.imageToken;clearTimeout(angleTimer);
  state.anglePending=true;state.inclineFailure=null;updateAngleUI('Estimating the wall against the floor…');renderFacets();
  try{
- if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=23');fresh=true;}
+ if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=24');fresh=true;}
  angleWorker.onmessage=({data})=>{
    if(data.kind==='model-warmup'){state.modelWarmup=data.status;return;}
    if(data.id!==angleJob||data.photo!==state.imageToken)return;
@@ -254,7 +254,7 @@ async function detect(cachedBoxes=state.demoHolds||null){
  let boxes=cachedBoxes;
  if(!boxes){
   boxes=await retryDetection(async attempt=>{
-  if(!worker)worker=new Worker('./detector-worker.js?v=23',{type:'module'});
+  if(!worker)worker=new Worker('./detector-worker.js?v=24',{type:'module'});
   const owner=worker;
   const pixels=sourceContext.getImageData(0,0,sourceCanvas.width,sourceCanvas.height);
   return new Promise((resolve,reject)=>{
@@ -293,9 +293,9 @@ async function generate(showToast=true){
   const result=await promise;if(job!==planId||token!==state.imageToken||mode!==state.mode)return;
   for(const p of mode==='grade'?[result]:result)if(p)previewModels.set(p,{setup:configuration,holds,visual:{imageAspect:sourceCanvas.width/sourceCanvas.height,fullAspect:geometryCanvas.width/geometryCanvas.height,crop:{...geometryCrop},floorNormal:state.localInclines?.floorReference?.normal,patches:state.localInclines?.patches||[],angleMode:state.angleMode,angle:configuration.angle}});
   if(mode==='grade')state.gradeProblem=result;else {state.routes=result;state.resultTarget=target;state.selected=0;}if(activeRoute())state.hasProblem=true;
-  if(mode==='create'&&!state.routes.length)state.planError='No supported problem found in this area. Try another face or adjust the optional scale settings.';
+  if(mode==='create'&&!state.routes.length)state.planError='No supported challenge found in this area. Try another face or adjust the optional scale settings.';
   liveScan.finish(state.liveToken);render();setTimeout(warmInclines,300);
-  if(showToast)notify(mode==='grade'?'Problem checked. Compare the estimate with a real climb.':state.routes.length?`${state.routes.length} problems ready. Use only the highlighted holds.`:state.planError);
+  if(showToast)notify(mode==='grade'?'Challenge checked. Compare the estimate with a real climb.':state.routes.length?`${state.routes.length} challenges ready. Use only the highlighted holds.`:state.planError);
  }catch(error){if(error.message==='Cancelled')return;state.routes=[];state.gradeProblem=null;state.planning=false;showPlanningIndicator(false);state.planError=error.message;liveScan.finish(state.liveToken);render();if(showToast)notify(error.message);}
 }
 function render(){
@@ -386,14 +386,14 @@ function targetTag(problem){
 }
 function renderResults(problem){
  renderTargetFeedback();
- const empty=state.planning?'<div class="empty-result planning-result"><span>✳</span><h3>Setting the problem…</h3><p>Checking starts, foot support and the finish.</p></div>':`<div class="empty-result"><span>↗</span><h3>${state.photo?'No problem selected.':'Your wall is the starting point.'}</h3><p>${esc(state.planError||'Choose a wall. The app prepares holds and problems automatically.')}</p></div>`;
+ const empty=state.planning?'<div class="empty-result planning-result"><span>✳</span><h3>Setting the challenge…</h3><p>Checking starts, foot support and the finish.</p></div>':`<div class="empty-result"><span>↗</span><h3>${state.photo?'No challenge selected.':'Your wall is the starting point.'}</h3><p>${esc(state.planError||'Choose a wall. The app prepares holds and challenges automatically.')}</p></div>`;
  if(state.mode==='grade'){
   const e=problem?.estimate;
   $('route-results').innerHTML=problem?`<div class="grade-result"><p class="eyebrow">PROVISIONAL PHOTO ESTIMATE</p><div class="grade-big" aria-label="Estimated grade V${e.grade}"><small>≈</small> V${e.grade}</div><div class="grade-range">Rough range <strong>V${e.low}–V${e.high}</strong></div><span>${problem.handIds.length} route holds · photo estimate</span><p>${problem.beta.length?'A candidate hand-and-foot sequence was found within the approximate reach limits.':'No supported sequence was found with the current photo geometry. This grade is a weak visual estimate.'}</p></div>`:empty;
- }else $('route-results').innerHTML=state.routes.length?state.routes.map((r,i)=>`<button class="route-card ${i===state.selected?'chosen':''}" data-route="${i}" aria-pressed="${i===state.selected}"><div class="route-card-top"><span class="route-index">PROBLEM 0${i+1}</span><span class="grade-pill" aria-label="Estimated grade V${r.estimate.grade}">≈ V${r.estimate.grade}</span></div><span class="problem-estimate-center">Rough range V${r.estimate.low}–V${r.estimate.high}</span>${targetTag(r)}<span class="route-title">${esc(r.name)}</span><span class="route-meta">${r.handIds.length} hands + ${r.footIds.length} feet-only</span></button>`).join(''):empty;
+ }else $('route-results').innerHTML=state.routes.length?state.routes.map((r,i)=>`<button class="route-card ${i===state.selected?'chosen':''}" data-route="${i}" aria-pressed="${i===state.selected}"><div class="route-card-top"><span class="route-index">CHALLENGE 0${i+1}</span><span class="grade-pill" aria-label="Estimated grade V${r.estimate.grade}">≈ V${r.estimate.grade}</span></div><span class="problem-estimate-center">Rough range V${r.estimate.low}–V${r.estimate.high}</span>${targetTag(r)}<span class="route-title">${esc(r.name)}</span><span class="route-meta">${r.handIds.length} hands + ${r.footIds.length} feet-only</span></button>`).join(''):empty;
  $('route-detail').classList.toggle('hidden',!problem);if(!problem)return;
  const e=problem.estimate,start=problem.start,hands=start?.hands||[],feet=start?.feet||[],match=hands[0]===hands[1];
- $('route-detail').innerHTML=`<div class="route-detail"><div class="problem-rule"><b>Hands</b><span>Orange holds, green starts and the white finish.</span></div><div class="problem-rule"><b>Feet</b><span>Any handhold plus the blue footholds. Other holds are off.</span></div><div class="problem-rule"><b>Start</b><span>${hands.length===2?(match?'Both hands on 2H.':'One hand on each LH / RH start.'):'Start position could not be established.'} ${feet.length===2?(feet[0]===feet[1]?'Both feet share 2F, off the ground.':'Begin with feet on LF / RF, off the ground.'):''}</span></div><div class="problem-rule"><b>Finish</b><span>Both hands on TOP, under control.</span></div><div class="detail-stat"><span>Estimated range</span><b>V${e.low}–V${e.high}</b></div><div class="detail-stat"><span>Largest modeled hand move</span><b>${problem.beta.length&&Number.isFinite(e.maxMove)?'~'+e.maxMove.toFixed(2)+' m':'Not established'}</b></div><div class="detail-stat"><span>Modeled contact changes</span><b>${problem.beta.length?problem.beta.length-1:'Not established'}</b></div><div class="detail-stat"><span>Geometry check</span><b>${problem.beta.length?'Candidate beta found':'Unverified'}</b></div>${e.personal?`<div class="personal-stat"><strong>For your height · ${Math.round(e.personal.bodyHeight*100)} cm</strong><br>${e.personal.effortEquivalent!==null&&Number.isFinite(e.personal.effortEquivalent)?`Height-adjusted effort ≈ V${Math.round(e.personal.effortEquivalent)}. Reach and cramped positions are considered.`:e.personal.feasible?"A height-specific movement candidate was found.":"No movement candidate fits this height in the current model."}</div>`:""}${e.incline?.localCount?`<div class="detail-stat"><span>Local inclines used</span><b>${e.incline.localRange[0]}° to ${e.incline.localRange[1]}° · ${e.incline.localCount}/${e.incline.total} holds</b></div>`:""}<div class="detail-actions"><button id="export-route">↓ Save problem</button><button id="check-grade">Test the grade ↗</button></div></div>`;
+ $('route-detail').innerHTML=`<div class="route-detail"><div class="problem-rule"><b>Hands</b><span>Orange holds, green starts and the white finish.</span></div><div class="problem-rule"><b>Feet</b><span>Any handhold plus the blue footholds. Other holds are off.</span></div><div class="problem-rule"><b>Start</b><span>${hands.length===2?(match?'Both hands on 2H.':'One hand on each LH / RH start.'):'Start position could not be established.'} ${feet.length===2?(feet[0]===feet[1]?'Both feet share 2F, off the ground.':'Begin with feet on LF / RF, off the ground.'):''}</span></div><div class="problem-rule"><b>Finish</b><span>Both hands on TOP, under control.</span></div><div class="detail-stat"><span>Estimated range</span><b>V${e.low}–V${e.high}</b></div><div class="detail-stat"><span>Largest modeled hand move</span><b>${problem.beta.length&&Number.isFinite(e.maxMove)?'~'+e.maxMove.toFixed(2)+' m':'Not established'}</b></div><div class="detail-stat"><span>Modeled contact changes</span><b>${problem.beta.length?problem.beta.length-1:'Not established'}</b></div><div class="detail-stat"><span>Geometry check</span><b>${problem.beta.length?'Candidate beta found':'Unverified'}</b></div>${e.personal?`<div class="personal-stat"><strong>For your height · ${Math.round(e.personal.bodyHeight*100)} cm</strong><br>${e.personal.effortEquivalent!==null&&Number.isFinite(e.personal.effortEquivalent)?`Height-adjusted effort ≈ V${Math.round(e.personal.effortEquivalent)}. Reach and cramped positions are considered.`:e.personal.feasible?"A height-specific movement candidate was found.":"No movement candidate fits this height in the current model."}</div>`:""}${e.incline?.localCount?`<div class="detail-stat"><span>Local inclines used</span><b>${e.incline.localRange[0]}° to ${e.incline.localRange[1]}° · ${e.incline.localCount}/${e.incline.total} holds</b></div>`:""}<div class="detail-actions"><button id="export-route">↓ Save challenge</button><button id="check-grade">Test the grade ↗</button></div></div>`;
  $('export-route').onclick=exportRoute;$('check-grade').onclick=openFeedback;
 }
 function renderInspector(){const h=state.edit?state.holds.find(h=>h.id===state.activeHold):null;$('hold-inspector').classList.toggle('hidden',!h);if(!h)return;$('hold-inspector').innerHTML=`<strong>Optional hold correction</strong><p class="hold-auto-note">${esc(h.appearance?.shape||'Shape uncertain')} · ${esc(h.appearance?.apparentSize||'apparent size uncertain')} · grip depth is not visible</p><label>Grip override<select id="hold-grip">${['unknown','jug','edge','crimp','sloper','pinch','pocket'].map(x=>`<option ${x===h.grip?'selected':''}>${x==='unknown'?'Auto · visual cues':x}</option>`).join('')}</select></label><label>Color<select id="hold-color">${[...state.palette.map(p=>p.id),...Object.keys(colors)].map(x=>`<option value="${x}" ${x===h.color?'selected':''}>${esc(colorLabel(x))}</option>`).join('')}</select></label><label>Use<select id="hold-role">${[['normal','Available'],['start','Start here'],['finish','Finish here'],['excluded','Exclude']].map(([v,label])=>`<option value="${v}" ${v===h.role?'selected':''}>${label}</option>`).join('')}</select></label><button id="remove-hold" aria-label="Delete selected hold">Delete</button><button id="close-inspector" aria-label="Close hold details">×</button>`;
@@ -405,7 +405,7 @@ function selectHold(id){
   if(!inFocus(h)||h.role==='excluded')return;
   state.selectedHolds=state.selectedHolds.includes(id)?state.selectedHolds.filter(x=>x!==id):[...state.selectedHolds,id];state.gradeProblem=null;scheduleRegenerate();
  }else if(state.edit)state.activeHold=state.activeHold===id?null:id;
- else {const role=roleForHold(activeRoute(),id);notify(role==='foot'?'Blue holds are feet only.':role?'This hold is allowed for hands and feet.':'This hold is outside the selected problem.');return;}
+ else {const role=roleForHold(activeRoute(),id);notify(role==='foot'?'Blue holds are feet only.':role?'This hold is allowed for hands and feet.':'This hold is outside the selected challenge.');return;}
  render();
 }
 function history(){try{const parsed=JSON.parse(localStorage.getItem('crux-checks-v1')||'[]');return Array.isArray(parsed)?parsed.filter(x=>Number.isFinite(x.actual)&&Number.isFinite(x.predicted)).slice(-100):[];}catch{return [];}}
@@ -424,7 +424,7 @@ function exportRoute(){
  ctx.fillStyle='#ccd4bd';ctx.font='14px sans-serif';ctx.fillText(`Rough photo range V${problem.estimate.low}–V${problem.estimate.high}`,22,sourceCanvas.height+56);
  ctx.fillStyle='#eee';ctx.fillText('Highlighted holds only. Blue = feet only. Handholds may also be used for feet.',22,sourceCanvas.height+82);ctx.fillText('Start on LH/RH + LF/RF. Match TOP under control. Geometry is approximate.',22,sourceCanvas.height+107);
  if(state.demo&&!state.example){ctx.font='11px sans-serif';ctx.fillText('Photo: Miyuki Meinaka / Wikimedia Commons / CC BY-SA 4.0 / cropped and annotated',22,sourceCanvas.height+142);}
- canvas.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob),name='crux-problem.png';dialog(`<p class="eyebrow">TAKE YOUR PROBLEM WITH YOU</p><h2>Your usable hold set</h2><img src="${url}" alt="Boulder problem with highlighted usable holds, starts and finish" style="width:100%;height:auto;border-radius:8px"><p>Colored outlines mark the whole problem. No numbered sequence is required.</p><a class="primary" href="${url}" download="${name}" style="text-decoration:none">Download PNG ↓</a>`);$('info-dialog').addEventListener('close',()=>URL.revokeObjectURL(url),{once:true});},'image/png');
+ canvas.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob),name='crux-challenge.png';dialog(`<p class="eyebrow">TAKE YOUR CHALLENGE WITH YOU</p><h2>Your usable hold set</h2><img src="${url}" alt="Bouldering challenge with highlighted usable holds, starts and finish" style="width:100%;height:auto;border-radius:8px"><p>Colored outlines mark the whole challenge. No numbered sequence is required.</p><a class="primary" href="${url}" download="${name}" style="text-decoration:none">Download PNG ↓</a>`);$('info-dialog').addEventListener('close',()=>URL.revokeObjectURL(url),{once:true});},'image/png');
 }
 async function openCamera(){if(state.busy)return;$('camera-dialog').showModal();$('camera-error').textContent='';$('capture-button').disabled=true;try{if(!navigator.mediaDevices?.getUserMedia)throw Error('Camera preview is unavailable. Use your phone camera or upload a photo.');stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});if(!$('camera-dialog').open){stopCamera();return;}$('camera-video').srcObject=stream;await $('camera-video').play();$('capture-button').disabled=false;}catch(e){$('camera-error').textContent=e.name==='NotAllowedError'?'Camera access was declined. You can allow it in browser settings, or upload a photo.':e.name==='NotFoundError'?'No camera found. Upload a wall photo instead.':e.message;}}
 function stopCamera(){stream?.getTracks().forEach(t=>t.stop());stream=null;$('camera-video').srcObject=null;}
@@ -477,7 +477,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopBeta();
 function registerTools(){
  const context=document.modelContext;if(!context?.registerTool)return;const lifetime=new AbortController();
  const brief=p=>({name:p.name,handIds:p.handIds,footIds:p.footIds,start:p.start,finishId:p.finishId,estimate:p.estimate,stats:p.stats,beta:p.beta});
- const tools=[{name:'get_climbing_wall',description:'Read hold outlines, allowed problem sets, start contacts, finish, optional candidate beta and provisional grade. Does not return the photo.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({mode:state.mode,holdCount:state.holds.length,outlinedHolds:state.holds.filter(h=>h.polygon&&!h.fallback).length,planning:state.planning,setup:setup(),angleMode:state.angleMode,angleEstimate:state.angleEstimate,inclineFailure:state.inclineFailure,inclineExecution:state.inclineExecution,modelWarmup:state.modelWarmup,detectionFailure:state.detectionFailure,localInclines:state.localInclines?{coverage:state.localInclines.coverage,angleRange:state.localInclines.angleRange}:null,focus:state.focus,problems:state.routes.map(brief),gradeProblem:state.gradeProblem?brief(state.gradeProblem):null})}];
+ const tools=[{name:'get_climbing_wall',description:'Read hold outlines, allowed challenge sets, start contacts, finish, optional candidate beta and provisional grade. Does not return the photo.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({mode:state.mode,holdCount:state.holds.length,outlinedHolds:state.holds.filter(h=>h.polygon&&!h.fallback).length,planning:state.planning,setup:setup(),angleMode:state.angleMode,angleEstimate:state.angleEstimate,inclineFailure:state.inclineFailure,inclineExecution:state.inclineExecution,modelWarmup:state.modelWarmup,detectionFailure:state.detectionFailure,localInclines:state.localInclines?{coverage:state.localInclines.coverage,angleRange:state.localInclines.angleRange}:null,focus:state.focus,problems:state.routes.map(brief),gradeProblem:state.gradeProblem?brief(state.gradeProblem):null})}];
  for(const tool of tools){try{Promise.resolve(context.registerTool(tool,{signal:lifetime.signal})).catch(()=>{});}catch{}}
  window.addEventListener('pagehide',()=>lifetime.abort(),{once:true});
 }

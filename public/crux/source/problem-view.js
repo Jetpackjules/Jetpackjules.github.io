@@ -1,5 +1,5 @@
 // Draw usable surfaces, not an imposed order of moves.
-import {placeContacts} from './contact-labels.mjs?v=23';
+import {placeContacts} from './contact-labels.mjs?v=24';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const problemColors={hand:'#ff754b',foot:'#56dddf',start:'#d4ef75',finish:'#fff9ee'};
 export function holdPolygon(h){

@@ -332,7 +332,7 @@ export function generateProblems(holds,setup,target,style='balanced',seed=42){
     const offset=trial%3;starts=starts.filter((_,i)=>i%3===offset);if(!starts.length)continue;
     const r=search(c,{hands,feet,finish,starts,maxExpanded:1500,neighborLimit:16,target,style,random:trial<seedTrials?random:()=>.5});audit.expanded+=r.expanded;
     if(!r.beta.length)continue;
-    let p=problemFrom(c,r,finish,{id:`p-${seed}-${trial}`,name:'New problem',style});
+    let p=problemFrom(c,r,finish,{id:`p-${seed}-${trial}`,name:'New challenge',style});
     // Re-evaluate exactly the selected set. No unselected foothold is available.
     const checked=fixedSearch(c,p,1000);audit.expanded+=checked.expanded;audit.easierBetaChecks+=checked.easierBetaChecks??0;
     if(checked.beta.length){p=problemFrom(c,checked,finish,{id:p.id,name:p.name,style});p.stats.initialHandMoves=r.beta.filter(s=>s.move&&['lh','rh'].includes(s.move.limb)).length;p.stats.shortcutsChecked=true;}
@@ -376,7 +376,7 @@ export function generateProblems(holds,setup,target,style='balanced',seed=42){
       const key=signature(q);if(tried.has(key))continue;tried.add(key);audit.subsetTrials++;
       const checked=fixedSearch(c,q,700);audit.expanded+=checked.expanded;audit.easierBetaChecks+=checked.easierBetaChecks??0;
       if(!checked.beta.length)continue;
-      const p=problemFrom(c,checked,c.index.get(q.finishId),{id:`p-${seed}-subset-${audit.subsetTrials}`,name:'New problem',style});
+      const p=problemFrom(c,checked,c.index.get(q.finishId),{id:`p-${seed}-subset-${audit.subsetTrials}`,name:'New challenge',style});
       p.stats.mutation={kind,removed,parentGrade:parent.estimate.grade,parentRawGrade:parent.estimate.rawGrade};p.stats.shortcutsChecked=true;
       if(addCandidate(p)){audit.subsetAccepted++;if(kind==='hand')audit.handRemovals++;else if(kind==='foot')audit.footRemovals++;else if(kind==='swap')audit.swaps++;else audit.additions++;}
     }
@@ -394,7 +394,7 @@ export function analyzeColorProblem(holds,setup,color){
   const finish=locked[0]??hands.reduce((best,i)=>best===undefined||c.hs[i].Y>c.hs[best].Y?i:best,undefined);
   let r=finish===undefined?{beta:[],expanded:0,searchLimited:false,reason:'No handholds selected.'}:search(c,{hands,feet,finish,maxExpanded:3600,neighborLimit:18});
   const handIds=hands.map(i=>c.hs[i].id),footIds=feet.filter(i=>!hands.includes(i)).map(i=>c.hs[i].id),first=r.beta[0];
-  const p={id:`color-${color??'selected'}`,name:color==null?'Your selected problem':`${color} problem`,color,handIds,footIds,start:first?{hands:[first.lh,first.rh],feet:[first.lf,first.rf]}:null,finishId:finish===undefined?null:c.hs[finish].id,beta:r.beta};
+  const p={id:`color-${color??'selected'}`,name:color==null?'Your selected challenge':`${color} challenge`,color,handIds,footIds,start:first?{hands:[first.lh,first.rh],feet:[first.lf,first.rf]}:null,finishId:finish===undefined?null:c.hs[finish].id,beta:r.beta};
   if(r.beta.length){r=fixedSearch(c,p);p.beta=r.beta;}
   return {...p,estimate:estimate(c,handIds,r.beta,r,referenceFor(c,p,r,true)),stats:finishStats(c,r,{allowedHoldCount:handIds.length+footIds.length})};
 }
