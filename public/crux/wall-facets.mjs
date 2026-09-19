@@ -1,6 +1,6 @@
 // Long image seams propose polygon boundaries; masked depth verifies their slopes.
 // Neither a plywood joint nor a color change is itself evidence of an incline.
-import {fitMetricPlane} from './incline-geometry.mjs?v=21';
+import {fitMetricPlane} from './incline-geometry.mjs?v=22';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
 const unit=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);};

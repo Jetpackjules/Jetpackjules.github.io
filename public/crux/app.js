@@ -1,19 +1,19 @@
-import {createImageStatus} from './image-status.mjs?v=21';
-import {demoNormalKey} from './demo-normal-frames.mjs?v=21';
-import {inclineFailureMessage} from './incline-status.mjs?v=21';
-import {retryDetection} from './detection-retry.mjs?v=21';
-import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=21';
-import {climberProfile} from './climber-profile.mjs?v=21';
-import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=21';
-import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=21';
-import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=21';
-import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=21';
-import {createClimberOverlay} from './climber-ik.mjs?v=21';
-import {setupInstall} from './pwa.js?v=21';
-import {placeContacts,visibleBox} from './contact-labels.mjs?v=21';
-import {attachWallZoom} from './wall-interaction.js?v=21';
-import {clamp} from './engine.js?v=21';
-import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=21';
+import {createImageStatus} from './image-status.mjs?v=22';
+import {demoNormalKey} from './demo-normal-frames.mjs?v=22';
+import {inclineFailureMessage} from './incline-status.mjs?v=22';
+import {retryDetection} from './detection-retry.mjs?v=22';
+import {createLiveScan,identifyHoldBoxes} from './scan-progress.mjs?v=22';
+import {climberProfile} from './climber-profile.mjs?v=22';
+import {attachFocusEditor,defaultFocusArea,insideFocus} from './focus-area.mjs?v=22';
+import {facetRegions,facetOverlay,createScanReveal} from './facet-view.mjs?v=22';
+import {estimateWallSpan,scaleFromSpan} from './wall-scale.mjs?v=22';
+import {assignHoldColors,nearestPaintGroup} from './hold-colors.mjs?v=22';
+import {createClimberOverlay} from './climber-ik.mjs?v=22';
+import {setupInstall} from './pwa.js?v=22';
+import {placeContacts,visibleBox} from './contact-labels.mjs?v=22';
+import {attachWallZoom} from './wall-interaction.js?v=22';
+import {clamp} from './engine.js?v=22';
+import {wallOverlay,paintProblem,problemIds,roleForHold,markerLabels,problemColors} from './problem-view.js?v=22';
 const $ = id=>document.getElementById(id);
 const state={mode:'create',resultTarget:null,updating:false,holds:[],routes:[],selected:0,selectedHolds:[],style:'balanced',edit:false,overlay:true,activeHold:null,demo:false,photo:null,busy:false,seed:Date.now(),imageToken:0,example:null,focus:null,focusPicking:false,focusDraft:null,angleMode:'auto',angleEstimate:null,gradeProblem:null,planning:false,planError:null,betaMode:false,betaIndex:0,climberMode:true,showAll:false,scanReveal:false,hasProblem:false,localInclines:null,scaleMode:'auto',photoHeight:4,baseAngle:0,scaleSpan:null,scaleGuides:false};
 const colors={red:'#e95952',orange:'#eb984e',yellow:'#e3c82c',green:'#44ba6c',blue:'#4e90df',purple:'#9363bc',pink:'#ee80b2',white:'#eeeae2',black:'#414640',cyan:'#6cbbbb',gray:'#92999d'};
@@ -97,7 +97,7 @@ function showScanOutlines(batch){
 function cancelPlan(){stopBeta();clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planId++;state.planning=false;planPending?.reject(new Error('Cancelled'));planPending=null;showPlanningIndicator(false);}
 function runPlanner(request){
  cancelPlan();const id=planId;state.planning=true;state.planError=null;showPlanningIndicator(true);
- planWorker=new Worker('./problem-worker.js?v=21',{type:'module'});
+ planWorker=new Worker('./problem-worker.js?v=22',{type:'module'});
  return new Promise((resolve,reject)=>{
   planPending={resolve,reject};
   const finish=(error,result)=>{if(id!==planId)return;clearTimeout(planTimer);planWorker?.terminate();planWorker=null;planPending=null;state.planning=false;showPlanningIndicator(false);error?reject(error):resolve(result);};
@@ -114,7 +114,7 @@ async function enrichHolds(boxes,id){
   let v,timer,finished=false;
   const done=result=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();if(outlinePending?.id===id)outlinePending=null;if(token!==state.imageToken||id!==scanJob||state.suspended){resolve([]);return;}const grouped=result?.palette?result:fallback();state.palette=grouped.palette;resolve(makeHolds(grouped.holds));};
   outlinePending={id,cancel:()=>{if(finished)return;finished=true;clearTimeout(timer);v?.terminate();resolve([]);}};
-  try{v=new Worker('./vision-worker.js?v=21',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
+  try{v=new Worker('./vision-worker.js?v=22',{type:'module'});timer=setTimeout(()=>done(),10000);v.onmessage=({data})=>{if(data.id!==id||id!==scanJob||token!==state.imageToken||state.suspended)return;if(data.batch){if(liveScan.isCurrent(state.liveToken))showScanOutlines(data.batch);imageStatus.start('holds',`Outlining holds… ${data.completed}/${data.total}`);return;}done(data);};v.onerror=()=>done();v.postMessage({id,pixels:pixels.data.buffer,width:pixels.width,height:pixels.height,holds:boxes},[pixels.data.buffer]);}
   catch{done();}
  });
 }
@@ -159,12 +159,25 @@ function angleRegion(){
  const xs=hs.map(h=>h.x).sort((a,b)=>a-b),ys=hs.map(h=>h.y).sort((a,b)=>a-b),q=(a,p)=>a[Math.floor((a.length-1)*p)];
  return {x:q(xs,.18),y:q(ys,.2),w:Math.max(.15,q(xs,.82)-q(xs,.18)),h:Math.max(.2,q(ys,.76)-q(ys,.2))};
 }
+function warmInclines(){
+ if(state.suspended||document.hidden)return;
+ try{
+  if(!angleWorker){
+   angleWorker=new Worker('./angle-worker.js?v=22');const owner=angleWorker;
+   owner.onmessage=({data})=>{if(angleWorker===owner&&data.kind==='model-warmup')state.modelWarmup=data.status;};
+   owner.onerror=()=>{if(angleWorker===owner){owner.terminate();angleWorker=null;}};
+  }
+  angleWorker.postMessage({kind:'warmup'});
+ }catch{/* Background preparation is optional; a scan can retry normally. */}
+}
 function requestAngleEstimate(fresh=false){
  if(state.suspended||!state.photo||state.angleMode!=='auto')return;
  const id=++angleJob,photo=state.imageToken;clearTimeout(angleTimer);
  state.anglePending=true;state.inclineFailure=null;updateAngleUI('Estimating the wall against the floor…');renderFacets();
  try{
- if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=21');fresh=true;angleWorker.onmessage=({data})=>{
+ if(!angleWorker){angleWorker=new Worker('./angle-worker.js?v=22');fresh=true;}
+ angleWorker.onmessage=({data})=>{
+   if(data.kind==='model-warmup'){state.modelWarmup=data.status;return;}
    if(data.id!==angleJob||data.photo!==state.imageToken)return;
    if(data.progress){touchAngleTimeout(data.id,data.photo);if(state.angleMode==='auto')updateAngleUI(data.progress);return;}
    if(!data.partial)clearTimeout(angleTimer);state.anglePending=false;state.inclinePending=!!data.partial;angleDepthReady=!!data.depthReady;
@@ -178,7 +191,7 @@ function requestAngleEstimate(fresh=false){
      if(!state.scanPending&&previousGeometry!==geometrySignature(state.localInclines,state.baseAngle))scheduleRegenerate();renderFacets();finishWallStatus();finishAngleReveal();
      if(data.partial)imageStatus.start('walls','Estimating face inclines…');
    }
- };const owner=angleWorker;angleWorker.onerror=()=>{if(angleWorker===owner)angleUnavailable();};}
+ };const owner=angleWorker;angleWorker.onerror=()=>{if(angleWorker===owner)angleUnavailable();};
  const r=state.focus||{x:0,y:0,w:1,h:1},localRoi={x:geometryCrop.x+r.x*geometryCrop.w,y:geometryCrop.y+r.y*geometryCrop.h,w:r.w*geometryCrop.w,h:r.h*geometryCrop.h};
  const holds=state.holds.map(h=>({id:h.id,x:geometryCrop.x+h.x*geometryCrop.w,y:geometryCrop.y+h.y*geometryCrop.h,w:h.w*geometryCrop.w,h:h.h*geometryCrop.h}));
  const request={id,photo,normalReference:state.normalReference,kind:fresh||!angleDepthReady?'analyze':'estimate',wallRoi:angleRegion(),localRoi,holds,imageAspect:geometryCanvas.width/geometryCanvas.height};
@@ -234,7 +247,7 @@ async function detect(cachedBoxes=null){
  let boxes=cachedBoxes;
  if(!boxes){
   boxes=await retryDetection(async()=>{
-  if(!worker)worker=new Worker('./detector-worker.js?v=21',{type:'module'});
+  if(!worker)worker=new Worker('./detector-worker.js?v=22',{type:'module'});
   const owner=worker;
   const pixels=sourceContext.getImageData(0,0,sourceCanvas.width,sourceCanvas.height);
   return new Promise((resolve,reject)=>{
@@ -455,7 +468,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopBeta();
 function registerTools(){
  const context=document.modelContext;if(!context?.registerTool)return;const lifetime=new AbortController();
  const brief=p=>({name:p.name,handIds:p.handIds,footIds:p.footIds,start:p.start,finishId:p.finishId,estimate:p.estimate,stats:p.stats,beta:p.beta});
- const tools=[{name:'get_climbing_wall',description:'Read hold outlines, allowed problem sets, start contacts, finish, optional candidate beta and provisional grade. Does not return the photo.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({mode:state.mode,holdCount:state.holds.length,outlinedHolds:state.holds.filter(h=>h.polygon&&!h.fallback).length,planning:state.planning,setup:setup(),angleMode:state.angleMode,angleEstimate:state.angleEstimate,inclineFailure:state.inclineFailure,inclineExecution:state.inclineExecution,detectionFailure:state.detectionFailure,localInclines:state.localInclines?{coverage:state.localInclines.coverage,angleRange:state.localInclines.angleRange}:null,focus:state.focus,problems:state.routes.map(brief),gradeProblem:state.gradeProblem?brief(state.gradeProblem):null})}];
+ const tools=[{name:'get_climbing_wall',description:'Read hold outlines, allowed problem sets, start contacts, finish, optional candidate beta and provisional grade. Does not return the photo.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>({mode:state.mode,holdCount:state.holds.length,outlinedHolds:state.holds.filter(h=>h.polygon&&!h.fallback).length,planning:state.planning,setup:setup(),angleMode:state.angleMode,angleEstimate:state.angleEstimate,inclineFailure:state.inclineFailure,inclineExecution:state.inclineExecution,modelWarmup:state.modelWarmup,detectionFailure:state.detectionFailure,localInclines:state.localInclines?{coverage:state.localInclines.coverage,angleRange:state.localInclines.angleRange}:null,focus:state.focus,problems:state.routes.map(brief),gradeProblem:state.gradeProblem?brief(state.gradeProblem):null})}];
  for(const tool of tools){try{Promise.resolve(context.registerTool(tool,{signal:lifetime.signal})).catch(()=>{});}catch{}}
  window.addEventListener('pagehide',()=>lifetime.abort(),{once:true});
 }
@@ -466,3 +479,6 @@ try{const height=localStorage.getItem('crux-height-cm');if(height&&Number(height
 setupInstall(dialog);
 updateHistory();setTarget(5,false);updateAngleUI('Add a wall photo to estimate its incline.');render();registerTools();
 loadPhoto('./demo-wall.jpg',{demo:true,crop:[1000,710,1150,1410]});
+// Let the interface paint first; prepare the upload model while the demo is usable.
+if('requestIdleCallback' in window)window.requestIdleCallback(warmInclines,{timeout:1200});else setTimeout(warmInclines,300);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)warmInclines();});

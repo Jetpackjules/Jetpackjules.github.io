@@ -1,7 +1,7 @@
-import {retainLocalSurfaceEvidence} from './surface-evidence.mjs?v=21';
-import {detectStraightSurfaceCells} from './straight-surface-cells.mjs?v=21';
-import {augmentGradientSeams} from './augment-gradient-seams.mjs?v=21';
-import {detectSurfaceSeams,traceSurfaceRings} from './automatic-surfaces.mjs?v=21';
+import {retainLocalSurfaceEvidence} from './surface-evidence.mjs?v=22';
+import {detectStraightSurfaceCells} from './straight-surface-cells.mjs?v=22';
+import {augmentGradientSeams} from './augment-gradient-seams.mjs?v=22';
+import {detectSurfaceSeams,traceSurfaceRings} from './automatic-surfaces.mjs?v=22';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),unit=n=>{const l=Math.hypot(...n);return l>1e-8?n.map(v=>v/l):null;},angle=(a,b)=>Math.acos(clamp(a.reduce((s,v,c)=>s+v*b[c],0),-1,1))*180/Math.PI;
 const quantile=(a,q)=>{a.sort((a,b)=>a-b);return a[Math.floor((a.length-1)*q)];};
 export function detectAdaptiveStraightSurfaces(input){

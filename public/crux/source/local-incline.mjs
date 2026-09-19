@@ -2,7 +2,7 @@
  * x/y/w/h use full-image normalized coordinates; hold x/y are center positions.
  * No NN inference, ground-truth accuracy claim, or manual-override handling here.
  */
-import {fitMetricPlane} from './incline-geometry.mjs?v=21';
+import {fitMetricPlane} from './incline-geometry.mjs?v=22';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);

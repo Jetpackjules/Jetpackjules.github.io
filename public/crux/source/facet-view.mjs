@@ -1,5 +1,5 @@
 // Polygon boundaries and angle certainty are separate pieces of evidence.
-import {clipToRect,inPolygon} from './wall-facets.mjs?v=21';
+import {clipToRect,inPolygon} from './wall-facets.mjs?v=22';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const validRect=r=>r&&[r.x,r.y,r.w,r.h].every(Number.isFinite)&&r.w>0&&r.h>0;
 const color=angle=>angle< -5?'#8fd8fa':angle<=5?'#cfee89':angle<=25?'#ffd384':angle<=45?'#ffab79':'#ec94c3';

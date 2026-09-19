@@ -4,6 +4,13 @@ const RUNTIME_BASE = new URL('./vendor/moge/', import.meta.url);
 const CACHE_NAME = 'crux-moge-small-normal-v1';
 const TOKENS = 1200;
 let runtimePromise, queue = Promise.resolve();
+const runtimeListeners=new Set();
+let runtimeMessage;
+function runtimeProgress(message){runtimeMessage=message;for(const listener of runtimeListeners)announce(listener,message);}
+function followRuntime(progress){
+ runtimeListeners.add(progress);if(runtimeMessage)announce(progress,runtimeMessage);
+ return runtimePromise.finally(()=>runtimeListeners.delete(progress));
+}
 const frames = new Map();
 
 export const MOGE_NORMAL_CONVENTION = 'opencv-camera-x-right-y-down-z-forward';
@@ -89,7 +96,8 @@ async function loadModelBytes(progress) {
 }
 
 async function getRuntime(progress) {
-  if (runtimePromise) return runtimePromise;
+  if (runtimePromise) return followRuntime(progress);
+  runtimeMessage=null;
   runtimePromise = (async () => {
     if (!globalThis.navigator?.gpu) return unavailable('webgpu-unavailable', 'Inclines need WebGPU on this device. Wall boundaries are still available.');
     if (typeof OffscreenCanvas === 'undefined') return unavailable('canvas-unavailable', 'This browser cannot prepare the incline model input. Wall boundaries are still available.');
@@ -100,13 +108,13 @@ async function getRuntime(progress) {
     ort.env.wasm.numThreads = 1; // GitHub Pages does not provide COOP/COEP isolation headers.
     ort.env.wasm.proxy = false;
     ort.env.webgpu.powerPreference = 'high-performance';
-    const start = performance.now(), bytes = await loadModelBytes(progress), downloadMs = performance.now() - start;
+    const start = performance.now(), bytes = await loadModelBytes(runtimeProgress), downloadMs = performance.now() - start;
     // The cold model download can take minutes on a mobile connection.
     // WebGPU permits an adapter to expire; do not initialize with the old probe.
     const readyAdapter = await navigator.gpu.requestAdapter({powerPreference: 'high-performance'});
     if (!readyAdapter) return unavailable('gpu-adapter-unavailable', 'The GPU became unavailable while loading inclines. Try again.');
     ort.env.webgpu.adapter = readyAdapter;
-    announce(progress, 'Starting incline model…');
+    runtimeProgress('Starting incline model…');
     const setup = performance.now();
     const session = await ort.InferenceSession.create(bytes, {executionProviders: ['webgpu'], graphOptimizationLevel: 'disabled'});
     return {status: 'ready', ort, session, downloadMs, setupMs: performance.now() - setup};
@@ -116,7 +124,13 @@ async function getRuntime(progress) {
     if (runtime.status !== 'ready') runtimePromise = undefined;
     return runtime;
   }).catch(error => { runtimePromise = undefined; throw error; });
-  return runtimePromise;
+  return followRuntime(progress);
+}
+
+// Shares the exact download/session with a later scan; no photo or inference needed.
+export async function warmMoGeSurfaceModel(){
+ try{const runtime=await getRuntime(()=>{});return {status:runtime.status,code:runtime.code};}
+ catch(error){return unavailable('incline-model-failed',String(error.message||error));}
 }
 
 async function run({pixels, width, height, signal}, progress) {
