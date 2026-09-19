@@ -8,12 +8,14 @@ HERE=Path(__file__).parent
 OUT=ROOT/'public/assets/projects/crux'
 OUT.mkdir(parents=True,exist_ok=True)
 data=json.loads((HERE/'data.json').read_text())
-W,H,FPS,SECONDS=960,640,24,12
+W,H,FPS,SECONDS=960,640,24,10
+TIMELINE_SECONDS=12
 photo=Image.open(ROOT/'public/crux/examples/overhang.png').convert('RGB').resize((W,H),Image.Resampling.LANCZOS)
 gray=Image.blend(photo.convert('L').convert('RGB'),Image.new('RGB',(W,H),'#101b17'),.18)
 font=ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf',28)
 small=ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf',20)
 lime=(210,241,114); coral=(255,110,76); teal=(69,220,221); white=(255,255,235)
+detection_red=(255,65,55)
 def smooth(v):
  v=max(0,min(1,v));return v*v*(3-2*v)
 def pts(poly):
@@ -61,7 +63,7 @@ def frame(t):
   if len(poly)<3:continue
   a=smooth((t-3.45-h['y']*1.65)/.42)*(1-route_t)
   if a<=0:continue
-  hd.polygon(poly,fill=(*teal,round(28*a)));hd.line(poly+[poly[0]],fill=(*teal,round(235*a)),width=2,joint='curve')
+  hd.polygon(poly,fill=(*detection_red,round(28*a)));hd.line(poly+[poly[0]],fill=(*detection_red,round(255*a)),width=3,joint='curve')
  base=Image.alpha_composite(base,all_holds)
  if 3.45<t<5.5:
   scan=layer();sd=ImageDraw.Draw(scan);y=int((t-3.45)/2.05*H);sd.line((0,y,W,y),fill=(*teal,130),width=2);base=Image.alpha_composite(base,scan)
@@ -76,9 +78,9 @@ def frame(t):
  return base.convert('RGB')
 
 ffmpeg=shutil.which('ffmpeg')
-cmd=[ffmpeg,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart',str(OUT/'overhang-loop.mp4')]
+cmd=[ffmpeg,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart',str(OUT/'overhang-loop-v2.mp4')]
 p=subprocess.Popen(cmd,stdin=subprocess.PIPE)
-for i in range(FPS*SECONDS):p.stdin.write(frame(i/(FPS*SECONDS-1)*SECONDS).tobytes())
+for i in range(FPS*SECONDS):p.stdin.write(frame(i/(FPS*SECONDS-1)*TIMELINE_SECONDS).tobytes())
 p.stdin.close()
 if p.wait():raise RuntimeError('Video encoding failed')
 frame(8.8).save(OUT/'overhang-poster.jpg',quality=90)
@@ -86,4 +88,4 @@ shots=[frame(t).resize((480,320)) for t in [0,2.8,5.8,8.8]]
 sheet=Image.new('RGB',(960,640))
 for i,im in enumerate(shots):sheet.paste(im,((i%2)*480,(i//2)*320))
 sheet.save(HERE/'stages.jpg',quality=93)
-print(json.dumps({'videoBytes':(OUT/'overhang-loop.mp4').stat().st_size,'seconds':SECONDS,'frames':FPS*SECONDS,'routeHolds':len(selected)}))
+print(json.dumps({'videoBytes':(OUT/'overhang-loop-v2.mp4').stat().st_size,'seconds':SECONDS,'frames':FPS*SECONDS,'routeHolds':len(selected)}))
