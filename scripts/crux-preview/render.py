@@ -11,7 +11,7 @@ data=json.loads((HERE/'data.json').read_text())
 W,H,FPS,SECONDS=960,640,24,10
 TIMELINE_SECONDS=12
 photo=Image.open(ROOT/'public/crux/examples/overhang.png').convert('RGB').resize((W,H),Image.Resampling.LANCZOS)
-gray=Image.blend(photo.convert('L').convert('RGB'),Image.new('RGB',(W,H),'#101b17'),.18)
+gray=Image.blend(photo.convert('L').convert('RGB'),Image.new('RGB',(W,H),'#171717'),.18)
 font=ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf',28)
 small=ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf',20)
 lime=(210,241,114); coral=(255,110,76); teal=(69,220,221); white=(255,255,235)
@@ -49,7 +49,7 @@ starts=[h for h in holds if str(h['id']) in start]
 tag(td,'START',min(h['x'] for h in starts)*W-82,max(h['y'] for h in starts)*H+18,lime)
 def frame(t):
  route_t=smooth((t-6.3)/1.2);reset=smooth((t-10.0)/2.0)
- dim=smooth((t-1.0)/1.3)*.24*(1-route_t)
+ dim=smooth((t-.75)/.35)
  base=Image.blend(photo,gray,dim).convert('RGBA')
  walls=layer();wd=ImageDraw.Draw(walls)
  for i,f in enumerate(sorted(data['faces'],key=lambda f:sum(p[0] for p in f['polygon'])/len(f['polygon']))):
@@ -78,7 +78,7 @@ def frame(t):
  return base.convert('RGB')
 
 ffmpeg=shutil.which('ffmpeg')
-cmd=[ffmpeg,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart',str(OUT/'overhang-loop-v2.mp4')]
+cmd=[ffmpeg,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','pipe:0','-an','-c:v','libx264','-preset','medium','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart',str(OUT/'overhang-loop-v3.mp4')]
 p=subprocess.Popen(cmd,stdin=subprocess.PIPE)
 for i in range(FPS*SECONDS):p.stdin.write(frame(i/(FPS*SECONDS-1)*TIMELINE_SECONDS).tobytes())
 p.stdin.close()
@@ -88,4 +88,4 @@ shots=[frame(t).resize((480,320)) for t in [0,2.8,5.8,8.8]]
 sheet=Image.new('RGB',(960,640))
 for i,im in enumerate(shots):sheet.paste(im,((i%2)*480,(i//2)*320))
 sheet.save(HERE/'stages.jpg',quality=93)
-print(json.dumps({'videoBytes':(OUT/'overhang-loop-v2.mp4').stat().st_size,'seconds':SECONDS,'frames':FPS*SECONDS,'routeHolds':len(selected)}))
+print(json.dumps({'videoBytes':(OUT/'overhang-loop-v3.mp4').stat().st_size,'seconds':SECONDS,'frames':FPS*SECONDS,'routeHolds':len(selected)}))
